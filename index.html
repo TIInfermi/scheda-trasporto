@@ -225,7 +225,7 @@ async function exportSinglePDF(id){
 </div>
 <div style="position:relative;z-index:1;">
   <div style="text-align:center; margin-bottom:16px;">
-    <h1 style="font-size:24px; margin:0;">Scheda Trasporto</h1>
+    <h1 style="font-size:24px; margin:0;">Scheda Paziente TI</h1>
   </div>
 
   <h2>INFO PAZIENTE</h2>
@@ -262,7 +262,6 @@ async function exportSinglePDF(id){
 
   <div style="margin-top:16px;">
     ${e.firmaOp?`<div><b>Firma operatore</b><br><img src="${e.firmaOp}" style="max-height:120px"></div>`:''}
-    ${e.firmaRef?`<div><b>Firma referente</b><br><img src="${e.firmaRef}" style="max-height:120px"></div>`:''}
   </div>
 </div>`;
   document.body.appendChild(div);
