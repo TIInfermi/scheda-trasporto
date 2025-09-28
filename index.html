@@ -7,9 +7,7 @@
 <style>
 body {
   font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-  margin:0;
-  padding:16px;
-  background:#f0f2f5;
+  margin:0; padding:16px; background:#f0f2f5;
 }
 .container {
   max-width: 950px;
@@ -19,46 +17,14 @@ body {
   border-radius:12px;
   box-shadow:0 6px 16px rgba(0,0,0,0.1);
 }
-.header {
-  display:flex;
-  align-items:center;
-  margin-bottom:16px;
-}
-.header img {
-  height:50px;
-  margin-right:12px;
-}
-.header h1 {
-  font-size:26px;
-  color:#333;
-  margin:0;
-  flex:1;
-  text-align:center;
-}
-.header h2 {
-  font-size:18px;
-  color:#555;
-  text-align:center;
-  margin-top:4px;
-}
 form {
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:16px;
 }
-label {
-  display:block;
-  font-size:14px;
-  margin-bottom:4px;
-  font-weight:500;
-}
+label { display:block; font-size:14px; margin-bottom:4px; font-weight:500; }
 input, select, textarea {
-  width:100%;
-  padding:8px 10px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  font-size:14px;
-  box-sizing:border-box;
+  width:100%; padding:8px 10px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-sizing:border-box;
 }
 textarea { min-height:60px; }
 .full { grid-column:1/3; }
@@ -79,55 +45,27 @@ textarea { min-height:60px; }
   flex-wrap:wrap;
 }
 button {
-  padding:10px 16px;
-  font-size:14px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  background:#4f46e5;
-  color:#fff;
-  transition:0.2s;
+  padding:10px 16px; font-size:14px; border:none; border-radius:6px; cursor:pointer; background:#4f46e5; color:#fff; transition:0.2s;
 }
 button:hover { background:#3730a3; }
-table {
-  width:100%;
-  border-collapse:collapse;
-  margin-top:20px;
-  font-size:13px;
-}
-th, td {
-  border:1px solid #ddd;
-  padding:8px;
-  text-align:left;
-}
-th {
-  background:#f3f4f6;
-}
+table { width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
+th, td { border:1px solid #ddd; padding:8px; text-align:left; }
+th { background:#f3f4f6; }
 tr:hover { background:#f1f5f9; }
 .small-img { height:40px; }
-.sign-box {
-  border:1px dashed #aaa;
-  padding:6px;
-  border-radius:6px;
-}
+.sign-box { border:1px dashed #aaa; padding:6px; border-radius:6px; }
 .signature-control { display:flex; gap:6px; align-items:center; margin-top:4px; font-size:12px; }
+h1 { font-size:24px; text-align:center; margin-bottom:12px; }
+h2 { font-size:16px; color:#555; margin-top:16px; margin-bottom:8px; border-bottom:1px solid #ccc; padding-bottom:4px; }
 @media(max-width:760px){
   form { grid-template-columns:1fr; }
   .full { grid-column:auto; }
-  .header { flex-direction:column; }
-  .header h1, .header h2 { text-align:center; }
 }
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="header">
-    <img src="https://via.placeholder.com/80x50.png?text=LOGO" alt="Logo">
-    <div>
-      <h1>Scheda Trasporto</h1>
-      <h2>INFO PAZIENTE</h2>
-    </div>
-  </div>
+  <h1>Scheda Trasporto</h1>
 
   <form id="mainForm" onsubmit="event.preventDefault(); saveEntry();">
     <div><label>Missione numero<input id="missione" required></label></div>
@@ -175,7 +113,7 @@ tr:hover { background:#f1f5f9; }
     <div class="buttons">
       <button type="submit">Salva scheda</button>
       <button type="button" onclick="resetForm()">Azzera form</button>
-      <button type="button" onclick="exportPDF()">Esporta tutte le schede PDF</button>
+      <button type="button" onclick="exportAllPDF()">Esporta tutte le schede PDF</button>
       <button type="button" onclick="exportAllAsJSON()">Esporta JSON</button>
     </div>
   </form>
@@ -184,9 +122,7 @@ tr:hover { background:#f1f5f9; }
     <h2>Elenco schede</h2>
     <table id="dataTable">
       <thead>
-        <tr>
-          <th>Missione</th><th>Data</th><th>Azioni</th>
-        </tr>
+        <tr><th>Missione</th><th>Data</th><th>Azioni</th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -196,15 +132,16 @@ tr:hover { background:#f1f5f9; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
 <script>
 const sigOp = new SignaturePad(document.getElementById('sigOp'), {backgroundColor:'rgba(255,255,255,0)'});
 const sigRef = new SignaturePad(document.getElementById('sigRef'), {backgroundColor:'rgba(255,255,255,0)'});
 function clearSig(who){ if(who==='op') sigOp.clear(); else sigRef.clear(); }
 
-const STORAGE_KEY = 'schede_trasporto_final';
+const STORAGE_KEY='schede_trasporto_final';
 let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
-let editingId = null;
-function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+let editingId=null;
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 
 function getFormData(){
   return {
@@ -232,110 +169,105 @@ function getFormData(){
     presidi: document.getElementById('presidi').value,
     note: document.getElementById('note').value,
     firmaOp: sigOp.isEmpty()?null:sigOp.toDataURL(),
-    firmaRef: sigRef.isEmpty()?null:sigRef.toDataURL()
+    firmaRef: sigRef.isEmpty()?null:sigRef.toDataURL(),
+    firmaData: new Date().toISOString()
   };
 }
 
 function saveEntry(){
   const data = getFormData();
-  if(!data.missione){ alert('Compila Missione numero'); return; }
-  if(editingId){
-    const idx = entries.findIndex(e=>e.id===editingId);
-    if(idx!==-1) entries[idx]=data;
-    editingId=null;
-  } else entries.unshift(data);
+  if(!data.missione){ alert('Compila Missione'); return; }
+  if(editingId){ const idx = entries.findIndex(x=>x.id===editingId); if(idx!==-1) entries[idx]=data; editingId=null; }
+  else entries.unshift(data);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   renderTable();
   resetForm();
 }
 
 function renderTable(){
-  const tbody = document.querySelector('#dataTable tbody');
+  const tbody=document.querySelector('#dataTable tbody');
   tbody.innerHTML='';
   for(const e of entries){
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${escapeHtml(e.missione)}</td><td>${escapeHtml(e.data)}</td>
-      <td>
-        <button onclick="editEntry('${e.id}')">Modifica</button>
-        <button onclick="deleteEntry('${e.id}')">Elimina</button>
-        <button onclick="exportSinglePDF('${e.id}')">PDF</button>
-      </td>`;
+    <td>
+      <button onclick="editEntry('${e.id}')">Modifica</button>
+      <button onclick="deleteEntry('${e.id}')">Elimina</button>
+      <button onclick="exportSinglePDF('${e.id}')">PDF</button>
+    </td>`;
     tbody.appendChild(tr);
   }
 }
 
 function editEntry(id){
-  const e = entries.find(x=>x.id===id);
+  const e=entries.find(x=>x.id===id);
   if(!e) return;
   editingId=id;
-  Object.keys(e).forEach(k=>{if(document.getElementById(k)) document.getElementById(k).value=e[k];});
-  if(e.firmaOp){ sigOp.clear(); sigOp.fromDataURL(e.firmaOp); } else sigOp.clear();
-  if(e.firmaRef){ sigRef.clear(); sigRef.fromDataURL(e.firmaRef); } else sigRef.clear();
+  for(const key in e){ if(document.getElementById(key)) document.getElementById(key).value=e[key]; }
+  if(e.firmaOp) sigOp.fromDataURL(e.firmaOp); else sigOp.clear();
+  if(e.firmaRef) sigRef.fromDataURL(e.firmaRef); else sigRef.clear();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function deleteEntry(id){
-  if(!confirm('Eliminare questa scheda?')) return;
-  entries=entries.filter(x=>x.id!==id);
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));
-  renderTable();
-}
-
-function resetForm(){
-  editingId=null;
-  document.getElementById('mainForm').reset();
-  sigOp.clear(); sigRef.clear();
-}
-
+function deleteEntry(id){ if(confirm('Eliminare scheda?')){ entries=entries.filter(x=>x.id!==id); localStorage.setItem(STORAGE_KEY,JSON.stringify(entries)); renderTable(); } }
+function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); sigOp.clear(); sigRef.clear(); }
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// EXPORT PDF singolo
 async function exportSinglePDF(id){
-  const e=entries.find(x=>x.id===id); if(!e) return;
-  const html = `
-    <div style="font-family:Arial;padding:16px;width:800px;">
-      <h2>Scheda Missione ${escapeHtml(e.missione)} — ${escapeHtml(e.data)}</h2>
-      <h3>INFO PAZIENTE</h3>
-      <table style="width:100%;border-collapse:collapse;" border="1">
-        <tr><td><b>Nome e Cognome</b></td><td>${escapeHtml(e.nome)}</td></tr>
-        <tr><td><b>Età</b></td><td>${escapeHtml(e.eta)}</td></tr>
-        <tr><td><b>Corporatura</b></td><td>${escapeHtml(e.corporatura)}</td></tr>
-        <tr><td><b>Patologia</b></td><td>${escapeHtml(e.patologia)}</td></tr>
-        <tr><td><b>Motivo trasporto</b></td><td>${escapeHtml(e.motivo)}</td></tr>
-        <tr><td><b>Prelevare da</b></td><td>${escapeHtml(e.prelevare)}</td></tr>
-        <tr><td><b>Portare a</b></td><td>${escapeHtml(e.portare)}</td></tr>
-        <tr><td><b>PDC</b></td><td>${escapeHtml(e.pdc)}</td></tr>
-        <tr><td><b>Telefono PDC</b></td><td>${escapeHtml(e.tel)}</td></tr>
-      </table>
-      <h3>TEAM</h3>
-      <table style="width:100%;border-collapse:collapse;" border="1">
-        <tr><td><b>Autista Soccorritore</b></td><td>${escapeHtml(e.autista)}</td></tr>
-        <tr><td><b>1° Soccorritore</b></td><td>${escapeHtml(e.socc1)}</td></tr>
-        <tr><td><b>2° Soccorritore</b></td><td>${escapeHtml(e.socc2)}</td></tr>
-        <tr><td><b>3° Soccorritore</b></td><td>${escapeHtml(e.socc3)}</td></tr>
-        <tr><td><b>Tirocinante</b></td><td>${escapeHtml(e.tiro)}</td></tr>
-      </table>
-      <h3>INFO TRASPORTO</h3>
-      <table style="width:100%;border-collapse:collapse;" border="1">
-        <tr><td><b>Arrivo in sede</b></td><td>${escapeHtml(e.arrivoSede)}</td></tr>
-        <tr><td><b>Arrivo dal paziente</b></td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
-        <tr><td><b>Mezzo assegnato</b></td><td>${escapeHtml(e.mezzo)}</td></tr>
-        <tr><td><b>Prezzo</b></td><td>${escapeHtml(e.prezzo)}</td></tr>
-        <tr><td><b>Presidi necessari</b></td><td>${escapeHtml(e.presidi)}</td></tr>
-        <tr><td><b>Note</b></td><td>${escapeHtml(e.note)}</td></tr>
-      </table>
-      <div style="margin-top:12px;">
-        ${e.firmaOp?'<div><b>Firma operatore</b><br><img src="'+e.firmaOp+'" style="max-height:120px"></div>':''}
-        ${e.firmaRef?'<div><b>Firma referente</b><br><img src="'+e.firmaRef+'" style="max-height:120px"></div>':''}
-      </div>
-    </div>
-  `;
+  const e=entries.find(x=>x.id===id);
+  if(!e) return;
   const div=document.createElement('div');
-  div.innerHTML=html;
+  div.style.position='absolute'; div.style.left='-9999px'; div.style.width='800px'; div.style.fontFamily='Arial, sans-serif'; div.style.fontSize='14px'; div.style.background='#fff'; div.style.padding='20px';
+  div.innerHTML=`
+<div style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.08;z-index:0;">
+  <img src="https://via.placeholder.com/300x150.png?text=LOGO" style="width:300px;opacity:0.1;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+</div>
+<div style="position:relative;z-index:1;">
+  <div style="text-align:center; margin-bottom:16px;">
+    <h1 style="font-size:24px; margin:0;">Scheda Trasporto</h1>
+  </div>
+
+  <h2>INFO PAZIENTE</h2>
+  <table style="width:100%; margin-bottom:12px; border-collapse:collapse;" border="1">
+    <tr><td><b>Nome e Cognome</b></td><td>${escapeHtml(e.nome)}</td></tr>
+    <tr><td><b>Età</b></td><td>${escapeHtml(e.eta)}</td></tr>
+    <tr><td><b>Corporatura</b></td><td>${escapeHtml(e.corporatura)}</td></tr>
+    <tr><td><b>Patologia</b></td><td>${escapeHtml(e.patologia)}</td></tr>
+    <tr><td><b>Motivo trasporto</b></td><td>${escapeHtml(e.motivo)}</td></tr>
+    <tr><td><b>Prelevare da</b></td><td>${escapeHtml(e.prelevare)}</td></tr>
+    <tr><td><b>Portare a</b></td><td>${escapeHtml(e.portare)}</td></tr>
+    <tr><td><b>PDC</b></td><td>${escapeHtml(e.pdc)}</td></tr>
+    <tr><td><b>Telefono PDC</b></td><td>${escapeHtml(e.tel)}</td></tr>
+  </table>
+
+  <h2>TEAM</h2>
+  <table style="width:100%; margin-bottom:12px; border-collapse:collapse;" border="1">
+    <tr><td><b>Autista Soccorritore</b></td><td>${escapeHtml(e.autista)}</td></tr>
+    <tr><td><b>1° Soccorritore</b></td><td>${escapeHtml(e.socc1)}</td></tr>
+    <tr><td><b>2° Soccorritore</b></td><td>${escapeHtml(e.socc2)}</td></tr>
+    <tr><td><b>3° Soccorritore</b></td><td>${escapeHtml(e.socc3)}</td></tr>
+    <tr><td><b>Tirocinante</b></td><td>${escapeHtml(e.tiro)}</td></tr>
+  </table>
+
+  <h2>INFO TRASPORTO</h2>
+  <table style="width:100%; margin-bottom:12px; border-collapse:collapse;" border="1">
+    <tr><td><b>Arrivo in sede</b></td><td>${escapeHtml(e.arrivoSede)}</td></tr>
+    <tr><td><b>Arrivo dal paziente</b></td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
+    <tr><td><b>Mezzo assegnato</b></td><td>${escapeHtml(e.mezzo)}</td></tr>
+    <tr><td><b>Prezzo</b></td><td>${escapeHtml(e.prezzo)}</td></tr>
+    <tr><td><b>Presidi necessari</b></td><td>${escapeHtml(e.presidi)}</td></tr>
+    <tr><td><b>Note</b></td><td>${escapeHtml(e.note)}</td></tr>
+  </table>
+
+  <div style="margin-top:16px;">
+    ${e.firmaOp?`<div><b>Firma operatore</b><br><img src="${e.firmaOp}" style="max-height:120px"></div>`:''}
+    ${e.firmaRef?`<div><b>Firma referente</b><br><img src="${e.firmaRef}" style="max-height:120px"></div>`:''}
+  </div>
+</div>`;
   document.body.appendChild(div);
-  const canvas=await html2canvas(div,{scale:2});
+  const canvas = await html2canvas(div,{scale:2});
   const imgData=canvas.toDataURL('image/png');
-  const {jsPDF}=window.jspdf;
+  const {jsPDF} = window.jspdf;
   const pdf=new jsPDF('p','mm','a4');
   const pdfWidth=pdf.internal.pageSize.getWidth()-20;
   const pdfHeight=(canvas.height*pdfWidth)/canvas.width;
@@ -344,29 +276,12 @@ async function exportSinglePDF(id){
   document.body.removeChild(div);
 }
 
-// EXPORT PDF tutte le schede
-async function exportPDF(){
-  const area = document.getElementById('pdfArea');
-  const canvas = await html2canvas(area, {scale:1.5});
-  const imgData = canvas.toDataURL('image/png');
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p','mm','a4');
-  const imgProps = pdf.getImageProperties(imgData);
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-  pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
-  pdf.save('schede_trasporto.pdf');
-}
+async function exportAllPDF(){ for(const e of entries) await exportSinglePDF(e.id); }
 
-// EXPORT JSON
 function exportAllAsJSON(){
-  const dataStr = JSON.stringify(entries,null,2);
-  const blob = new Blob([dataStr],{type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href=url;
-  a.download='schede_trasporto.json';
-  a.click();
+  const blob=new Blob([JSON.stringify(entries,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='schede_trasporto.json'; a.click();
   URL.revokeObjectURL(url);
 }
 
