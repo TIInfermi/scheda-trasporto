@@ -16,7 +16,6 @@ body {
   padding:24px;
   border-radius:12px;
   box-shadow:0 6px 16px rgba(0,0,0,0.1);
-  overflow-x:auto;
 }
 header {
   display:flex;
@@ -66,23 +65,16 @@ button {
 }
 button:hover { background:#3730a3; }
 table { width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
-th, td { border:1px solid #ddd; padding:8px; text-align:left; word-break:break-word; }
+th, td { border:1px solid #ddd; padding:8px; text-align:left; }
 th { background:#f3f4f6; }
 tr:hover { background:#f1f5f9; }
 .sign-box { border:1px dashed #aaa; padding:6px; border-radius:6px; }
 .signature-control { display:flex; gap:6px; align-items:center; margin-top:4px; font-size:12px; }
-
-/* MOBILE RESPONSIVE */
 @media(max-width:760px){
   form { grid-template-columns:1fr; }
   .full { grid-column:auto; }
   header { flex-direction:column; align-items:flex-start; }
   header h1 { text-align:left; }
-  table, thead, tbody, th, td, tr { display:block; }
-  thead tr { display:none; }
-  tr { margin-bottom:12px; border-bottom:1px solid #ccc; }
-  td { text-align:right; padding-left:50%; position:relative; }
-  td::before { content: attr(data-label); position:absolute; left:10px; width:45%; text-align:left; font-weight:bold; }
 }
 </style>
 </head>
@@ -105,7 +97,7 @@ tr:hover { background:#f1f5f9; }
     <div><label>Prelevare da<input id="prelevare"></label></div>
     <div><label>Portare a<input id="portare"></label></div>
     <div><label>PDC<input id="pdc"></label></div>
-    <div><label>Telefono PDC<input id="tel" type="tel"></label></div>
+    <div><label>Telefono PDC<input type="tel" id="tel"></label></div>
 
     <div class="section-title">TEAM</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
@@ -120,13 +112,13 @@ tr:hover { background:#f1f5f9; }
     <div><label>Mezzo assegnato<input id="mezzo"></label></div>
     <div><label>Prezzo<input type="number" step="0.01" id="prezzo"></label></div>
     <div class="full"><label>Presidi necessari<textarea id="presidi"></textarea></label></div>
-    <div class="full"><label>Note<textarea id="note"></textarea></label></div>
+    <div class="full"><label>Note<textarea id="note"></textarea></div>
 
     <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1">
         <label>Firma referente</label>
         <div class="sign-box"><canvas id="sigRef" width="400" height="120"></canvas>
-          <div class="signature-control"><button type="button" onclick="clearSig()">Pulisci firma</button></div>
+          <div class="signature-control"><button type="button" onclick="clearSig('ref')">Pulisci firma</button></div>
         </div>
       </div>
     </div>
@@ -150,13 +142,14 @@ tr:hover { background:#f1f5f9; }
   </div>
 </div>
 
+<!-- jsPDF + autoTable + SignaturePad -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
 <script>
 const sigRef = new SignaturePad(document.getElementById('sigRef'), {backgroundColor:'rgba(255,255,255,0)'});
-function clearSig(){ sigRef.clear(); }
+function clearSig(who){ if(who==='ref') sigRef.clear(); }
 
 const STORAGE_KEY='schede_trasporto_final';
 let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
@@ -209,13 +202,12 @@ function renderTable(){
   tbody.innerHTML='';
   for(const e of entries){
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td data-label="Missione">${e.missione}</td>
-                    <td data-label="Data">${e.data}</td>
-                    <td data-label="Azioni">
-                      <button onclick="editEntry('${e.id}')">Modifica</button>
-                      <button onclick="deleteEntry('${e.id}')">Elimina</button>
-                      <button onclick="exportSinglePDF('${e.id}')">PDF</button>
-                    </td>`;
+    tr.innerHTML=`<td>${escapeHtml(e.missione)}</td><td>${escapeHtml(e.data)}</td>
+    <td>
+      <button onclick="editEntry('${e.id}')">Modifica</button>
+      <button onclick="deleteEntry('${e.id}')">Elimina</button>
+      <button onclick="exportSinglePDF('${e.id}')">PDF</button>
+    </td>`;
     tbody.appendChild(tr);
   }
 }
@@ -231,7 +223,9 @@ function editEntry(id){
 
 function deleteEntry(id){ if(confirm('Eliminare scheda?')){ entries=entries.filter(x=>x.id!==id); localStorage.setItem(STORAGE_KEY,JSON.stringify(entries)); renderTable(); } }
 function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); sigRef.clear(); }
+function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// Funzione PDF ottimizzata
 async function exportSinglePDF(id){
   const e = entries.find(x=>x.id===id);
   if(!e) return;
@@ -239,11 +233,15 @@ async function exportSinglePDF(id){
   const pdf = new jsPDF('p','mm','a4');
   pdf.setFont('helvetica'); pdf.setFontSize(14);
 
-  const logoUrl = "https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg";
-  const img = new Image();
-  img.src = logoUrl;
-  await new Promise(resolve=>{img.onload=resolve;});
-  pdf.addImage(img, 'JPEG', 10, 10, 40, 40);
+  // Carica logo
+  const loadImage = (src) => new Promise(resolve=>{
+    const img = new Image();
+    img.crossOrigin="anonymous";
+    img.onload = () => resolve(img);
+    img.src = src;
+  });
+  const logoImg = await loadImage("https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg");
+  pdf.addImage(logoImg,'JPEG',10,10,40,40);
   pdf.text("Scheda Paziente TI", 60, 25);
 
   let y = 55;
@@ -286,14 +284,14 @@ async function exportSinglePDF(id){
   pdf.autoTable({ startY: y, head:[["Campo","Valore"]], body: transData, theme:'grid', styles:{fontSize:12}, headStyles:{fillColor:[200,200,200]} });
   y = pdf.lastAutoTable.finalY + 8;
 
+  // Firma referente
   if(e.firmaRef){
-    const imgSig = new Image();
-    imgSig.src = e.firmaRef;
-    await new Promise(resolve=>{imgSig.onload=resolve;});
-    pdf.addImage(imgSig, 'PNG', 10, y, 60, 30);
-    pdf.text("Firma referente", 10, y + 32);
+    const sigImg = await loadImage(e.firmaRef);
+    pdf.addImage(sigImg,'PNG',10,y,60,30);
+    pdf.text("Firma referente", 10, y+32);
   }
 
+  // Timestamp rosso in basso a destra
   pdf.setTextColor(255,0,0);
   pdf.setFontSize(10);
   pdf.text(`Generato il: ${e.timestamp}`, pdf.internal.pageSize.getWidth()-80, pdf.internal.pageSize.getHeight()-10);
