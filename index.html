@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Scheda Paziente TI</title>
+<title>SCHEDA PAZIENTE TI</title>
 <style>
 body {
   font-family: 'Segoe UI', Roboto, Arial, sans-serif;
@@ -16,6 +16,22 @@ body {
   padding:24px;
   border-radius:12px;
   box-shadow:0 6px 16px rgba(0,0,0,0.1);
+}
+header {
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:16px;
+}
+header img {
+  height:60px;
+  width:auto;
+}
+header h1 {
+  font-size:24px;
+  text-align:center;
+  flex:1;
+  margin:0;
 }
 form {
   display:grid;
@@ -52,22 +68,22 @@ table { width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
 th, td { border:1px solid #ddd; padding:8px; text-align:left; }
 th { background:#f3f4f6; }
 tr:hover { background:#f1f5f9; }
-.small-img { height:40px; }
 .sign-box { border:1px dashed #aaa; padding:6px; border-radius:6px; }
 .signature-control { display:flex; gap:6px; align-items:center; margin-top:4px; font-size:12px; }
-h1 { font-size:24px; text-align:center; margin-bottom:12px; }
-h2 { font-size:16px; color:#555; margin-top:16px; margin-bottom:8px; border-bottom:1px solid #ccc; padding-bottom:4px; }
-.logo { position:absolute; top:16px; left:16px; width:100px; }
 @media(max-width:760px){
   form { grid-template-columns:1fr; }
   .full { grid-column:auto; }
+  header { flex-direction:column; align-items:flex-start; }
+  header h1 { text-align:left; }
 }
 </style>
 </head>
 <body>
-<div class="container">
-  <img class="logo" src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg?text=LOGO" alt="Logo">
-  <h1>Scheda Paziente TI</h1>
+<div class="container" id="pdfContent">
+  <header>
+    <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg" alt="Logo">
+    <h1>Scheda Paziente TI</h1>
+  </header>
 
   <div class="section-title">INFO PAZIENTE</div>
   <form id="mainForm" onsubmit="event.preventDefault(); saveEntry();">
@@ -109,8 +125,8 @@ h2 { font-size:16px; color:#555; margin-top:16px; margin-bottom:8px; border-bott
 
     <div class="buttons">
       <button type="submit">Salva scheda</button>
-      <button type="button" onclick="resetForm()">Pulisci scheda TI</button>
-      <button type="button" onclick="exportAllPDF()">Esporta tutte le schede PDF</button>
+      <button type="button" onclick="resetForm()">Azzera form</button>
+      <button type="button" onclick="exportPDF()">Esporta PDF</button>
       <button type="button" onclick="exportAllAsJSON()">Esporta JSON</button>
     </div>
   </form>
@@ -127,6 +143,7 @@ h2 { font-size:16px; color:#555; margin-top:16px; margin-bottom:8px; border-bott
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
 <script>
@@ -165,12 +182,12 @@ function getFormData(){
     presidi: document.getElementById('presidi').value,
     note: document.getElementById('note').value,
     firmaRef: sigRef.isEmpty()?null:sigRef.toDataURL(),
-    firmaData: new Date().toISOString()
+    timestamp: new Date().toLocaleString()
   };
 }
 
 function saveEntry(){
-  const data=getFormData();
+  const data = getFormData();
   if(!data.missione){ alert('Compila Missione'); return; }
   if(editingId){ const idx = entries.findIndex(x=>x.id===editingId); if(idx!==-1) entries[idx]=data; editingId=null; }
   else entries.unshift(data);
@@ -207,68 +224,28 @@ function deleteEntry(id){ if(confirm('Eliminare scheda?')){ entries=entries.filt
 function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); sigRef.clear(); }
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// PDF
 async function exportSinglePDF(id){
-  const e = entries.find(x=>x.id===id); 
+  const e=entries.find(x=>x.id===id);
   if(!e) return;
+  const div = document.getElementById('pdfContent');
+
+  const canvas = await html2canvas(div, {scale:2, useCORS:true});
+  const imgData = canvas.toDataURL('image/png');
+
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
-  let y=10;
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
 
-  // Logo
-  const img = new Image();
-  img.src='https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg?text=LOGO';
-  await new Promise(res=>img.onload=res);
-  pdf.addImage(img,'PNG',10,10,40,20);
-
-  // Titolo
-  pdf.setFontSize(16); 
-  pdf.text('Scheda Paziente TI',105,20,{align:'center'}); 
-  y=35;
-
-  pdf.setFontSize(12);
-  const sections = [
-    {title:'INFO PAZIENTE', fields:[
-      ['Nome e Cognome',e.nome],['Età',e.eta],['Corporatura',e.corporatura],['Patologia',e.patologia],
-      ['Motivo trasporto',e.motivo],['Prelevare da',e.prelevare],['Portare a',e.portare],['PDC',e.pdc],['Telefono PDC',e.tel]
-    ]},
-    {title:'TEAM', fields:[
-      ['Autista',e.autista],['1° Soccorritore',e.socc1],['2° Soccorritore',e.socc2],['3° Soccorritore',e.socc3],['Tirocinante',e.tiro]
-    ]},
-    {title:'INFO TRASPORTO', fields:[
-      ['Arrivo in sede',e.arrivoSede],['Arrivo dal paziente',e.arrivoPaz],['Mezzo assegnato',e.mezzo],['Prezzo',e.prezzo],
-      ['Presidi necessari',e.presidi],['Note',e.note]
-    ]}
-  ];
-
-  for(const sec of sections){
-    pdf.setFontSize(14); pdf.text(sec.title,10,y); y+=6;
-    pdf.setFontSize(12);
-    for(const f of sec.fields){
-      pdf.text(`${f[0]}: ${f[1]||''}`,10,y); y+=6;
-      if(y>270){ pdf.addPage(); y=10; } // nuova pagina se necessario
-    }
-    y+=4;
-  }
-
-  // Timestamp
-  pdf.text(`Generata il: ${new Date().toLocaleString('it-IT')}`,10,y); y+=6;
-
-  // Firma referente
-  if(e.firmaRef){
-    const fImg = new Image();
-    fImg.src=e.firmaRef;
-    await new Promise(res=>fImg.onload=res);
-    pdf.addImage(fImg,'PNG',10,y,80,30);
-  }
+  // aggiungi timestamp in basso
+  pdf.setFontSize(10);
+  pdf.text(`Generato il: ${e.timestamp}`, 10, pdf.internal.pageSize.getHeight() - 10);
 
   pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
 }
 
-async function exportAllPDF(){
-  for(const e of entries){ await exportSinglePDF(e.id); }
-}
-
+function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 function exportAllAsJSON(){
   const blob=new Blob([JSON.stringify(entries,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
