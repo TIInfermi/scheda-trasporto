@@ -65,9 +65,12 @@ h2 { font-size:16px; color:#555; margin-top:16px; margin-bottom:8px; border-bott
 </head>
 <body>
 <div class="container">
-  <h1>Scheda Paziente TI</h1>
-  <div class="section-title">INFO PAZIENTE</div>
+  <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;">
+    <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg?text=LOGO" alt="Logo" style="height:60px;">
+    <h1 style="margin:0; text-align:center; flex:1;">Scheda Paziente TI</h1>
+  </div>
 
+  <div class="section-title">INFO PAZIENTE</div>
   <form id="mainForm" onsubmit="event.preventDefault(); saveEntry();">
     <div><label>Missione numero<input id="missione" required></label></div>
     <div><label>Data<input type="date" id="data" required></label></div>
@@ -99,12 +102,6 @@ h2 { font-size:16px; color:#555; margin-top:16px; margin-bottom:8px; border-bott
     <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1">
         <label>Firma referente</label>
-        <div class="sign-box"><canvas id="sigOp" width="400" height="120"></canvas>
-          <div class="signature-control"><button type="button" onclick="clearSig('op')">Pulisci</button></div>
-        </div>
-      </div>
-      <div style="flex:1">
-        <label>Firma referente</label>
         <div class="sign-box"><canvas id="sigRef" width="400" height="120"></canvas>
           <div class="signature-control"><button type="button" onclick="clearSig('ref')">Pulisci</button></div>
         </div>
@@ -131,17 +128,16 @@ h2 { font-size:16px; color:#555; margin-top:16px; margin-bottom:8px; border-bott
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
 <script>
-const sigOp = new SignaturePad(document.getElementById('sigOp'), {backgroundColor:'rgba(255,255,255,0)'});
 const sigRef = new SignaturePad(document.getElementById('sigRef'), {backgroundColor:'rgba(255,255,255,0)'});
-function clearSig(who){ if(who==='op') sigOp.clear(); else sigRef.clear(); }
+function clearSig(who){ if(who==='ref') sigRef.clear(); }
 
 const STORAGE_KEY='schede_trasporto_final';
 let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
 let editingId=null;
+
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 
 function getFormData(){
@@ -169,7 +165,6 @@ function getFormData(){
     prezzo: document.getElementById('prezzo').value,
     presidi: document.getElementById('presidi').value,
     note: document.getElementById('note').value,
-    firmaOp: sigOp.isEmpty()?null:sigOp.toDataURL(),
     firmaRef: sigRef.isEmpty()?null:sigRef.toDataURL(),
     firmaData: new Date().toISOString()
   };
@@ -205,92 +200,88 @@ function editEntry(id){
   if(!e) return;
   editingId=id;
   for(const key in e){ if(document.getElementById(key)) document.getElementById(key).value=e[key]; }
-  if(e.firmaOp) sigOp.fromDataURL(e.firmaOp); else sigOp.clear();
   if(e.firmaRef) sigRef.fromDataURL(e.firmaRef); else sigRef.clear();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function deleteEntry(id){ if(confirm('Eliminare scheda?')){ entries=entries.filter(x=>x.id!==id); localStorage.setItem(STORAGE_KEY,JSON.stringify(entries)); renderTable(); } }
-function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); sigOp.clear(); sigRef.clear(); }
+function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); sigRef.clear(); }
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// Generazione PDF ottimizzata
 async function exportSinglePDF(id){
   const e = entries.find(x=>x.id===id);
   if(!e) return;
-
-  const timestamp = new Date().toLocaleString('it-IT'); // Timestamp generazione
-
-  const div = document.createElement('div');
-  div.style.position='absolute'; div.style.left='-9999px'; div.style.width='800px'; 
-  div.style.fontFamily='Arial, sans-serif'; div.style.fontSize='14px'; div.style.background='#fff'; div.style.padding='20px';
-  
-  div.innerHTML = `
-<div style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.08;z-index:0;">
-  <img src="https://via.placeholder.com/300x150.png?text=LOGO" 
-       style="width:300px;opacity:0.1;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
-</div>
-<div style="position:relative;z-index:1;">
-  <div style="text-align:center; margin-bottom:16px;">
-    <h1 style="font-size:24px; margin:0;">Scheda Paziente TI</h1>
-  </div>
-
-  <h2>INFO PAZIENTE</h2>
-  <table style="width:100%; margin-bottom:12px; border-collapse:collapse;" border="1">
-    <tr><td><b>Nome e Cognome</b></td><td>${escapeHtml(e.nome)}</td></tr>
-    <tr><td><b>Età</b></td><td>${escapeHtml(e.eta)}</td></tr>
-    <tr><td><b>Corporatura</b></td><td>${escapeHtml(e.corporatura)}</td></tr>
-    <tr><td><b>Patologia</b></td><td>${escapeHtml(e.patologia)}</td></tr>
-    <tr><td><b>Motivo trasporto</b></td><td>${escapeHtml(e.motivo)}</td></tr>
-    <tr><td><b>Prelevare da</b></td><td>${escapeHtml(e.prelevare)}</td></tr>
-    <tr><td><b>Portare a</b></td><td>${escapeHtml(e.portare)}</td></tr>
-    <tr><td><b>PDC</b></td><td>${escapeHtml(e.pdc)}</td></tr>
-    <tr><td><b>Telefono PDC</b></td><td>${escapeHtml(e.tel)}</td></tr>
-  </table>
-
-  <h2>TEAM</h2>
-  <table style="width:100%; margin-bottom:12px; border-collapse:collapse;" border="1">
-    <tr><td><b>Autista Soccorritore</b></td><td>${escapeHtml(e.autista)}</td></tr>
-    <tr><td><b>1° Soccorritore</b></td><td>${escapeHtml(e.socc1)}</td></tr>
-    <tr><td><b>2° Soccorritore</b></td><td>${escapeHtml(e.socc2)}</td></tr>
-    <tr><td><b>3° Soccorritore</b></td><td>${escapeHtml(e.socc3)}</td></tr>
-    <tr><td><b>Tirocinante</b></td><td>${escapeHtml(e.tiro)}</td></tr>
-  </table>
-
-  <h2>INFO TRASPORTO</h2>
-  <table style="width:100%; margin-bottom:12px; border-collapse:collapse;" border="1">
-    <tr><td><b>Arrivo in sede</b></td><td>${escapeHtml(e.arrivoSede)}</td></tr>
-    <tr><td><b>Arrivo dal paziente</b></td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
-    <tr><td><b>Mezzo assegnato</b></td><td>${escapeHtml(e.mezzo)}</td></tr>
-    <tr><td><b>Prezzo</b></td><td>${escapeHtml(e.prezzo)}</td></tr>
-    <tr><td><b>Presidi necessari</b></td><td>${escapeHtml(e.presidi)}</td></tr>
-    <tr><td><b>Note</b></td><td>${escapeHtml(e.note)}</td></tr>
-  </table>
-
-  <div style="margin-top:12px; font-size:12px; color:#555;">
-    Generata il: ${timestamp}
-  </div>
-
-  <div style="margin-top:16px;">
-    ${e.firmaOp?`<div><b>Firma operatore</b><br><img src="${e.firmaOp}" style="max-height:120px"></div>`:''}
-    ${e.firmaRef?`<div><b>Firma referente</b><br><img src="${e.firmaRef}" style="max-height:120px"></div>`:''}
-  </div>
-</div>`;
-
-  document.body.appendChild(div);
-  const canvas = await html2canvas(div,{scale:2});
-  const imgData = canvas.toDataURL('image/png');
   const {jsPDF} = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
-  const pdfWidth = pdf.internal.pageSize.getWidth()-20;
-  const pdfHeight = (canvas.height*pdfWidth)/canvas.width;
-  pdf.addImage(imgData,'PNG',10,10,pdfWidth,pdfHeight);
+  let y=10;
+
+  // Logo
+  const img = new Image();
+  img.src='https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg?text=LOGO';
+  await new Promise(res=>{img.onload=res;});
+  pdf.addImage(img,'PNG',10,10,40,20);
+
+  pdf.setFontSize(18);
+  pdf.text('Scheda Paziente TI', 105, 20, {align:'center'});
+  y=35;
+
+  pdf.setFontSize(14);
+  pdf.text('INFO PAZIENTE', 10, y); y+=6;
+
+  const infoPaziente = [
+    ['Nome e Cognome', e.nome],
+    ['Età', e.eta],
+    ['Corporatura', e.corporatura],
+    ['Patologia', e.patologia],
+    ['Motivo trasporto', e.motivo],
+    ['Prelevare da', e.prelevare],
+    ['Portare a', e.portare],
+    ['PDC', e.pdc],
+    ['Telefono PDC', e.tel]
+  ];
+
+  infoPaziente.forEach(row=>{
+    pdf.text(`${row[0]}: ${row[1]||''}`, 10, y);
+    y+=6;
+  });
+
+  y+=4; pdf.text('TEAM',10,y); y+=6;
+  const team = [
+    ['Autista Soccorritore', e.autista],
+    ['1° Soccorritore', e.socc1],
+    ['2° Soccorritore', e.socc2],
+    ['3° Soccorritore', e.socc3],
+    ['Tirocinante', e.tiro]
+  ];
+  team.forEach(row=>{pdf.text(`${row[0]}: ${row[1]||''}`,10,y); y+=6;});
+
+  y+=4; pdf.text('INFO TRASPORTO',10,y); y+=6;
+  const trasporto = [
+    ['Arrivo in sede', e.arrivoSede],
+    ['Arrivo dal paziente', e.arrivoPaz],
+    ['Mezzo assegnato', e.mezzo],
+    ['Prezzo', e.prezzo],
+    ['Presidi necessari', e.presidi],
+    ['Note', e.note]
+  ];
+  trasporto.forEach(row=>{pdf.text(`${row[0]}: ${row[1]||''}`,10,y); y+=6;});
+
+  y+=4;
+  pdf.text(`Generata il: ${new Date().toLocaleString('it-IT')}`,10,y); y+=8;
+
+  if(e.firmaRef){
+    const fImg = new Image();
+    fImg.src = e.firmaRef;
+    await new Promise(res=>{fImg.onload=res;});
+    pdf.addImage(fImg,'PNG',10,y,80,30);
+    y+=35;
+  }
+
   pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
-  document.body.removeChild(div);
 }
 
-
-async function exportAllPDF(){ for(const e of entries) await exportSinglePDF(e.id); }
-
+function exportAllPDF(){ entries.forEach(e=>exportSinglePDF(e.id)); }
 function exportAllAsJSON(){
   const blob=new Blob([JSON.stringify(entries,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -302,5 +293,3 @@ renderTable();
 </script>
 </body>
 </html>
-
-
