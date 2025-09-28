@@ -98,7 +98,7 @@ h2 { font-size:16px; color:#555; margin-top:16px; margin-bottom:8px; border-bott
 
     <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1">
-        <label>Firma operatore</label>
+        <label>Firma referente</label>
         <div class="sign-box"><canvas id="sigOp" width="400" height="120"></canvas>
           <div class="signature-control"><button type="button" onclick="clearSig('op')">Pulisci</button></div>
         </div>
@@ -215,13 +215,19 @@ function resetForm(){ editingId=null; document.getElementById('mainForm').reset(
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function exportSinglePDF(id){
-  const e=entries.find(x=>x.id===id);
+  const e = entries.find(x=>x.id===id);
   if(!e) return;
-  const div=document.createElement('div');
-  div.style.position='absolute'; div.style.left='-9999px'; div.style.width='800px'; div.style.fontFamily='Arial, sans-serif'; div.style.fontSize='14px'; div.style.background='#fff'; div.style.padding='20px';
-  div.innerHTML=`
+
+  const timestamp = new Date().toLocaleString('it-IT'); // Timestamp generazione
+
+  const div = document.createElement('div');
+  div.style.position='absolute'; div.style.left='-9999px'; div.style.width='800px'; 
+  div.style.fontFamily='Arial, sans-serif'; div.style.fontSize='14px'; div.style.background='#fff'; div.style.padding='20px';
+  
+  div.innerHTML = `
 <div style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.08;z-index:0;">
-  <img src="https://via.placeholder.com/300x150.png?text=LOGO" style="width:300px;opacity:0.1;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+  <img src="https://via.placeholder.com/300x150.png?text=LOGO" 
+       style="width:300px;opacity:0.1;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
 </div>
 <div style="position:relative;z-index:1;">
   <div style="text-align:center; margin-bottom:16px;">
@@ -260,21 +266,28 @@ async function exportSinglePDF(id){
     <tr><td><b>Note</b></td><td>${escapeHtml(e.note)}</td></tr>
   </table>
 
+  <div style="margin-top:12px; font-size:12px; color:#555;">
+    Generata il: ${timestamp}
+  </div>
+
   <div style="margin-top:16px;">
     ${e.firmaOp?`<div><b>Firma operatore</b><br><img src="${e.firmaOp}" style="max-height:120px"></div>`:''}
+    ${e.firmaRef?`<div><b>Firma referente</b><br><img src="${e.firmaRef}" style="max-height:120px"></div>`:''}
   </div>
 </div>`;
+
   document.body.appendChild(div);
   const canvas = await html2canvas(div,{scale:2});
-  const imgData=canvas.toDataURL('image/png');
+  const imgData = canvas.toDataURL('image/png');
   const {jsPDF} = window.jspdf;
-  const pdf=new jsPDF('p','mm','a4');
-  const pdfWidth=pdf.internal.pageSize.getWidth()-20;
-  const pdfHeight=(canvas.height*pdfWidth)/canvas.width;
+  const pdf = new jsPDF('p','mm','a4');
+  const pdfWidth = pdf.internal.pageSize.getWidth()-20;
+  const pdfHeight = (canvas.height*pdfWidth)/canvas.width;
   pdf.addImage(imgData,'PNG',10,10,pdfWidth,pdfHeight);
   pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
   document.body.removeChild(div);
 }
+
 
 async function exportAllPDF(){ for(const e of entries) await exportSinglePDF(e.id); }
 
@@ -289,4 +302,5 @@ renderTable();
 </script>
 </body>
 </html>
+
 
