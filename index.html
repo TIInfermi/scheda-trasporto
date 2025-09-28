@@ -79,7 +79,7 @@ tr:hover { background:#f1f5f9; }
 </style>
 </head>
 <body>
-<div class="container">
+<div class="container" id="pdfContent">
   <header>
     <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg" alt="Logo">
     <h1>Scheda Paziente TI</h1>
@@ -97,7 +97,7 @@ tr:hover { background:#f1f5f9; }
     <div><label>Prelevare da<input id="prelevare"></label></div>
     <div><label>Portare a<input id="portare"></label></div>
     <div><label>PDC<input id="pdc"></label></div>
-    <div><label>Telefono PDC<input type="tel" id="tel"></label></div>
+    <div><label>Telefono PDC<input id="tel" type="tel"></label></div>
 
     <div class="section-title">TEAM</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
@@ -112,7 +112,7 @@ tr:hover { background:#f1f5f9; }
     <div><label>Mezzo assegnato<input id="mezzo"></label></div>
     <div><label>Prezzo<input type="number" step="0.01" id="prezzo"></label></div>
     <div class="full"><label>Presidi necessari<textarea id="presidi"></textarea></label></div>
-    <div class="full"><label>Note<textarea id="note"></textarea></div>
+    <div class="full"><label>Note<textarea id="note"></textarea></label></div>
 
     <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1">
@@ -142,9 +142,8 @@ tr:hover { background:#f1f5f9; }
   </div>
 </div>
 
-<!-- jsPDF + autoTable + SignaturePad -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
 <script>
@@ -154,7 +153,6 @@ function clearSig(who){ if(who==='ref') sigRef.clear(); }
 const STORAGE_KEY='schede_trasporto_final';
 let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
 let editingId=null;
-
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 
 function getFormData(){
@@ -225,82 +223,74 @@ function deleteEntry(id){ if(confirm('Eliminare scheda?')){ entries=entries.filt
 function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); sigRef.clear(); }
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// Funzione PDF ottimizzata
 async function exportSinglePDF(id){
   const e = entries.find(x=>x.id===id);
   if(!e) return;
+
+  const pdfDiv = document.createElement('div');
+  pdfDiv.style.width = '800px';
+  pdfDiv.style.padding = '20px';
+  pdfDiv.style.background = '#fff';
+  pdfDiv.style.fontFamily = 'Arial, sans-serif';
+  pdfDiv.innerHTML = `
+    <h1 style="text-align:center;">Scheda Paziente TI</h1>
+    <h2>INFO PAZIENTE</h2>
+    <table border="1" style="width:100%;border-collapse:collapse;">
+      <tr><td><b>Missione</b></td><td>${escapeHtml(e.missione)}</td></tr>
+      <tr><td><b>Data</b></td><td>${escapeHtml(e.data)}</td></tr>
+      <tr><td><b>Nome e Cognome</b></td><td>${escapeHtml(e.nome)}</td></tr>
+      <tr><td><b>Età</b></td><td>${escapeHtml(e.eta)}</td></tr>
+      <tr><td><b>Corporatura</b></td><td>${escapeHtml(e.corporatura)}</td></tr>
+      <tr><td><b>Patologia</b></td><td>${escapeHtml(e.patologia)}</td></tr>
+      <tr><td><b>Motivo trasporto</b></td><td>${escapeHtml(e.motivo)}</td></tr>
+      <tr><td><b>Prelevare da</b></td><td>${escapeHtml(e.prelevare)}</td></tr>
+      <tr><td><b>Portare a</b></td><td>${escapeHtml(e.portare)}</td></tr>
+      <tr><td><b>PDC</b></td><td>${escapeHtml(e.pdc)}</td></tr>
+      <tr><td><b>Telefono PDC</b></td><td>${escapeHtml(e.tel)}</td></tr>
+    </table>
+
+    <h2>TEAM</h2>
+    <table border="1" style="width:100%;border-collapse:collapse;">
+      <tr><td><b>Autista Soccorritore</b></td><td>${escapeHtml(e.autista)}</td></tr>
+      <tr><td><b>1° Soccorritore</b></td><td>${escapeHtml(e.socc1)}</td></tr>
+      <tr><td><b>2° Soccorritore</b></td><td>${escapeHtml(e.socc2)}</td></tr>
+      <tr><td><b>3° Soccorritore</b></td><td>${escapeHtml(e.socc3)}</td></tr>
+      <tr><td><b>Tirocinante</b></td><td>${escapeHtml(e.tiro)}</td></tr>
+    </table>
+
+    <h2>INFO TRASPORTO</h2>
+    <table border="1" style="width:100%;border-collapse:collapse;">
+      <tr><td><b>Arrivo in sede</b></td><td>${escapeHtml(e.arrivoSede)}</td></tr>
+      <tr><td><b>Arrivo dal paziente</b></td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
+      <tr><td><b>Mezzo assegnato</b></td><td>${escapeHtml(e.mezzo)}</td></tr>
+      <tr><td><b>Prezzo</b></td><td>${escapeHtml(e.prezzo)}</td></tr>
+      <tr><td><b>Presidi necessari</b></td><td>${escapeHtml(e.presidi)}</td></tr>
+      <tr><td><b>Note</b></td><td>${escapeHtml(e.note)}</td></tr>
+    </table>
+
+    ${e.firmaRef?`<h2>Firma referente</h2><img src="${e.firmaRef}" style="max-height:120px;">`:''}
+  `;
+
+  document.body.appendChild(pdfDiv);
+  const canvas = await html2canvas(pdfDiv, {scale:2});
+  const imgData = canvas.toDataURL('image/png');
+  document.body.removeChild(pdfDiv);
+
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
-  pdf.setFont('helvetica'); pdf.setFontSize(14);
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
 
-  // Carica logo
-  const loadImage = (src) => new Promise(resolve=>{
-    const img = new Image();
-    img.crossOrigin="anonymous";
-    img.onload = () => resolve(img);
-    img.src = src;
-  });
-  const logoImg = await loadImage("https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg");
-  pdf.addImage(logoImg,'JPEG',10,10,40,40);
-  pdf.text("Scheda Paziente TI", 60, 25);
-
-  let y = 55;
-  pdf.setFontSize(12);
-
-  const patientData = [
-    ["Missione numero", e.missione],
-    ["Data", e.data],
-    ["Nome e Cognome", e.nome],
-    ["Età", e.eta],
-    ["Corporatura", e.corporatura],
-    ["Patologia", e.patologia],
-    ["Motivo trasporto", e.motivo],
-    ["Prelevare da", e.prelevare],
-    ["Portare a", e.portare],
-    ["PDC", e.pdc],
-    ["Telefono PDC", e.tel]
-  ];
-  pdf.autoTable({ startY: y, head:[["Campo","Valore"]], body: patientData, theme:'grid', styles:{fontSize:12}, headStyles:{fillColor:[200,200,200]} });
-  y = pdf.lastAutoTable.finalY + 8;
-
-  const teamData = [
-    ["Autista Soccorritore", e.autista],
-    ["1° Soccorritore", e.socc1],
-    ["2° Soccorritore", e.socc2],
-    ["3° Soccorritore", e.socc3],
-    ["Tirocinante", e.tiro]
-  ];
-  pdf.autoTable({ startY: y, head:[["Ruolo","Nome"]], body: teamData, theme:'grid', styles:{fontSize:12}, headStyles:{fillColor:[200,200,200]} });
-  y = pdf.lastAutoTable.finalY + 8;
-
-  const transData = [
-    ["Arrivo in sede", e.arrivoSede],
-    ["Arrivo dal paziente", e.arrivoPaz],
-    ["Mezzo assegnato", e.mezzo],
-    ["Prezzo", e.prezzo],
-    ["Presidi necessari", e.presidi],
-    ["Note", e.note]
-  ];
-  pdf.autoTable({ startY: y, head:[["Campo","Valore"]], body: transData, theme:'grid', styles:{fontSize:12}, headStyles:{fillColor:[200,200,200]} });
-  y = pdf.lastAutoTable.finalY + 8;
-
-  // Firma referente
-  if(e.firmaRef){
-    const sigImg = await loadImage(e.firmaRef);
-    pdf.addImage(sigImg,'PNG',10,y,60,30);
-    pdf.text("Firma referente", 10, y+32);
-  }
-
-  // Timestamp rosso in basso a destra
-  pdf.setTextColor(255,0,0);
+  // timestamp in basso a destra
   pdf.setFontSize(10);
-  pdf.text(`Generato il: ${e.timestamp}`, pdf.internal.pageSize.getWidth()-80, pdf.internal.pageSize.getHeight()-10);
+  pdf.setTextColor(255,0,0);
+  pdf.text(`Generato il: ${e.timestamp}`, pdfWidth - 80, pdf.internal.pageSize.getHeight() - 10);
 
   pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
 }
 
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
-
 function exportAllAsJSON(){
   const blob=new Blob([JSON.stringify(entries,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
