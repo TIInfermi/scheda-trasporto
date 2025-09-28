@@ -1,111 +1,135 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Scheda Trasporto - Generatore PDF</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-      margin: 0;
-      padding: 16px;
-      background: #f0f2f5;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 24px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 24px;
-      font-size: 24px;
-      color: #333;
-    }
-    form {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-    label {
-      display: block;
-      font-size: 14px;
-      margin-bottom: 4px;
-      font-weight: 500;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    textarea { min-height: 60px; }
-    .full { grid-column: 1 / 3; }
-    .section-title {
-      grid-column: 1 / 3;
-      font-size: 18px;
-      margin-top: 16px;
-      margin-bottom: 8px;
-      color: #555;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 4px;
-    }
-    .buttons {
-      grid-column: 1 / 3;
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-    }
-    button {
-      padding: 10px 16px;
-      font-size: 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background: #4f46e5;
-      color: #fff;
-      transition: 0.2s;
-    }
-    button:hover { background: #3730a3; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 13px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-    }
-    th {
-      background: #f3f4f6;
-      text-align: left;
-    }
-    .small-img { height: 40px; }
-    .sign-box {
-      border: 1px dashed #aaa;
-      padding: 6px;
-      border-radius: 6px;
-    }
-    .signature-control { display: flex; gap: 6px; align-items: center; margin-top: 4px; font-size: 12px; }
-    @media(max-width:760px) {
-      form { grid-template-columns: 1fr; }
-      .full { grid-column: auto; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scheda Trasporto - Generatore PDF</title>
+<style>
+body {
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  margin:0;
+  padding:16px;
+  background:#f0f2f5;
+}
+.container {
+  max-width: 950px;
+  margin:0 auto;
+  background:#fff;
+  padding:24px;
+  border-radius:12px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.1);
+}
+.header {
+  display:flex;
+  align-items:center;
+  margin-bottom:16px;
+}
+.header img {
+  height:50px;
+  margin-right:12px;
+}
+.header h1 {
+  font-size:26px;
+  color:#333;
+  margin:0;
+  flex:1;
+  text-align:center;
+}
+.header h2 {
+  font-size:18px;
+  color:#555;
+  text-align:center;
+  margin-top:4px;
+}
+form {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+}
+label {
+  display:block;
+  font-size:14px;
+  margin-bottom:4px;
+  font-weight:500;
+}
+input, select, textarea {
+  width:100%;
+  padding:8px 10px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  font-size:14px;
+  box-sizing:border-box;
+}
+textarea { min-height:60px; }
+.full { grid-column:1/3; }
+.section-title {
+  grid-column:1/3;
+  font-size:18px;
+  margin-top:16px;
+  margin-bottom:8px;
+  color:#555;
+  border-bottom:1px solid #ccc;
+  padding-bottom:4px;
+}
+.buttons {
+  grid-column:1/3;
+  display:flex;
+  gap:12px;
+  margin-top:16px;
+  flex-wrap:wrap;
+}
+button {
+  padding:10px 16px;
+  font-size:14px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  background:#4f46e5;
+  color:#fff;
+  transition:0.2s;
+}
+button:hover { background:#3730a3; }
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+  font-size:13px;
+}
+th, td {
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:left;
+}
+th {
+  background:#f3f4f6;
+}
+tr:hover { background:#f1f5f9; }
+.small-img { height:40px; }
+.sign-box {
+  border:1px dashed #aaa;
+  padding:6px;
+  border-radius:6px;
+}
+.signature-control { display:flex; gap:6px; align-items:center; margin-top:4px; font-size:12px; }
+@media(max-width:760px){
+  form { grid-template-columns:1fr; }
+  .full { grid-column:auto; }
+  .header { flex-direction:column; }
+  .header h1, .header h2 { text-align:center; }
+}
+</style>
 </head>
 <body>
 <div class="container">
-  <h1>Scheda Trasporto</h1>
+  <div class="header">
+    <img src="https://via.placeholder.com/80x50.png?text=LOGO" alt="Logo">
+    <div>
+      <h1>Scheda Trasporto</h1>
+      <h2>INFO PAZIENTE</h2>
+    </div>
+  </div>
 
   <form id="mainForm" onsubmit="event.preventDefault(); saveEntry();">
-    <!-- Dati principali -->
     <div><label>Missione numero<input id="missione" required></label></div>
     <div><label>Data<input type="date" id="data" required></label></div>
     <div><label>Nome e Cognome<input id="nome"></label></div>
@@ -125,7 +149,7 @@
     <div><label>3° Soccorritore<input id="socc3"></label></div>
     <div><label>Tirocinante<input id="tiro"></label></div>
 
-    <div class="section-title">INFO</div>
+    <div class="section-title">INFO TRASPORTO</div>
     <div><label>Arrivo in sede<input type="time" id="arrivoSede"></label></div>
     <div><label>Arrivo dal paziente<input type="time" id="arrivoPaz"></label></div>
     <div><label>Mezzo assegnato<input id="mezzo"></label></div>
@@ -161,9 +185,7 @@
     <table id="dataTable">
       <thead>
         <tr>
-          <th>Missione</th><th>Data</th><th>Nome</th><th>Età</th>
-          <th>Prelevare/Portare</th><th>Mezzo</th><th>Prezzo</th>
-          <th>Firma Op</th><th>Firma Ref</th><th>Azioni</th>
+          <th>Missione</th><th>Data</th><th>Azioni</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -171,26 +193,22 @@
   </div>
 </div>
 
-<!-- Librerie -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-
 <script>
 const sigOp = new SignaturePad(document.getElementById('sigOp'), {backgroundColor:'rgba(255,255,255,0)'});
 const sigRef = new SignaturePad(document.getElementById('sigRef'), {backgroundColor:'rgba(255,255,255,0)'});
-
 function clearSig(who){ if(who==='op') sigOp.clear(); else sigRef.clear(); }
 
-const STORAGE_KEY = 'schede_trasporto_v2';
-let entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+const STORAGE_KEY = 'schede_trasporto_final';
+let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
 let editingId = null;
-
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 function getFormData(){
   return {
-    id: editingId || uid(),
+    id: editingId||uid(),
     missione: document.getElementById('missione').value,
     data: document.getElementById('data').value,
     nome: document.getElementById('nome').value,
@@ -214,7 +232,7 @@ function getFormData(){
     presidi: document.getElementById('presidi').value,
     note: document.getElementById('note').value,
     firmaOp: sigOp.isEmpty()?null:sigOp.toDataURL(),
-    firmaRef: sigRef.isEmpty()?null:sigRef.toDataURL(),
+    firmaRef: sigRef.isEmpty()?null:sigRef.toDataURL()
   };
 }
 
@@ -235,17 +253,8 @@ function renderTable(){
   const tbody = document.querySelector('#dataTable tbody');
   tbody.innerHTML='';
   for(const e of entries){
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${escapeHtml(e.missione)}</td>
-      <td>${escapeHtml(e.data)}</td>
-      <td>${escapeHtml(e.nome)}</td>
-      <td>${escapeHtml(e.eta)}</td>
-      <td>${escapeHtml(e.prelevare)} / ${escapeHtml(e.portare)}</td>
-      <td>${escapeHtml(e.mezzo)}</td>
-      <td>${escapeHtml(e.prezzo)}</td>
-      <td>${e.firmaOp?'<img class="small-img" src="'+e.firmaOp+'">':''}</td>
-      <td>${e.firmaRef?'<img class="small-img" src="'+e.firmaRef+'">':''}</td>
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${escapeHtml(e.missione)}</td><td>${escapeHtml(e.data)}</td>
       <td>
         <button onclick="editEntry('${e.id}')">Modifica</button>
         <button onclick="deleteEntry('${e.id}')">Elimina</button>
@@ -258,19 +267,17 @@ function renderTable(){
 function editEntry(id){
   const e = entries.find(x=>x.id===id);
   if(!e) return;
-  editingId = id;
-  Object.keys(e).forEach(k=>{
-    if(document.getElementById(k)) document.getElementById(k).value = e[k];
-  });
-  if(e.firmaOp) { sigOp.clear(); sigOp.fromDataURL(e.firmaOp); } else sigOp.clear();
-  if(e.firmaRef) { sigRef.clear(); sigRef.fromDataURL(e.firmaRef); } else sigRef.clear();
-  window.scrollTo({top:0, behavior:'smooth'});
+  editingId=id;
+  Object.keys(e).forEach(k=>{if(document.getElementById(k)) document.getElementById(k).value=e[k];});
+  if(e.firmaOp){ sigOp.clear(); sigOp.fromDataURL(e.firmaOp); } else sigOp.clear();
+  if(e.firmaRef){ sigRef.clear(); sigRef.fromDataURL(e.firmaRef); } else sigRef.clear();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function deleteEntry(id){
   if(!confirm('Eliminare questa scheda?')) return;
-  entries = entries.filter(x=>x.id!==id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  entries=entries.filter(x=>x.id!==id);
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));
   renderTable();
 }
 
@@ -280,100 +287,89 @@ function resetForm(){
   sigOp.clear(); sigRef.clear();
 }
 
-// Safe helper
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// EXPORT PDF di tutte le schede
-async function exportPDF(){
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p','mm','a4');
-  let y = 10;
-
-  for(const e of entries){
-    const html = `
-      <div style="font-family:Arial;font-size:12px;margin-bottom:6px;">
-        <b>Missione:</b> ${escapeHtml(e.missione)} | <b>Data:</b> ${escapeHtml(e.data)}<br>
-        <b>Nome:</b> ${escapeHtml(e.nome)} | <b>Età:</b> ${escapeHtml(e.eta)} | <b>Corporatura:</b> ${escapeHtml(e.corporatura)}<br>
-        <b>Patologia:</b> ${escapeHtml(e.patologia)}<br>
-        <b>Motivo trasporto:</b> ${escapeHtml(e.motivo)}<br>
-        <b>Prelevare/Portare:</b> ${escapeHtml(e.prelevare)} → ${escapeHtml(e.portare)}<br>
-        <b>PDC:</b> ${escapeHtml(e.pdc)} | <b>Tel:</b> ${escapeHtml(e.tel)}<br>
-        <b>TEAM:</b> ${escapeHtml(e.autista)}, ${escapeHtml(e.socc1)}, ${escapeHtml(e.socc2)}, ${escapeHtml(e.socc3)}, ${escapeHtml(e.tiro)}<br>
-        <b>INFO:</b> Arrivo sede: ${escapeHtml(e.arrivoSede)}, Arrivo paziente: ${escapeHtml(e.arrivoPaz)}, Mezzo: ${escapeHtml(e.mezzo)}, Prezzo: ${escapeHtml(e.prezzo)}<br>
-        <b>Presidi:</b> ${escapeHtml(e.presidi)}<br>
-        <b>Note:</b> ${escapeHtml(e.note)}
-      </div>
-    `;
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    document.body.appendChild(div);
-    const canvas = await html2canvas(div,{scale:2});
-    const imgData = canvas.toDataURL('image/png');
-    const pdfWidth = pdf.internal.pageSize.getWidth() - 20;
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    if(y + pdfHeight > pdf.internal.pageSize.getHeight()){ pdf.addPage(); y=10; }
-    pdf.addImage(imgData,'PNG',10,y,pdfWidth,pdfHeight);
-    y+=pdfHeight+5;
-    document.body.removeChild(div);
-  }
-
-  pdf.save('schede_trasporto.pdf');
-}
-
-// EXPORT PDF singola scheda
+// EXPORT PDF singolo
 async function exportSinglePDF(id){
-  const e = entries.find(x=>x.id===id);
-  if(!e) return;
-
+  const e=entries.find(x=>x.id===id); if(!e) return;
   const html = `
-    <div style="font-family:Arial;font-size:12px;">
-      <h2>Scheda Missione ${escapeHtml(e.missione)} - ${escapeHtml(e.data)}</h2>
-      <table style="width:100%;border-collapse:collapse" border="1">
-        <tr><td><b>Nome</b></td><td>${escapeHtml(e.nome)}</td></tr>
+    <div style="font-family:Arial;padding:16px;width:800px;">
+      <h2>Scheda Missione ${escapeHtml(e.missione)} — ${escapeHtml(e.data)}</h2>
+      <h3>INFO PAZIENTE</h3>
+      <table style="width:100%;border-collapse:collapse;" border="1">
+        <tr><td><b>Nome e Cognome</b></td><td>${escapeHtml(e.nome)}</td></tr>
         <tr><td><b>Età</b></td><td>${escapeHtml(e.eta)}</td></tr>
         <tr><td><b>Corporatura</b></td><td>${escapeHtml(e.corporatura)}</td></tr>
         <tr><td><b>Patologia</b></td><td>${escapeHtml(e.patologia)}</td></tr>
         <tr><td><b>Motivo trasporto</b></td><td>${escapeHtml(e.motivo)}</td></tr>
-        <tr><td><b>Prelevare / Portare</b></td><td>${escapeHtml(e.prelevare)} → ${escapeHtml(e.portare)}</td></tr>
+        <tr><td><b>Prelevare da</b></td><td>${escapeHtml(e.prelevare)}</td></tr>
+        <tr><td><b>Portare a</b></td><td>${escapeHtml(e.portare)}</td></tr>
         <tr><td><b>PDC</b></td><td>${escapeHtml(e.pdc)}</td></tr>
-        <tr><td><b>Tel PDC</b></td><td>${escapeHtml(e.tel)}</td></tr>
-        <tr><td><b>TEAM</b></td><td>${escapeHtml(e.autista)}, ${escapeHtml(e.socc1)}, ${escapeHtml(e.socc2)}, ${escapeHtml(e.socc3)}, ${escapeHtml(e.tiro)}</td></tr>
-        <tr><td><b>INFO</b></td><td>Arrivo sede: ${escapeHtml(e.arrivoSede)}, Arrivo paziente: ${escapeHtml(e.arrivoPaz)}, Mezzo: ${escapeHtml(e.mezzo)}, Prezzo: ${escapeHtml(e.prezzo)}</td></tr>
-        <tr><td><b>Presidi</b></td><td>${escapeHtml(e.presidi)}</td></tr>
+        <tr><td><b>Telefono PDC</b></td><td>${escapeHtml(e.tel)}</td></tr>
+      </table>
+      <h3>TEAM</h3>
+      <table style="width:100%;border-collapse:collapse;" border="1">
+        <tr><td><b>Autista Soccorritore</b></td><td>${escapeHtml(e.autista)}</td></tr>
+        <tr><td><b>1° Soccorritore</b></td><td>${escapeHtml(e.socc1)}</td></tr>
+        <tr><td><b>2° Soccorritore</b></td><td>${escapeHtml(e.socc2)}</td></tr>
+        <tr><td><b>3° Soccorritore</b></td><td>${escapeHtml(e.socc3)}</td></tr>
+        <tr><td><b>Tirocinante</b></td><td>${escapeHtml(e.tiro)}</td></tr>
+      </table>
+      <h3>INFO TRASPORTO</h3>
+      <table style="width:100%;border-collapse:collapse;" border="1">
+        <tr><td><b>Arrivo in sede</b></td><td>${escapeHtml(e.arrivoSede)}</td></tr>
+        <tr><td><b>Arrivo dal paziente</b></td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
+        <tr><td><b>Mezzo assegnato</b></td><td>${escapeHtml(e.mezzo)}</td></tr>
+        <tr><td><b>Prezzo</b></td><td>${escapeHtml(e.prezzo)}</td></tr>
+        <tr><td><b>Presidi necessari</b></td><td>${escapeHtml(e.presidi)}</td></tr>
         <tr><td><b>Note</b></td><td>${escapeHtml(e.note)}</td></tr>
       </table>
-      <div style="margin-top:8px">
+      <div style="margin-top:12px;">
         ${e.firmaOp?'<div><b>Firma operatore</b><br><img src="'+e.firmaOp+'" style="max-height:120px"></div>':''}
         ${e.firmaRef?'<div><b>Firma referente</b><br><img src="'+e.firmaRef+'" style="max-height:120px"></div>':''}
       </div>
     </div>
   `;
-
-  const div = document.createElement('div');
-  div.innerHTML = html;
+  const div=document.createElement('div');
+  div.innerHTML=html;
   document.body.appendChild(div);
-  const canvas = await html2canvas(div,{scale:2});
+  const canvas=await html2canvas(div,{scale:2});
+  const imgData=canvas.toDataURL('image/png');
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF('p','mm','a4');
+  const pdfWidth=pdf.internal.pageSize.getWidth()-20;
+  const pdfHeight=(canvas.height*pdfWidth)/canvas.width;
+  pdf.addImage(imgData,'PNG',10,10,pdfWidth,pdfHeight);
+  pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
+  document.body.removeChild(div);
+}
+
+// EXPORT PDF tutte le schede
+async function exportPDF(){
+  const area = document.getElementById('pdfArea');
+  const canvas = await html2canvas(area, {scale:1.5});
   const imgData = canvas.toDataURL('image/png');
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
-  const pdfWidth = pdf.internal.pageSize.getWidth() - 20;
-  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-  pdf.addImage(imgData,'PNG',10,10,pdfWidth,pdfHeight);
-  pdf.save('scheda_'+e.missione+'_'+(e.data||'')+'.pdf');
-  document.body.removeChild(div);
+  const imgProps = pdf.getImageProperties(imgData);
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+  pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+  pdf.save('schede_trasporto.pdf');
 }
 
 // EXPORT JSON
 function exportAllAsJSON(){
-  const dataStr = JSON.stringify(entries, null, 2);
-  const blob = new Blob([dataStr], {type:'application/json'});
+  const dataStr = JSON.stringify(entries,null,2);
+  const blob = new Blob([dataStr],{type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'schede_trasporto.json'; a.click();
+  a.href=url;
+  a.download='schede_trasporto.json';
+  a.click();
   URL.revokeObjectURL(url);
 }
 
-// INIT
 renderTable();
 </script>
 </body>
