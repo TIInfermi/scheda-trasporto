@@ -118,24 +118,24 @@ tr:hover { background:#f1f5f9; }
       <div style="flex:1">
         <label>Firma referente</label>
         <div class="sign-box"><canvas id="sigRef" width="400" height="120"></canvas>
-          <div class="signature-control"><button type="button" onclick="clearSig('ref')">Pulisci</button></div>
+          <div class="signature-control"><button type="button" onclick="clearSig('ref')">Pulisci firma</button></div>
         </div>
       </div>
     </div>
 
     <div class="buttons">
-      <button type="submit">Salva scheda</button>
-      <button type="button" onclick="resetForm()">Azzera form</button>
+      <button type="submit">Salva scheda TI</button>
+      <button type="button" onclick="resetForm()">Pulisci scheda TI</button>
       <button type="button" onclick="exportPDF()">Esporta PDF</button>
       <button type="button" onclick="exportAllAsJSON()">Esporta JSON</button>
     </div>
   </form>
 
   <div id="pdfArea">
-    <h2>Elenco schede</h2>
+    <h2>Elenco schede TI</h2>
     <table id="dataTable">
       <thead>
-        <tr><th>Missione</th><th>Data</th><th>Azioni</th></tr>
+        <tr><th>Missione N°</th><th>Data</th><th>Azioni</th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -257,3 +257,4 @@ renderTable();
 </script>
 </body>
 </html>
+
