@@ -79,7 +79,7 @@ tr:hover { background:#f1f5f9; }
 </style>
 </head>
 <body>
-<div class="container" id="pdfContent">
+<div class="container">
   <header>
     <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg" alt="Logo">
     <h1>Scheda Paziente TI</h1>
@@ -118,7 +118,7 @@ tr:hover { background:#f1f5f9; }
       <div style="flex:1">
         <label>Firma referente</label>
         <div class="sign-box"><canvas id="sigRef" width="400" height="120"></canvas>
-          <div class="signature-control"><button type="button" onclick="clearSig('ref')">Pulisci firma</button></div>
+          <div class="signature-control"><button type="button" onclick="clearSig()">Pulisci firma</button></div>
         </div>
       </div>
     </div>
@@ -143,12 +143,12 @@ tr:hover { background:#f1f5f9; }
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
 const sigRef = new SignaturePad(document.getElementById('sigRef'), {backgroundColor:'rgba(255,255,255,0)'});
-function clearSig(who){ if(who==='ref') sigRef.clear(); }
+function clearSig(){ sigRef.clear(); }
 
 const STORAGE_KEY='schede_trasporto_final';
 let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
@@ -201,7 +201,7 @@ function renderTable(){
   tbody.innerHTML='';
   for(const e of entries){
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${escapeHtml(e.missione)}</td><td>${escapeHtml(e.data)}</td>
+    tr.innerHTML=`<td>${e.missione}</td><td>${e.data}</td>
     <td>
       <button onclick="editEntry('${e.id}')">Modifica</button>
       <button onclick="deleteEntry('${e.id}')">Elimina</button>
@@ -222,30 +222,88 @@ function editEntry(id){
 
 function deleteEntry(id){ if(confirm('Eliminare scheda?')){ entries=entries.filter(x=>x.id!==id); localStorage.setItem(STORAGE_KEY,JSON.stringify(entries)); renderTable(); } }
 function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); sigRef.clear(); }
-function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function exportSinglePDF(id){
-  const e=entries.find(x=>x.id===id);
+  const e = entries.find(x=>x.id===id);
   if(!e) return;
-  const div = document.getElementById('pdfContent');
-
-  const canvas = await html2canvas(div, {scale:2, useCORS:true});
-  const imgData = canvas.toDataURL('image/png');
-
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-  pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+  pdf.setFont('helvetica'); pdf.setFontSize(14);
 
-  // aggiungi timestamp in basso
+  // Logo in alto a sinistra
+  const logoUrl = "https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg";
+  const img = new Image();
+  img.src = logoUrl;
+  await new Promise(resolve=>{img.onload=resolve;});
+  pdf.addImage(img, 'JPEG', 10, 10, 40, 40);
+
+  pdf.text("Scheda Paziente TI", 60, 25);
+
+  let y = 55; // posizione verticale dopo logo
+  pdf.setFontSize(12);
+
+  // INFO PAZIENTE
+  pdf.text("INFO PAZIENTE", 10, y); y += 8;
+  const patientData = [
+    ["Missione numero", e.missione],
+    ["Data", e.data],
+    ["Nome e Cognome", e.nome],
+    ["Età", e.eta],
+    ["Corporatura", e.corporatura],
+    ["Patologia", e.patologia],
+    ["Motivo trasporto", e.motivo],
+    ["Prelevare da", e.prelevare],
+    ["Portare a", e.portare],
+    ["PDC", e.pdc],
+    ["Telefono PDC", e.tel]
+  ];
+  pdf.autoTable({ startY: y, head:[["Campo","Valore"]], body: patientData, theme:'grid', styles:{fontSize:12}, headStyles:{fillColor:[200,200,200]} });
+  y = pdf.lastAutoTable.finalY + 8;
+
+  // TEAM
+  pdf.text("TEAM", 10, y); y += 8;
+  const teamData = [
+    ["Autista Soccorritore", e.autista],
+    ["1° Soccorritore", e.socc1],
+    ["2° Soccorritore", e.socc2],
+    ["3° Soccorritore", e.socc3],
+    ["Tirocinante", e.tiro]
+  ];
+  pdf.autoTable({ startY: y, head:[["Ruolo","Nome"]], body: teamData, theme:'grid', styles:{fontSize:12}, headStyles:{fillColor:[200,200,200]} });
+  y = pdf.lastAutoTable.finalY + 8;
+
+  // INFO TRASPORTO
+  pdf.text("INFO TRASPORTO", 10, y); y += 8;
+  const transData = [
+    ["Arrivo in sede", e.arrivoSede],
+    ["Arrivo dal paziente", e.arrivoPaz],
+    ["Mezzo assegnato", e.mezzo],
+    ["Prezzo", e.prezzo],
+    ["Presidi necessari", e.presidi],
+    ["Note", e.note]
+  ];
+  pdf.autoTable({ startY: y, head:[["Campo","Valore"]], body: transData, theme:'grid', styles:{fontSize:12}, headStyles:{fillColor:[200,200,200]} });
+  y = pdf.lastAutoTable.finalY + 8;
+
+  // Firma referente
+  if(e.firmaRef){
+    const imgSig = new Image();
+    imgSig.src = e.firmaRef;
+    await new Promise(resolve=>{imgSig.onload=resolve;});
+    pdf.addImage(imgSig, 'PNG', 10, y, 60, 30);
+    pdf.text("Firma referente", 10, y + 32);
+  }
+
+  // Timestamp in basso a destra
+  pdf.setTextColor(255,0,0);
   pdf.setFontSize(10);
-  pdf.text(`Generato il: ${e.timestamp}`, 10, pdf.internal.pageSize.getHeight() - 10);
+  pdf.text(`Generato il: ${e.timestamp}`, pdf.internal.pageSize.getWidth()-80, pdf.internal.pageSize.getHeight()-10);
 
   pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
 }
 
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
+
 function exportAllAsJSON(){
   const blob=new Blob([JSON.stringify(entries,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -257,4 +315,3 @@ renderTable();
 </script>
 </body>
 </html>
-
