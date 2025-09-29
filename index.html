@@ -102,7 +102,7 @@ tr:hover { background:#f1f5f9; }
     <div><label>Portare a<input id="portare"></label></div>
     <div><label>PDC<input id="pdc"></label></div>
     <!-- Telefono PDC solo numeri -->
-    <div><label>Telefono PDC<input id="tel" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="Inserisci solo numeri"></label></div>
+    <div><label>Telefono PDC<input id="tel" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder=""></label></div>
 
     <div class="section-title">TEAM</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
@@ -121,7 +121,7 @@ tr:hover { background:#f1f5f9; }
     <div>
       <label>Mezzo assegnato
         <select id="mezzo">
-          <option value="">-- seleziona --</option>
+          <option value="">-- Seleziona un mezzo --</option>
           <option>ABZ 205</option>
           <option>ABZ 406</option>
           <option>ABZ 551</option>
@@ -136,7 +136,7 @@ tr:hover { background:#f1f5f9; }
     </div>
 
     <!-- Prezzo come testo: permetti digitare normalemente, formatta al blur -->
-    <div><label>Prezzo<input type="text" id="prezzo" placeholder="Esempio: 50 oppure 50,5 oppure 50 €"></label></div>
+    <div><label>Prezzo<input type="text" id="prezzo" placeholder=""></label></div>
 
     <div class="full"><label>Presidi necessari<textarea id="presidi"></textarea></label></div>
     <div class="full"><label>Note<textarea id="note"></textarea></label></div>
@@ -145,7 +145,7 @@ tr:hover { background:#f1f5f9; }
     <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1">
         <label>Firma referente (nome e cognome)</label>
-        <input id="firmaRef" placeholder="Inserisci il tuo nome e cognome">
+        <input id="firmaRef" placeholder="">
       </div>
     </div>
 
@@ -382,4 +382,5 @@ renderTable();
 </script>
 </body>
 </html>
+
 
