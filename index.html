@@ -298,60 +298,70 @@ async function deleteEntry(id){
 
 // PDF EXPORT
 async function exportSinglePDF(id){
-  const e = entries.find(x => x.id === id);
-  if(!e) return;
-
-  // Crea un div temporaneo
+  const e = entries.find(x=>x.id===id); if(!e) return;
   const pdfDiv = document.createElement('div');
-  pdfDiv.style.width = '800px';
-  pdfDiv.style.padding = '10px';
-  pdfDiv.style.background = '#fff';
-  pdfDiv.style.fontFamily = 'Arial, sans-serif';
-  pdfDiv.style.fontSize = '12px';
-  
-  // Filigrana come immagine in background
-  pdfDiv.style.position = 'relative';
+  pdfDiv.style.width='800px'; pdfDiv.style.padding='10px'; pdfDiv.style.background='#fff'; pdfDiv.style.fontFamily='Arial, sans-serif'; pdfDiv.style.fontSize='12px';
   pdfDiv.innerHTML = `
-    <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg"
-         style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); opacity:0.1; width:80%; z-index:0;">
-    <div style="position:relative; z-index:1;">
-      <div style="text-align:right; font-weight:bold; color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
-      <h1 style="text-align:center;font-weight:bold;font-size:18px;">Scheda Paziente TI</h1>
-      <h2 style="font-weight:bold;font-size:14px;">Info paziente</h2>
-      <table border="1" style="width:100%; border-collapse:collapse;">
-        <tr><td>Missione</td><td>${escapeHtml(e.missione)}</td></tr>
-        <tr><td>Data</td><td>${escapeHtml(e.data)}</td></tr>
-        <tr><td>Nome</td><td>${escapeHtml(e.nome)}</td></tr>
-        <tr><td>Età</td><td>${escapeHtml(e.eta)}</td></tr>
-        <tr><td>PDC</td><td>${escapeHtml(e.pdc)}</td></tr>
-        <tr><td>Telefono PDC</td><td>${escapeHtml(e.tel)}</td></tr>
-      </table>
-      <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString()}</p>
-    </div>
+    <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
+    <h1 style="text-align:center;font-weight:bold;font-size:18px;">Scheda Paziente TI</h1>
+    <h2 style="font-weight:bold;font-size:14px;">Info paziente</h2>
+    <table border="1" style="width:100%;border-collapse:collapse;">
+      <tr><td>Missione</td><td>${escapeHtml(e.missione)}</td></tr>
+      <tr><td>Data</td><td>${escapeHtml(e.data)}</td></tr>
+      <tr><td>Nome e Cognome</td><td>${escapeHtml(e.nome)}</td></tr>
+      <tr><td>Età</td><td>${escapeHtml(e.eta)}</td></tr>
+      <tr><td>Data di nascita</td><td>${escapeHtml(e.dob)}</td></tr>
+      <tr><td>Corporatura</td><td>${escapeHtml(e.corporatura)}</td></tr>
+      <tr><td>Patologia</td><td>${escapeHtml(e.patologia)}</td></tr>
+      <tr><td>Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
+      <tr><td>PDC</td><td>${escapeHtml(e.pdc)}</td></tr>
+      <tr><td>Telefono PDC</td><td>${escapeHtml(e.tel)}</td></tr>
+    </table>
+    <h2 style="font-weight:bold;font-size:14px;">Team</h2>
+    <table border="1" style="width:100%;border-collapse:collapse;">
+      <tr><td>Autista Soccorritore</td><td>${escapeHtml(e.autista)}</td></tr>
+      <tr><td>1° Soccorritore</td><td>${escapeHtml(e.socc1)}</td></tr>
+      <tr><td>2° Soccorritore</td><td>${escapeHtml(e.socc2)}</td></tr>
+      <tr><td>3° Soccorritore</td><td>${escapeHtml(e.socc3)}</td></tr>
+      <tr><td>Tirocinante</td><td>${escapeHtml(e.tiro)}</td></tr>
+    </table>
+    <h2 style="font-weight:bold;font-size:14px;">Info trasporto</h2>
+    <table border="1" style="width:100%;border-collapse:collapse;">
+      <tr><td>Arrivo in sede</td><td>${escapeHtml(e.arrivoSede)}</td></tr>
+      <tr><td>Arrivo dal paziente</td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
+      <tr><td>Arrivo a destinazione</td><td>${escapeHtml(e.arrivoDest)}</td></tr>
+      <tr><td>Mezzo assegnato</td><td>${escapeHtml(e.mezzo)}</td></tr>
+      <tr><td>Prezzo</td><td>${escapeHtml(e.prezzo)}</td></tr>
+      <tr><td>Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
+      <tr><td>Note</td><td>${escapeHtml(e.note)}</td></tr>
+    </table>
+    <h2 style="font-weight:bold;font-size:14px;">Referente</h2>
+    <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
+    <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString()}</p>
   `;
-
   document.body.appendChild(pdfDiv);
   const canvas = await html2canvas(pdfDiv, {scale:2});
   document.body.removeChild(pdfDiv);
-
   const imgData = canvas.toDataURL('image/png');
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgWidth = pageWidth;
   const imgHeight = (canvas.height * pageWidth) / canvas.width;
-
-  const scaleFactor = imgHeight > pageHeight ? pageHeight/imgHeight : 1;
-  pdf.addImage(imgData, 'PNG', 0, 0, pageWidth*scaleFactor, imgHeight*scaleFactor);
-  pdf.save(`scheda_${e.missione}_${e.data || ''}.pdf`);
+  let scaleFactor = imgHeight > pageHeight ? pageHeight/imgHeight : 1;
+  pdf.addImage(imgData,'PNG',0,0,imgWidth*scaleFactor,imgHeight*scaleFactor);
+  pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
   notify('PDF generato, download avviato','success');
 }
+
 
 
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 </script>
 </body>
 </html>
+
 
 
 
