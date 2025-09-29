@@ -31,9 +31,21 @@ tr:hover { background:#f1f5f9; }
 #logoutBtn:hover { background:#3730a3; }
 footer { text-align:center; margin-top:20px; font-size:12px; color:#555; }
 header img.logo { display:block; margin:0 auto; }
+
+/* Notifiche */
+#notifications { position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px; }
+.notification { padding:12px 20px; border-radius:8px; color:#fff; opacity:0.9; min-width:200px; position:relative; animation:fadein 0.3s; }
+.notification .close { position:absolute; top:5px; right:8px; cursor:pointer; font-weight:bold; }
+.notification.success { background:rgba(34,139,34,0.9); }
+.notification.error { background:rgba(220,20,60,0.9); }
+.notification.warning { background:rgba(255,165,0,0.9); }
+@keyframes fadein { from {opacity:0;} to {opacity:0.9;} }
+
 </style>
 </head>
 <body>
+
+<div id="notifications"></div>
 
 <!-- Login -->
 <div id="loginDiv">
@@ -66,8 +78,7 @@ header img.logo { display:block; margin:0 auto; }
     <div class="full"><label>Motivo trasporto<textarea id="motivo"></textarea></label></div>
     <div><label>Prelevare da<input id="prelevare"></label></div>
     <div><label>Portare a<input id="portare"></label></div>
-    <div><label>PDC<input id="pdc"></label></div>
-    <div><label>Telefono PDC<input type="number" id="tel" inputmode="numeric" pattern="[0-9]*" oninput="this.value=this.value.replace(/\\D/g,'')"></label></div>
+    <div><label>PDC<input id="pdc" type="tel"></label></div>
 
     <div class="section-title">Team</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
@@ -90,12 +101,12 @@ header img.logo { display:block; margin:0 auto; }
         </select>
       </label>
     </div>
-    <div><label>Prezzo<input type="number" id="prezzo" step="0.01" min="0" oninput="formatPrice(this)"></label></div>
+    <div><label>Prezzo<input id="prezzo" type="text" placeholder="0.00"></label></div>
     <div class="full"><label>Presidi necessari<textarea id="presidi"></textarea></label></div>
     <div class="full"><label>Note<textarea id="note"></textarea></label></div>
     <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1">
-        <label>Referente (nome e cognome)</label>
+        <label>Referente che ha compilato la scheda</label>
         <input id="firmaRef" placeholder="">
       </div>
     </div>
@@ -150,11 +161,36 @@ const auth = firebase.auth();
 // UTILITY
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-function formatPrice(el){ let val=parseFloat(el.value); if(isNaN(val)) val=0; el.value=val.toFixed(2); }
+
+// NOTIFICHE
+function notify(message,type='success'){
+  const div=document.createElement('div');
+  div.className='notification '+type;
+  div.innerHTML = message + '<span class="close" onclick="this.parentElement.remove()">x</span>';
+  document.getElementById('notifications').appendChild(div);
+  setTimeout(()=>{ if(div.parentElement) div.parentElement.remove() },5000);
+}
+
+// LOGOUT AUTOMATICO
+let inactivityTimer;
+function resetInactivity(){ 
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(()=>{ logout(); notify('Logout automatico per inattività','error'); }, 15*60*1000); // 15 minuti
+}
+document.onmousemove = resetInactivity;
+document.onkeypress = resetInactivity;
+document.onclick = resetInactivity;
+document.onscroll = resetInactivity;
 
 // LOGIN / LOGOUT
-function login(){ const email=document.getElementById('loginEmail').value; const password=document.getElementById('loginPassword').value; auth.signInWithEmailAndPassword(email,password).catch(err=>alert(err.message)); }
-function logout(){ auth.signOut(); }
+function login(){
+  const email=document.getElementById('loginEmail').value;
+  const password=document.getElementById('loginPassword').value;
+  auth.signInWithEmailAndPassword(email,password)
+    .then(()=>{ notify('Accesso effettuato','success'); })
+    .catch(err=>notify(err.message,'error'));
+}
+function logout(){ auth.signOut().then(()=>{ notify('Logout eseguito, prego riaccedi','error'); }); }
 
 // RUNTIME
 let entries=[], editingId=null;
@@ -163,6 +199,7 @@ auth.onAuthStateChanged(user=>{
     document.getElementById('loginDiv').style.display='none';
     document.getElementById('mainApp').style.display='block';
     setupRealtimeListener();
+    resetInactivity();
   } else {
     document.getElementById('loginDiv').style.display='block';
     document.getElementById('mainApp').style.display='none';
@@ -180,6 +217,8 @@ function setupRealtimeListener(){
 
 // FORM DATA
 function getFormData(){
+  let prezzoVal = parseFloat(document.getElementById('prezzo').value.replace(',','.')) || 0;
+  prezzoVal = prezzoVal.toFixed(2)+'€';
   return {
     id: editingId||uid(),
     missione: document.getElementById('missione').value,
@@ -192,8 +231,7 @@ function getFormData(){
     motivo: document.getElementById('motivo').value,
     prelevare: document.getElementById('prelevare').value,
     portare: document.getElementById('portare').value,
-    pdc: document.getElementById('pdc').value,
-    tel: document.getElementById('tel').value,
+    pdc: document.getElementById('tel').value.replace(/\D/g,''),
     autista: document.getElementById('autista').value,
     socc1: document.getElementById('socc1').value,
     socc2: document.getElementById('socc2').value,
@@ -203,7 +241,7 @@ function getFormData(){
     arrivoPaz: document.getElementById('arrivoPaz').value,
     arrivoDest: document.getElementById('arrivoDest').value,
     mezzo: document.getElementById('mezzo').value,
-    prezzo: document.getElementById('prezzo').value,
+    prezzo: prezzoVal,
     presidi: document.getElementById('presidi').value,
     note: document.getElementById('note').value,
     firmaRef: document.getElementById('firmaRef').value,
@@ -212,16 +250,23 @@ function getFormData(){
   };
 }
 
+// PRICE INPUT: permetti solo numeri e punto
+const prezzoInput = document.getElementById('prezzo');
+prezzoInput.addEventListener('input',()=>{
+  let val = prezzoInput.value.replace(/[^0-9.,]/g,'');
+  prezzoInput.value = val;
+});
+
 // SAVE
 async function saveEntry(){
   const data = getFormData();
   if(!data.missione){ alert('Compila Missione'); return; }
-  try{ await db.collection("schede_TI").doc(data.id).set(data); resetForm(); } 
-  catch(err){ console.error(err); alert("Errore nel salvataggio"); }
+  try{ await db.collection("schede_TI").doc(data.id).set(data); resetForm(); notify('Scheda salvata','success'); } 
+  catch(err){ console.error(err); notify('Errore nel salvataggio','error'); }
 }
 
 // RESET
-function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); }
+function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); notify('Scheda pulita','error'); }
 
 // RENDER TABLE
 function renderTable(){
@@ -243,11 +288,12 @@ function renderTable(){
 function editEntry(id){
   const e=entries.find(x=>x.id===id); if(!e) return; editingId=id;
   for(const key in e){ if(document.getElementById(key)) document.getElementById(key).value=e[key]; }
+  notify('Modifiche abilitate','warning');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 async function deleteEntry(id){
   if(!confirm('Eliminare scheda?')) return;
-  try{ await db.collection("schede_TI").doc(id).delete(); } catch(err){ console.error(err); }
+  try{ await db.collection("schede_TI").doc(id).delete(); notify('Scheda eliminata','error'); } catch(err){ console.error(err); }
 }
 
 // PDF EXPORT (senza logo)
@@ -275,7 +321,6 @@ async function exportSinglePDF(id){
       <tr><td>Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
       <tr><td>Prelevare da</td><td>${escapeHtml(e.prelevare)}</td></tr>
       <tr><td>Portare a</td><td>${escapeHtml(e.portare)}</td></tr>
-      <tr><td>Prezzo</td><td>${escapeHtml(parseFloat(e.prezzo).toFixed(2))}€</td></tr>
     </table>
     <h2 style="font-weight:bold;font-size:14px;">Team</h2>
     <table border="1" style="width:100%;border-collapse:collapse;">
@@ -291,12 +336,13 @@ async function exportSinglePDF(id){
       <tr><td>Arrivo dal paziente</td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
       <tr><td>Arrivo a destinazione</td><td>${escapeHtml(e.arrivoDest)}</td></tr>
       <tr><td>Mezzo assegnato</td><td>${escapeHtml(e.mezzo)}</td></tr>
+      <tr><td>Prezzo</td><td>${escapeHtml(e.prezzo)}</td></tr>
       <tr><td>Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
       <tr><td>Note</td><td>${escapeHtml(e.note)}</td></tr>
     </table>
-    <h2 style="font-weight:bold;font-size:14px;">Operatore responsabile della compilazione:</h2>
+    <h2 style="font-weight:bold;font-size:14px;">Referente</h2>
     <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
-    <div style="text-align:right;color:red;font-size:12px;margin-top:10px;">${new Date(e.timestamp).toLocaleString()}</div>
+    <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString()}</p>
   `;
 
   document.body.appendChild(pdfDiv);
@@ -311,14 +357,11 @@ async function exportSinglePDF(id){
   const imgWidth = pageWidth;
   const imgHeight = (canvas.height * pageWidth) / canvas.width;
 
-  if(imgHeight <= pageHeight){
-    pdf.addImage(imgData,'PNG',0,0,imgWidth,imgHeight);
-  } else {
-    let scaleFactor = pageHeight / imgHeight;
-    pdf.addImage(imgData,'PNG',0,0,imgWidth*scaleFactor,imgHeight*scaleFactor);
-  }
+  let scaleFactor = imgHeight > pageHeight ? pageHeight/imgHeight : 1;
+  pdf.addImage(imgData,'PNG',0,0,imgWidth*scaleFactor,imgHeight*scaleFactor);
 
   pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
+  notify('PDF generato','success');
 }
 
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
@@ -326,5 +369,3 @@ function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 </script>
 </body>
 </html>
-
-
