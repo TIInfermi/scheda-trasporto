@@ -98,7 +98,7 @@ tr:hover { background:#f1f5f9; }
     <div><label>Prelevare da<input id="prelevare"></label></div>
     <div><label>Portare a<input id="portare"></label></div>
     <div><label>PDC<input id="pdc"></label></div>
-    <div><label>Telefono PDC<input id="tel" type="tel" inputmode="numeric" pattern="[0-9]*"></label></div>
+    <div><label>Telefono PDC<input id="tel" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder=""></label></div>
 
     <div class="section-title">TEAM</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
@@ -127,28 +127,23 @@ tr:hover { background:#f1f5f9; }
         </select>
       </label>
     </div>
-    <div><label>Prezzo<input type="text" id="prezzo"></label></div>
+    <div><label>Prezzo<input type="text" id="prezzo" placeholder=""></label></div>
     <div class="full"><label>Presidi necessari<textarea id="presidi"></textarea></label></div>
     <div class="full"><label>Note<textarea id="note"></textarea></label></div>
-
-    <!-- NUOVO CAMPO: Stato trasporto -->
-    <div class="full">
-      <label>Stato trasporto
-        <select id="stato">
-          <option value="">-- Seleziona stato --</option>
-          <option>Confermato</option>
-          <option>In lavorazione</option>
-          <option>Annullato</option>
-        </select>
-      </label>
-    </div>
-
     <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1">
         <label>Firma referente (nome e cognome)</label>
-        <input id="firmaRef">
+        <input id="firmaRef" placeholder="">
       </div>
     </div>
+    <div><label>Stato trasporto
+      <select id="stato">
+        <option value="">-- Seleziona Stato --</option>
+        <option>Confermato</option>
+        <option>In lavorazione</option>
+        <option>Annullato</option>
+      </select>
+    </label></div>
 
     <div class="buttons">
       <button type="submit">Salva scheda TI</button>
@@ -157,55 +152,48 @@ tr:hover { background:#f1f5f9; }
     </div>
   </form>
 
-<div id="pdfArea">
-  <h2>Elenco schede TI</h2>
-  <table id="dataTable">
-    <thead>
-      <tr>
-        <th>Missione N°</th>
-        <th>Data</th>
-        <th>Stato</th>
-        <th>Azioni</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div id="pdfArea">
+    <h2>Elenco schede TI</h2>
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Missione N°</th>
+          <th>Data</th>
+          <th>Stato</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </div>
 
-
+<!-- Librerie -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
-const STORAGE_KEY='schede_trasporto_final';
-let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
-let editingId=null;
+// CONFIG FIREBASE: sostituisci con i tuoi dati
+const firebaseConfig = {
+  apiKey: "AIzaSyBCyJjpDuixqjC86U93B7naAWhIu0CZEq8",
+  authDomain: "schede-ti.firebaseapp.com",
+  projectId: "schede-ti",
+  storageBucket: "schede-ti.firebasestorage.app",
+  messagingSenderId: "832227119483",
+  appId: "1:832227119483:web:c5af587729355eaffe6dde"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let entries = [];
+let editingId = null;
+
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function formatPriceForSave(raw){
-  if(raw==null) return '';
-  const cleaned = String(raw).replace(/\s/g,'').replace(',', '.').replace(/[^\d.]/g,'');
-  if(cleaned === '') return '';
-  const n = parseFloat(cleaned);
-  if(isNaN(n)) return '';
-  return n.toFixed(2) + '€';
-}
-
-const prezzoInput = document.getElementById('prezzo');
-prezzoInput.addEventListener('focus', function(){
-  const v = (this.value||'').replace(/\s/g,'').replace('€','').replace(',', '.').replace(/[^\d.]/g,'');
-  this.value = v;
-});
-prezzoInput.addEventListener('input', function(){
-  let v = this.value.replace(/,/g, '.').replace(/[^\d.]/g,'');
-  const parts = v.split('.');
-  if(parts.length>2){ v = parts[0] + '.' + parts.slice(1).join(''); }
-  this.value = v;
-});
-prezzoInput.addEventListener('blur', function(){ this.value = formatPriceForSave(this.value); });
-
-document.getElementById('tel').addEventListener('input', function(){ this.value = (this.value||'').replace(/\D/g,''); });
 
 function getFormData(){
   return {
@@ -231,64 +219,87 @@ function getFormData(){
     arrivoPaz: document.getElementById('arrivoPaz').value,
     arrivoDest: document.getElementById('arrivoDest').value,
     mezzo: document.getElementById('mezzo').value,
-    prezzo: formatPriceForSave(document.getElementById('prezzo').value),
+    prezzo: document.getElementById('prezzo').value,
     presidi: document.getElementById('presidi').value,
     note: document.getElementById('note').value,
-    stato: document.getElementById('stato').value,
     firmaRef: document.getElementById('firmaRef').value,
+    stato: document.getElementById('stato').value,
     timestamp: new Date().toLocaleString()
   };
 }
 
-function saveEntry(){
+// SALVA SU FIREBASE
+async function saveEntry(){
   const data = getFormData();
   if(!data.missione){ alert('Compila Missione'); return; }
-  if(editingId){
-    const idx = entries.findIndex(x=>x.id===editingId);
-    if(idx!==-1) entries[idx]=data;
-    editingId=null;
-  } else entries.unshift(data);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  renderTable();
-  resetForm();
+  try{
+    await db.collection("schede_TI").doc(data.id).set(data);
+    alert("Scheda salvata nel database!");
+    resetForm();
+    loadEntriesFromDB();
+  }catch(err){
+    console.error(err); alert("Errore nel salvataggio della scheda");
+  }
 }
 
+// CARICA DAL DATABASE
+async function loadEntriesFromDB(){
+  try{
+    const snapshot = await db.collection("schede_TI").orderBy("timestamp","desc").get();
+    entries = snapshot.docs.map(doc => doc.data());
+    renderTable();
+  }catch(err){
+    console.error(err); alert("Errore nel caricamento delle schede");
+  }
+}
+
+// RENDER TABELLA
 function renderTable(){
-  const tbody=document.querySelector('#dataTable tbody');
+  const tbody = document.querySelector('#dataTable tbody');
   tbody.innerHTML='';
   for(const e of entries){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${escapeHtml(e.missione)}</td>
-                  <td>${escapeHtml(e.data)}</td>
-                  <td>${escapeHtml(e.stato||'')}</td>
-                  <td>
-                    <button onclick="editEntry('${e.id}')">Modifica</button>
-                    <button onclick="deleteEntry('${e.id}')">Elimina</button>
-                    <button onclick="exportSinglePDF('${e.id}')">PDF</button>
-                  </td>`;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(e.missione)}</td>
+                    <td>${escapeHtml(e.data)}</td>
+                    <td>${escapeHtml(e.stato||'')}</td>
+                    <td>
+                      <button onclick="editEntry('${e.id}')">Modifica</button>
+                      <button onclick="deleteEntry('${e.id}')">Elimina</button>
+                      <button onclick="exportSinglePDF('${e.id}')">PDF</button>
+                    </td>`;
     tbody.appendChild(tr);
   }
 }
 
-
+// MODIFICA
 function editEntry(id){
-  const e=entries.find(x=>x.id===id);
+  const e = entries.find(x=>x.id===id);
   if(!e) return;
-  editingId=id;
-  for(const key in e){ if(document.getElementById(key)) document.getElementById(key).value=e[key]; }
+  editingId = id;
+  for(const key in e){
+    if(document.getElementById(key)) document.getElementById(key).value = e[key];
+  }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function deleteEntry(id){
-  if(confirm('Eliminare scheda?')){
-    entries=entries.filter(x=>x.id!==id);
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));
-    renderTable();
+// ELIMINA
+async function deleteEntry(id){
+  if(!confirm('Eliminare scheda?')) return;
+  try{
+    await db.collection("schede_TI").doc(id).delete();
+    loadEntriesFromDB();
+  }catch(err){
+    console.error(err); alert("Errore nell'eliminazione");
   }
 }
 
-function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); }
+// RESET FORM
+function resetForm(){
+  editingId = null;
+  document.getElementById('mainForm').reset();
+}
 
+// PDF
 async function exportSinglePDF(id){
   const e = entries.find(x=>x.id===id);
   if(!e) return;
@@ -298,10 +309,9 @@ async function exportSinglePDF(id){
   pdfDiv.style.padding = '20px';
   pdfDiv.style.background = '#fff';
   pdfDiv.style.fontFamily = 'Arial, sans-serif';
-  pdfDiv.style.fontSize = '12px'; // font base
+  pdfDiv.style.fontSize = '12px';
   pdfDiv.innerHTML = `
     <h1 style="text-align:center; font-size:20px; font-weight:bold;">Scheda Paziente TI</h1>
-
     <h2 style="font-size:15px; font-weight:bold;">Info paziente</h2>
     <table border="1" style="width:100%;border-collapse:collapse; font-size:12px;">
       <tr><td><b>Missione</b></td><td>${escapeHtml(e.missione)}</td></tr>
@@ -317,7 +327,6 @@ async function exportSinglePDF(id){
       <tr><td><b>PDC</b></td><td>${escapeHtml(e.pdc)}</td></tr>
       <tr><td><b>Telefono PDC</b></td><td>${escapeHtml(e.tel)}</td></tr>
     </table>
-
     <h2 style="font-size:15px; font-weight:bold;">Team</h2>
     <table border="1" style="width:100%;border-collapse:collapse; font-size:12px;">
       <tr><td><b>Autista Soccorritore</b></td><td>${escapeHtml(e.autista)}</td></tr>
@@ -326,7 +335,6 @@ async function exportSinglePDF(id){
       <tr><td><b>3° Soccorritore</b></td><td>${escapeHtml(e.socc3)}</td></tr>
       <tr><td><b>Tirocinante</b></td><td>${escapeHtml(e.tiro)}</td></tr>
     </table>
-
     <h2 style="font-size:15px; font-weight:bold;">Info trasporto</h2>
     <table border="1" style="width:100%;border-collapse:collapse; font-size:12px;">
       <tr><td><b>Arrivo in sede</b></td><td>${escapeHtml(e.arrivoSede)}</td></tr>
@@ -337,23 +345,18 @@ async function exportSinglePDF(id){
       <tr><td><b>Presidi necessari</b></td><td style="white-space:pre-wrap;">${escapeHtml(e.presidi)}</td></tr>
       <tr><td><b>Note</b></td><td style="white-space:pre-wrap;">${escapeHtml(e.note)}</td></tr>
     </table>
-
     ${e.firmaRef?`<h2 style="font-size:15px; font-weight:bold;">Referente responsabile della compilazione</h2>
     <p style="font-size:16px; font-weight:bold;">${escapeHtml(e.firmaRef)}</p>`:''}
   `;
-
   document.body.appendChild(pdfDiv);
-  const canvas = await html2canvas(pdfDiv, {scale:2});
+  const canvas = await html2canvas(pdfDiv,{scale:2});
   const imgData = canvas.toDataURL('image/png');
   document.body.removeChild(pdfDiv);
-
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
   const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  const pdfHeight = (canvas.height*pdfWidth)/canvas.width;
   pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
-
-  // Stato in alto a destra
   if(e.stato){
     let color=[0,0,0];
     if(e.stato==="Confermato") color=[0,128,0];
@@ -363,23 +366,14 @@ async function exportSinglePDF(id){
     pdf.setTextColor(...color);
     pdf.text(`Stato: ${e.stato}`, pdfWidth-10, 15, {align:"right"});
   }
-
   pdf.setFontSize(10);
   pdf.setTextColor(255,0,0);
-  pdf.text(`Generato il: ${e.timestamp}`, pdfWidth - 80, pdf.internal.pageSize.getHeight() - 10);
-
+  pdf.text(`Generato il: ${e.timestamp}`, pdfWidth-80, pdf.internal.pageSize.getHeight()-10);
   pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
 }
 
-
-
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
-
-renderTable();
+window.addEventListener('load', loadEntriesFromDB);
 </script>
 </body>
 </html>
-
-
-
-
