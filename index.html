@@ -67,7 +67,7 @@ header img.logo { display:block; margin:0 auto; }
     <div><label>Prelevare da<input id="prelevare"></label></div>
     <div><label>Portare a<input id="portare"></label></div>
     <div><label>PDC<input id="pdc"></label></div>
-    <div><label>Telefono PDC<input type="tel" id="tel" inputmode="numeric" pattern="[0-9]*" oninput="this.value=this.value.replace(/\\D/g,'')"></label></div>
+    <div><label>Telefono PDC<input type="number" id="tel" inputmode="numeric" pattern="[0-9]*" oninput="this.value=this.value.replace(/\\D/g,'')"></label></div>
 
     <div class="section-title">Team</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
@@ -326,3 +326,4 @@ function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 </script>
 </body>
 </html>
+
