@@ -32,14 +32,14 @@ tr:hover { background:#f1f5f9; }
 footer { text-align:center; margin-top:20px; font-size:12px; color:#555; }
 header img.logo { display:block; margin:0 auto; }
 
-/* Notifiche */
-#notifications { position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px; }
-.notification { padding:12px 20px; border-radius:8px; color:#fff; opacity:0.9; min-width:200px; position:relative; animation:fadein 0.3s; }
-.notification .close { position:absolute; top:5px; right:8px; cursor:pointer; font-weight:bold; }
-.notification.success { background:rgba(34,139,34,0.9); }
-.notification.error { background:rgba(220,20,60,0.9); }
-.notification.warning { background:rgba(255,165,0,0.9); }
-@keyframes fadein { from {opacity:0;} to {opacity:0.9;} }
+/* Notifiche centrate */
+#notifications { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:10px; align-items:center; }
+.notification { padding:12px 20px; border-radius:8px; color:#fff; min-width:250px; position:relative; opacity:0.95; font-weight:bold; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.2); cursor:pointer; transition:0.3s; }
+.notification.success { background:rgba(34,139,34,0.85); }
+.notification.error { background:rgba(220,20,60,0.85); }
+.notification.warning { background:rgba(255,165,0,0.85); }
+.notification .close { position:absolute; top:5px; right:8px; font-weight:bold; cursor:pointer; }
+.notification:hover { opacity:1; }
 </style>
 </head>
 <body>
@@ -145,14 +145,7 @@ header img.logo { display:block; margin:0 auto; }
 
 <script>
 // CONFIG FIREBASE
-const firebaseConfig = {
-  apiKey: "AIzaSyBCyJjpDuixqjC86U93B7naAWhIu0CZEq8",
-  authDomain: "schede-ti.firebaseapp.com",
-  projectId: "schede-ti",
-  storageBucket: "schede-ti.firebasestorage.app",
-  messagingSenderId: "832227119483",
-  appId: "1:832227119483:web:c5af587729355eaffe6dde"
-};
+const firebaseConfig = { apiKey: "AIzaSyBCyJjpDuixqjC86U93B7naAWhIu0CZEq8", authDomain: "schede-ti.firebaseapp.com", projectId: "schede-ti", storageBucket: "schede-ti.firebasestorage.app", messagingSenderId: "832227119483", appId: "1:832227119483:web:c5af587729355eaffe6dde"};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -161,11 +154,11 @@ const auth = firebase.auth();
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 
-// NOTIFICHE
-function notify(message,type='success'){
-  const div=document.createElement('div');
-  div.className='notification '+type;
-  div.innerHTML = message + '<span class="close" onclick="this.parentElement.remove()">x</span>';
+// NOTIFICHE CENTRATE
+function notify(msg,type='success'){ 
+  const div=document.createElement('div'); 
+  div.className='notification '+type; 
+  div.innerHTML=msg+'<span class="close" onclick="this.parentElement.remove()">×</span>';
   document.getElementById('notifications').appendChild(div);
   setTimeout(()=>{ if(div.parentElement) div.parentElement.remove() },5000);
 }
@@ -178,21 +171,12 @@ function login(){
     .then(()=>{ notify('Accesso effettuato','success'); })
     .catch(err=>notify(err.message,'error'));
 }
-
-function logout(){ 
-  auth.signOut().then(()=>{ notify('Logout eseguito, prego riaccedi','error'); });
-}
+function logout(){ auth.signOut().then(()=>{ notify('Logout eseguito, prego riaccedi','error'); }); }
 
 // INATTIVITA'
 let inactivityTimer;
-function resetInactivity(){ 
-  clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(()=>{ logout(); notify('Logout automatico per inattività','error'); }, 15*60*1000); 
-}
-document.onmousemove = resetInactivity;
-document.onkeypress = resetInactivity;
-document.onclick = resetInactivity;
-document.onscroll = resetInactivity;
+function resetInactivity(){ clearTimeout(inactivityTimer); inactivityTimer = setTimeout(()=>{ logout(); notify('Logout automatico per inattività','error'); }, 15*60*1000);}
+document.onmousemove=resetInactivity; document.onkeypress=resetInactivity; document.onclick=resetInactivity; document.onscroll=resetInactivity;
 
 // RUNTIME
 let entries=[], editingId=null;
@@ -208,13 +192,12 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-// REALTIME LISTENER
+// LISTENER FIRESTORE
 function setupRealtimeListener(){
-  db.collection("schede_TI").orderBy("timestamp","desc")
-    .onSnapshot(snapshot=>{
-      entries = snapshot.docs.map(doc=>doc.data());
-      renderTable();
-    });
+  db.collection("schede_TI").orderBy("timestamp","desc").onSnapshot(snapshot=>{
+    entries = snapshot.docs.map(doc=>doc.data());
+    renderTable();
+  });
 }
 
 // FORM DATA
@@ -252,22 +235,21 @@ function getFormData(){
   };
 }
 
-// PRICE INPUT: solo numeri e virgola/punto
-const prezzoInput = document.getElementById('prezzo');
-prezzoInput.addEventListener('input',()=>{
-  let val = prezzoInput.value.replace(/[^0-9.,]/g,'');
-  prezzoInput.value = val;
+// PRICE INPUT
+document.getElementById('prezzo').addEventListener('input',()=>{ 
+  let val = document.getElementById('prezzo').value.replace(/[^0-9.,]/g,'');
+  document.getElementById('prezzo').value = val;
 });
 
-// SAVE
+// SALVA
 async function saveEntry(){
   const data = getFormData();
   if(!data.missione){ alert('Compila Missione'); return; }
   try{
     await db.collection("schede_TI").doc(data.id).set(data);
+    if(editingId) notify('Scheda aggiornata','success'); else notify('Scheda salvata','success');
     editingId=null;
     resetForm(false);
-    notify('Scheda salvata','success');
   } catch(err){ console.error(err); notify('Errore nel salvataggio','error'); }
 }
 
@@ -301,7 +283,6 @@ function editEntry(id){
   notify('Modifiche abilitate','warning');
   window.scrollTo({top:0,behavior:'smooth'});
 }
-
 async function deleteEntry(id){
   if(!confirm('Eliminare scheda?')) return;
   try{ await db.collection("schede_TI").doc(id).delete(); notify('Scheda eliminata','error'); } catch(err){ console.error(err); }
@@ -310,15 +291,9 @@ async function deleteEntry(id){
 // PDF EXPORT
 async function exportSinglePDF(id){
   const e = entries.find(x=>x.id===id); if(!e) return;
-
   const pdfDiv = document.createElement('div');
-  pdfDiv.style.width='800px';
-  pdfDiv.style.padding='10px';
-  pdfDiv.style.background='#fff';
-  pdfDiv.style.fontFamily='Arial, sans-serif';
-  pdfDiv.style.fontSize='12px';
-  pdfDiv.innerHTML = `
-    <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
+  pdfDiv.style.width='800px'; pdfDiv.style.padding='10px'; pdfDiv.style.background='#fff'; pdfDiv.style.fontFamily='Arial, sans-serif'; pdfDiv.style.fontSize='12px';
+  pdfDiv.innerHTML = `<div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
     <h1 style="text-align:center;font-weight:bold;font-size:18px;">Scheda Paziente TI</h1>
     <h2 style="font-weight:bold;font-size:14px;">Info paziente</h2>
     <table border="1" style="width:100%;border-collapse:collapse;">
@@ -354,13 +329,10 @@ async function exportSinglePDF(id){
     </table>
     <h2 style="font-weight:bold;font-size:14px;">Referente</h2>
     <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
-    <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString()}</p>
-  `;
-
+    <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString()}</p>`;
   document.body.appendChild(pdfDiv);
-  const canvas = await html2canvas(pdfDiv, {scale:2});
+  const canvas = await html2canvas(pdfDiv,{scale:2});
   document.body.removeChild(pdfDiv);
-
   const imgData = canvas.toDataURL('image/png');
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
@@ -368,12 +340,10 @@ async function exportSinglePDF(id){
   const pageHeight = pdf.internal.pageSize.getHeight();
   const imgWidth = pageWidth;
   const imgHeight = (canvas.height * pageWidth) / canvas.width;
-
   let scaleFactor = imgHeight > pageHeight ? pageHeight/imgHeight : 1;
   pdf.addImage(imgData,'PNG',0,0,imgWidth*scaleFactor,imgHeight*scaleFactor);
-
   pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
-  notify('PDF generato','success');
+  notify('PDF generato, download avviato','success');
 }
 
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
