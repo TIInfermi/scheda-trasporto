@@ -298,9 +298,16 @@ async function deleteEntry(id){
 
 // PDF EXPORT
 async function exportSinglePDF(id){
-  const e = entries.find(x=>x.id===id); if(!e) return;
+  const e = entries.find(x=>x.id===id); 
+  if(!e) return;
+
+  // Creazione div temporaneo per il contenuto del PDF
   const pdfDiv = document.createElement('div');
-  pdfDiv.style.width='800px'; pdfDiv.style.padding='10px'; pdfDiv.style.background='#fff'; pdfDiv.style.fontFamily='Arial, sans-serif'; pdfDiv.style.fontSize='12px';
+  pdfDiv.style.width='800px';
+  pdfDiv.style.padding='10px';
+  pdfDiv.style.background='#fff';
+  pdfDiv.style.fontFamily='Arial, sans-serif';
+  pdfDiv.style.fontSize='12px';
   pdfDiv.innerHTML = `
     <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
     <h1 style="text-align:center;font-weight:bold;font-size:18px;">Scheda Paziente TI</h1>
@@ -339,9 +346,11 @@ async function exportSinglePDF(id){
     <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
     <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString()}</p>
   `;
+  
   document.body.appendChild(pdfDiv);
   const canvas = await html2canvas(pdfDiv, {scale:2});
   document.body.removeChild(pdfDiv);
+  
   const imgData = canvas.toDataURL('image/png');
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
@@ -349,13 +358,29 @@ async function exportSinglePDF(id){
   const pageHeight = pdf.internal.pageSize.getHeight();
   const imgWidth = pageWidth;
   const imgHeight = (canvas.height * pageWidth) / canvas.width;
-  let scaleFactor = imgHeight > pageHeight ? pageHeight/imgHeight : 1;
-  pdf.addImage(imgData,'PNG',0,0,imgWidth*scaleFactor,imgHeight*scaleFactor);
-  pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
-  notify('PDF generato, download avviato','success');
+
+  // FILIGRANA
+  const watermark = new Image();
+  watermark.src = 'https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg';
+  watermark.onload = function () {
+    const wmWidth = pageWidth*0.6;
+    const wmHeight = (watermark.height*wmWidth)/watermark.width;
+    const x = (pageWidth - wmWidth)/2;
+    const y = (pageHeight - wmHeight)/2;
+    
+    pdf.setGState(new pdf.GState({opacity:0.1}));
+    pdf.addImage(watermark,'PNG',x,y,wmWidth,wmHeight);
+    pdf.setGState(new pdf.GState({opacity:1}));
+
+    pdf.addImage(imgData,'PNG',0,0,imgWidth,imgHeight);
+    pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
+    notify('PDF generato, download avviato','success');
+  };
 }
+
 
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 </script>
 </body>
 </html>
+
