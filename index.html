@@ -82,9 +82,11 @@ header img.logo { display:block; margin:0 auto; }
   <p>Effettua l'accesso con le credenziali che ti sono state affidate</p>
   <input type="email" id="loginEmail" placeholder="Email"><br>
 <input type="password" id="loginPassword" placeholder="Password"><br>
-<label style="font-size:14px; display:block; margin-bottom:8px;">
-  <input type="checkbox" id="rememberMe"> Ricordami
+<label style="font-size:14px; display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+  <input type="checkbox" id="rememberMe">
+  Ricordami
 </label>
+
 <button onclick="login()">Accedi</button>
 
   <footer>© Antonio Troiani, Tutti i diritti riservati</footer>
@@ -415,6 +417,7 @@ function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 </script>
 </body>
 </html>
+
 
 
 
