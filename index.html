@@ -37,7 +37,7 @@ header img.logo { display:block; margin:0 auto; }
 
 <!-- Login -->
 <div id="loginDiv">
-  <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg" alt="Logo" class="logo" style="height:80px; margin-bottom:10px;">
+  <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg" alt="Logo" class="logo" style="height:120px; margin-bottom:10px;">
   <h2>Benvenuto nel sistema di creazione schede TI</h2>
   <p>Effettua l'accesso con le credenziali che ti sono state affidate</p>
   <input type="email" id="loginEmail" placeholder="Email"><br>
@@ -67,7 +67,7 @@ header img.logo { display:block; margin:0 auto; }
     <div><label>Prelevare da<input id="prelevare"></label></div>
     <div><label>Portare a<input id="portare"></label></div>
     <div><label>PDC<input id="pdc"></label></div>
-    <div><label>Telefono PDC<input id="tel" type="tel" inputmode="numeric" pattern="[0-9]*"></label></div>
+    <div><label>Telefono PDC<input type="tel" id="tel" inputmode="numeric" pattern="[0-9]*" oninput="this.value=this.value.replace(/\\D/g,'')"></label></div>
 
     <div class="section-title">Team</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
@@ -90,12 +90,12 @@ header img.logo { display:block; margin:0 auto; }
         </select>
       </label>
     </div>
-    <div><label>Prezzo<input type="text" id="prezzo"></label></div>
+    <div><label>Prezzo<input type="number" id="prezzo" step="0.01" min="0" oninput="formatPrice(this)"></label></div>
     <div class="full"><label>Presidi necessari<textarea id="presidi"></textarea></label></div>
     <div class="full"><label>Note<textarea id="note"></textarea></label></div>
     <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1">
-        <label>Firma referente (nome e cognome)</label>
+        <label>Referente (nome e cognome)</label>
         <input id="firmaRef" placeholder="">
       </div>
     </div>
@@ -150,13 +150,10 @@ const auth = firebase.auth();
 // UTILITY
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function formatPrice(el){ let val=parseFloat(el.value); if(isNaN(val)) val=0; el.value=val.toFixed(2); }
 
 // LOGIN / LOGOUT
-function login(){
-  const email=document.getElementById('loginEmail').value;
-  const password=document.getElementById('loginPassword').value;
-  auth.signInWithEmailAndPassword(email,password).catch(err=>alert(err.message));
-}
+function login(){ const email=document.getElementById('loginEmail').value; const password=document.getElementById('loginPassword').value; auth.signInWithEmailAndPassword(email,password).catch(err=>alert(err.message)); }
 function logout(){ auth.signOut(); }
 
 // RUNTIME
@@ -257,13 +254,12 @@ async function deleteEntry(id){
 async function exportSinglePDF(id){
   const e = entries.find(x=>x.id===id); if(!e) return;
 
-  // Creazione div temporaneo per PDF
   const pdfDiv = document.createElement('div');
   pdfDiv.style.width='800px';
   pdfDiv.style.padding='10px';
   pdfDiv.style.background='#fff';
   pdfDiv.style.fontFamily='Arial, sans-serif';
-  pdfDiv.style.fontSize='12px'; // font base
+  pdfDiv.style.fontSize='12px';
   pdfDiv.innerHTML = `
     <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
     <h1 style="text-align:center;font-weight:bold;font-size:18px;">Scheda Paziente TI</h1>
@@ -279,6 +275,7 @@ async function exportSinglePDF(id){
       <tr><td>Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
       <tr><td>Prelevare da</td><td>${escapeHtml(e.prelevare)}</td></tr>
       <tr><td>Portare a</td><td>${escapeHtml(e.portare)}</td></tr>
+      <tr><td>Prezzo</td><td>${escapeHtml(parseFloat(e.prezzo).toFixed(2))}€</td></tr>
     </table>
     <h2 style="font-weight:bold;font-size:14px;">Team</h2>
     <table border="1" style="width:100%;border-collapse:collapse;">
@@ -294,17 +291,15 @@ async function exportSinglePDF(id){
       <tr><td>Arrivo dal paziente</td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
       <tr><td>Arrivo a destinazione</td><td>${escapeHtml(e.arrivoDest)}</td></tr>
       <tr><td>Mezzo assegnato</td><td>${escapeHtml(e.mezzo)}</td></tr>
-      <tr><td>Prezzo</td><td>${escapeHtml(e.prezzo)}</td></tr>
       <tr><td>Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
       <tr><td>Note</td><td>${escapeHtml(e.note)}</td></tr>
     </table>
-    <h2 style="font-weight:bold;font-size:14px;">Firma</h2>
+    <h2 style="font-weight:bold;font-size:14px;">Referente</h2>
     <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
+    <div style="text-align:right;color:red;font-size:12px;margin-top:10px;">${new Date(e.timestamp).toLocaleString()}</div>
   `;
 
   document.body.appendChild(pdfDiv);
-
-  // html2canvas con scale 2
   const canvas = await html2canvas(pdfDiv, {scale:2});
   document.body.removeChild(pdfDiv);
 
@@ -316,11 +311,9 @@ async function exportSinglePDF(id){
   const imgWidth = pageWidth;
   const imgHeight = (canvas.height * pageWidth) / canvas.width;
 
-  let position = 0;
   if(imgHeight <= pageHeight){
     pdf.addImage(imgData,'PNG',0,0,imgWidth,imgHeight);
   } else {
-    // riduzione progressiva fino a entrare nella pagina
     let scaleFactor = pageHeight / imgHeight;
     pdf.addImage(imgData,'PNG',0,0,imgWidth*scaleFactor,imgHeight*scaleFactor);
   }
@@ -328,10 +321,8 @@ async function exportSinglePDF(id){
   pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
 }
 
-
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 
 </script>
 </body>
 </html>
-
