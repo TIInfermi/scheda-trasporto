@@ -5,87 +5,47 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SCHEDA PAZIENTE TI</title>
 <style>
-body {
-  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-  margin:0; padding:16px; background:#f0f2f5;
-}
-.container {
-  max-width: 950px;
-  margin:0 auto;
-  background:#fff;
-  padding:24px;
-  border-radius:12px;
-  box-shadow:0 6px 16px rgba(0,0,0,0.1);
-}
-header {
-  display:flex;
-  align-items:center;
-  gap:16px;
-  margin-bottom:16px;
-}
-header img {
-  height:60px;
-  width:auto;
-}
-header h1 {
-  font-size:24px;
-  text-align:center;
-  flex:1;
-  margin:0;
-}
-form {
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:16px;
-}
+body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin:0; padding:16px; background:#f0f2f5; }
+.container { max-width: 950px; margin:0 auto; background:#fff; padding:24px; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.1); }
+header { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
+header img { height:60px; width:auto; }
+header h1 { font-size:24px; text-align:center; flex:1; margin:0; }
+form { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
 label { display:block; font-size:14px; margin-bottom:4px; font-weight:500; }
-input, select, textarea {
-  width:100%; padding:8px 10px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-sizing:border-box;
-}
+input, select, textarea { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-sizing:border-box; }
 textarea { min-height:60px; }
 .full { grid-column:1/3; }
-.section-title {
-  grid-column:1/3;
-  font-size:18px;
-  margin-top:16px;
-  margin-bottom:8px;
-  color:#555;
-  border-bottom:1px solid #ccc;
-  padding-bottom:4px;
-}
-.buttons {
-  grid-column:1/3;
-  display:flex;
-  gap:12px;
-  margin-top:16px;
-  flex-wrap:wrap;
-}
-button {
-  padding:10px 16px; font-size:14px; border:none; border-radius:6px; cursor:pointer; background:#4f46e5; color:#fff; transition:0.2s;
-}
+.section-title { grid-column:1/3; font-size:18px; margin-top:16px; margin-bottom:8px; color:#555; border-bottom:1px solid #ccc; padding-bottom:4px; font-weight:bold; }
+.buttons { grid-column:1/3; display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
+button { padding:10px 16px; font-size:14px; border:none; border-radius:6px; cursor:pointer; background:#4f46e5; color:#fff; transition:0.2s; }
 button:hover { background:#3730a3; }
 table { width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
 th, td { border:1px solid #ddd; padding:8px; text-align:left; }
 th { background:#f3f4f6; }
 tr:hover { background:#f1f5f9; }
-.sign-box { border:1px dashed #aaa; padding:6px; border-radius:6px; }
-.signature-control { display:flex; gap:6px; align-items:center; margin-top:4px; font-size:12px; }
-@media(max-width:760px){
-  form { grid-template-columns:1fr; }
-  .full { grid-column:auto; }
-  header { flex-direction:column; align-items:flex-start; }
-  header h1 { text-align:left; }
-}
+@media(max-width:760px){ form { grid-template-columns:1fr; } .full { grid-column:auto; } header { flex-direction:column; align-items:flex-start; } header h1 { text-align:left; } }
+#loginDiv { max-width:400px; margin:50px auto; padding:20px; background:#fff; border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,0.1); }
+#loginDiv input { margin-bottom:10px; }
+#logoutBtn { margin-bottom:20px; }
 </style>
 </head>
 <body>
-<div class="container" id="pdfContent">
+
+<div id="loginDiv">
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email"><br>
+  <input type="password" id="loginPassword" placeholder="Password"><br>
+  <button onclick="login()">Accedi</button>
+</div>
+
+<div class="container" id="mainApp" style="display:none;">
+  <button id="logoutBtn" onclick="logout()">Logout</button>
   <header>
     <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/308508198_176374684914619_6711714230399794652_n.jpg" alt="Logo">
     <h1>Scheda Paziente TI</h1>
   </header>
 
-  <div class="section-title">INFO PAZIENTE</div>
+  <div class="section-title">Info paziente</div>
   <form id="mainForm" onsubmit="event.preventDefault(); saveEntry();">
     <div><label>Missione numero<input id="missione" required></label></div>
     <div><label>Data<input type="date" id="data" required></label></div>
@@ -100,14 +60,14 @@ tr:hover { background:#f1f5f9; }
     <div><label>PDC<input id="pdc"></label></div>
     <div><label>Telefono PDC<input id="tel" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder=""></label></div>
 
-    <div class="section-title">TEAM</div>
+    <div class="section-title">Team</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
     <div><label>1° Soccorritore<input id="socc1"></label></div>
     <div><label>2° Soccorritore<input id="socc2"></label></div>
     <div><label>3° Soccorritore<input id="socc3"></label></div>
     <div><label>Tirocinante<input id="tiro"></label></div>
 
-    <div class="section-title">INFO TRASPORTO</div>
+    <div class="section-title">Info trasporto</div>
     <div><label>Arrivo in sede<input type="time" id="arrivoSede"></label></div>
     <div><label>Arrivo dal paziente<input type="time" id="arrivoPaz"></label></div>
     <div><label>Arrivo a destinazione<input type="time" id="arrivoDest"></label></div>
@@ -156,28 +116,23 @@ tr:hover { background:#f1f5f9; }
     <h2>Elenco schede TI</h2>
     <table id="dataTable">
       <thead>
-        <tr>
-          <th>Missione N°</th>
-          <th>Data</th>
-          <th>Stato</th>
-          <th>Azioni</th>
-        </tr>
+        <tr><th>Missione N°</th><th>Data</th><th>Stato</th><th>Azioni</th></tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
 </div>
 
-<!-- Librerie -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <script>
-// CONFIG FIREBASE: sostituisci con i tuoi dati
+// SOSTITUISCI CON I TUOI DATI FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyBCyJjpDuixqjC86U93B7naAWhIu0CZEq8",
   authDomain: "schede-ti.firebaseapp.com",
@@ -188,10 +143,40 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
 
-let entries = [];
-let editingId = null;
+let entries = [], editingId = null;
 
+// LOGIN / LOGOUT
+async function login(){
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  try{
+    await auth.signInWithEmailAndPassword(email,password);
+    document.getElementById('loginDiv').style.display='none';
+    document.getElementById('mainApp').style.display='block';
+    loadEntriesFromDB();
+  }catch(err){ alert("Errore login: "+err.message); }
+}
+function logout(){
+  auth.signOut();
+  document.getElementById('loginDiv').style.display='block';
+  document.getElementById('mainApp').style.display='none';
+}
+
+// MONITOR AUTH
+auth.onAuthStateChanged(user=>{
+  if(user){
+    document.getElementById('loginDiv').style.display='none';
+    document.getElementById('mainApp').style.display='block';
+    loadEntriesFromDB();
+  }else{
+    document.getElementById('loginDiv').style.display='block';
+    document.getElementById('mainApp').style.display='none';
+  }
+});
+
+// FUNZIONI MODULO / FIRESTORE
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -228,7 +213,6 @@ function getFormData(){
   };
 }
 
-// SALVA SU FIREBASE
 async function saveEntry(){
   const data = getFormData();
   if(!data.missione){ alert('Compila Missione'); return; }
@@ -237,23 +221,17 @@ async function saveEntry(){
     alert("Scheda salvata nel database!");
     resetForm();
     loadEntriesFromDB();
-  }catch(err){
-    console.error(err); alert("Errore nel salvataggio della scheda");
-  }
+  }catch(err){ console.error(err); alert("Errore nel salvataggio"); }
 }
 
-// CARICA DAL DATABASE
 async function loadEntriesFromDB(){
   try{
     const snapshot = await db.collection("schede_TI").orderBy("timestamp","desc").get();
-    entries = snapshot.docs.map(doc => doc.data());
+    entries = snapshot.docs.map(doc=>doc.data());
     renderTable();
-  }catch(err){
-    console.error(err); alert("Errore nel caricamento delle schede");
-  }
+  }catch(err){ console.error(err); }
 }
 
-// RENDER TABELLA
 function renderTable(){
   const tbody = document.querySelector('#dataTable tbody');
   tbody.innerHTML='';
@@ -271,45 +249,29 @@ function renderTable(){
   }
 }
 
-// MODIFICA
 function editEntry(id){
-  const e = entries.find(x=>x.id===id);
-  if(!e) return;
-  editingId = id;
-  for(const key in e){
-    if(document.getElementById(key)) document.getElementById(key).value = e[key];
-  }
+  const e = entries.find(x=>x.id===id); if(!e) return;
+  editingId=id;
+  for(const key in e){ if(document.getElementById(key)) document.getElementById(key).value=e[key]; }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ELIMINA
 async function deleteEntry(id){
   if(!confirm('Eliminare scheda?')) return;
-  try{
-    await db.collection("schede_TI").doc(id).delete();
-    loadEntriesFromDB();
-  }catch(err){
-    console.error(err); alert("Errore nell'eliminazione");
-  }
+  try{ await db.collection("schede_TI").doc(id).delete(); loadEntriesFromDB(); }
+  catch(err){ console.error(err); }
 }
 
-// RESET FORM
 function resetForm(){
-  editingId = null;
+  editingId=null;
   document.getElementById('mainForm').reset();
 }
 
 // PDF
 async function exportSinglePDF(id){
-  const e = entries.find(x=>x.id===id);
-  if(!e) return;
-
+  const e = entries.find(x=>x.id===id); if(!e) return;
   const pdfDiv = document.createElement('div');
-  pdfDiv.style.width = '800px';
-  pdfDiv.style.padding = '20px';
-  pdfDiv.style.background = '#fff';
-  pdfDiv.style.fontFamily = 'Arial, sans-serif';
-  pdfDiv.style.fontSize = '12px';
+  pdfDiv.style.width='800px'; pdfDiv.style.padding='20px'; pdfDiv.style.background='#fff'; pdfDiv.style.fontFamily='Arial, sans-serif'; pdfDiv.style.fontSize='12px';
   pdfDiv.innerHTML = `
     <h1 style="text-align:center; font-size:20px; font-weight:bold;">Scheda Paziente TI</h1>
     <h2 style="font-size:15px; font-weight:bold;">Info paziente</h2>
@@ -345,8 +307,7 @@ async function exportSinglePDF(id){
       <tr><td><b>Presidi necessari</b></td><td style="white-space:pre-wrap;">${escapeHtml(e.presidi)}</td></tr>
       <tr><td><b>Note</b></td><td style="white-space:pre-wrap;">${escapeHtml(e.note)}</td></tr>
     </table>
-    ${e.firmaRef?`<h2 style="font-size:15px; font-weight:bold;">Referente responsabile della compilazione</h2>
-    <p style="font-size:16px; font-weight:bold;">${escapeHtml(e.firmaRef)}</p>`:''}
+    ${e.firmaRef?`<h2 style="font-size:15px; font-weight:bold;">Referente responsabile</h2><p style="font-size:16px; font-weight:bold;">${escapeHtml(e.firmaRef)}</p>`:''}
   `;
   document.body.appendChild(pdfDiv);
   const canvas = await html2canvas(pdfDiv,{scale:2});
@@ -357,6 +318,7 @@ async function exportSinglePDF(id){
   const pdfWidth = pdf.internal.pageSize.getWidth();
   const pdfHeight = (canvas.height*pdfWidth)/canvas.width;
   pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+
   if(e.stato){
     let color=[0,0,0];
     if(e.stato==="Confermato") color=[0,128,0];
@@ -366,14 +328,14 @@ async function exportSinglePDF(id){
     pdf.setTextColor(...color);
     pdf.text(`Stato: ${e.stato}`, pdfWidth-10, 15, {align:"right"});
   }
-  pdf.setFontSize(10);
-  pdf.setTextColor(255,0,0);
+
+  pdf.setFontSize(10); pdf.setTextColor(255,0,0);
   pdf.text(`Generato il: ${e.timestamp}`, pdfWidth-80, pdf.internal.pageSize.getHeight()-10);
   pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
 }
 
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
-window.addEventListener('load', loadEntriesFromDB);
 </script>
+
 </body>
 </html>
