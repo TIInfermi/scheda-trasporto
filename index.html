@@ -354,7 +354,7 @@ async function exportSinglePDF(id){
       <tr><td><b>Note</b></td><td>${escapeHtml(e.note)}</td></tr>
     </table>
 
-    ${e.firmaRef?`<h2>Firmato da</h2><p>${escapeHtml(e.firmaRef)}</p>`:''}
+    ${e.firmaRef?`<h2>Referente responsabile della compilazione</h2><p>${escapeHtml(e.firmaRef)}</p>`:''}
   `;
 
   document.body.appendChild(pdfDiv);
@@ -382,3 +382,4 @@ renderTable();
 </script>
 </body>
 </html>
+
