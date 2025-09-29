@@ -298,10 +298,11 @@ async function exportSinglePDF(id){
   pdfDiv.style.padding = '20px';
   pdfDiv.style.background = '#fff';
   pdfDiv.style.fontFamily = 'Arial, sans-serif';
-  pdfDiv.style.fontSize = '12px';
+  pdfDiv.style.fontSize = '12px'; // font base
   pdfDiv.innerHTML = `
-    <h1 style="text-align:center; font-size:18px; font-weight:500;">Scheda Paziente TI</h1>
-    <h2 style="font-size:14px; font-weight:500;">Info paziente</h2>
+    <h1 style="text-align:center; font-size:20px; font-weight:bold;">Scheda Paziente TI</h1>
+
+    <h2 style="font-size:15px; font-weight:bold;">Info paziente</h2>
     <table border="1" style="width:100%;border-collapse:collapse; font-size:12px;">
       <tr><td><b>Missione</b></td><td>${escapeHtml(e.missione)}</td></tr>
       <tr><td><b>Data</b></td><td>${escapeHtml(e.data)}</td></tr>
@@ -317,7 +318,7 @@ async function exportSinglePDF(id){
       <tr><td><b>Telefono PDC</b></td><td>${escapeHtml(e.tel)}</td></tr>
     </table>
 
-    <h2 style="font-size:14px; font-weight:500;">Team</h2>
+    <h2 style="font-size:15px; font-weight:bold;">Team</h2>
     <table border="1" style="width:100%;border-collapse:collapse; font-size:12px;">
       <tr><td><b>Autista Soccorritore</b></td><td>${escapeHtml(e.autista)}</td></tr>
       <tr><td><b>1° Soccorritore</b></td><td>${escapeHtml(e.socc1)}</td></tr>
@@ -326,7 +327,7 @@ async function exportSinglePDF(id){
       <tr><td><b>Tirocinante</b></td><td>${escapeHtml(e.tiro)}</td></tr>
     </table>
 
-    <h2 style="font-size:14px; font-weight:500;">Info trasporto</h2>
+    <h2 style="font-size:15px; font-weight:bold;">Info trasporto</h2>
     <table border="1" style="width:100%;border-collapse:collapse; font-size:12px;">
       <tr><td><b>Arrivo in sede</b></td><td>${escapeHtml(e.arrivoSede)}</td></tr>
       <tr><td><b>Arrivo dal paziente</b></td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
@@ -337,7 +338,8 @@ async function exportSinglePDF(id){
       <tr><td><b>Note</b></td><td style="white-space:pre-wrap;">${escapeHtml(e.note)}</td></tr>
     </table>
 
-    ${e.firmaRef?`<h2 style="font-size:14px; font-weight:500;">Referente responsabile della compilazione</h2><p>${escapeHtml(e.firmaRef)}</p>`:''}
+    ${e.firmaRef?`<h2 style="font-size:15px; font-weight:bold;">Referente responsabile della compilazione</h2>
+    <p style="font-size:16px; font-weight:bold;">${escapeHtml(e.firmaRef)}</p>`:''}
   `;
 
   document.body.appendChild(pdfDiv);
@@ -359,7 +361,7 @@ async function exportSinglePDF(id){
     else if(e.stato==="Annullato") color=[255,0,0];
     pdf.setFontSize(12);
     pdf.setTextColor(...color);
-    pdf.text(`${e.stato}`, pdfWidth-10, 15, {align:"right"});
+    pdf.text(`Stato: ${e.stato}`, pdfWidth-10, 15, {align:"right"});
   }
 
   pdf.setFontSize(10);
@@ -370,12 +372,14 @@ async function exportSinglePDF(id){
 }
 
 
+
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 
 renderTable();
 </script>
 </body>
 </html>
+
 
 
 
