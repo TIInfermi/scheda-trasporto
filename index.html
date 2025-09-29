@@ -133,7 +133,7 @@ header img.logo { display:block; margin:0 auto; }
     <div class="full"><label>Note<textarea id="note"></textarea></label></div>
     <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1">
-        <label>Referente che ha compilato la scheda</label>
+        <label>Operatore che ha compilato la scheda</label>
         <input id="firmaRef" placeholder="">
       </div>
     </div>
@@ -367,7 +367,7 @@ async function exportSinglePDF(id){
       <tr><td>Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
       <tr><td>Note</td><td>${escapeHtml(e.note)}</td></tr>
     </table>
-    <h2 style="font-weight:bold;font-size:14px;">Referente</h2>
+    <h2 style="font-weight:bold;font-size:14px;">Operatore responsabile della compilazione:</h2>
     <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
     <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString()}</p>
   `;
@@ -391,3 +391,4 @@ function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 </script>
 </body>
 </html>
+
