@@ -78,13 +78,16 @@
     let schede = JSON.parse(localStorage.getItem('schedeTI')||'[]');
     let editingId = null;
 
-    // Formatta automaticamente il prezzo
-    document.getElementById("prezzo").addEventListener("blur", function(){
-      let v = parseFloat(this.value);
-      if(!isNaN(v)){
-        this.value = v.toFixed(2) + "€";
-      }
-    });
+// Formatta automaticamente il prezzo in tempo reale
+document.getElementById("prezzo").addEventListener("input", function(){
+  let raw = this.value.replace(/[^\d.]/g,""); // elimina simboli
+  let v = parseFloat(raw);
+  if(!isNaN(v)){
+    this.value = v.toFixed(2) + "€";
+  } else {
+    this.value = "";
+  }
+});
 
     function uid(){return '_' + Math.random().toString(36).substr(2,9);}
     function getFormData(){
@@ -187,3 +190,4 @@
   </script>
 </body>
 </html>
+
