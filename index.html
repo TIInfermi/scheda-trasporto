@@ -157,16 +157,21 @@ tr:hover { background:#f1f5f9; }
     </div>
   </form>
 
-  <div id="pdfArea">
-    <h2>Elenco schede TI</h2>
-    <table id="dataTable">
-      <thead>
-        <tr><th>Missione N°</th><th>Data</th><th>Azioni</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+<div id="pdfArea">
+  <h2>Elenco schede TI</h2>
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Missione N°</th>
+        <th>Data</th>
+        <th>Stato</th>
+        <th>Azioni</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -253,15 +258,18 @@ function renderTable(){
   tbody.innerHTML='';
   for(const e of entries){
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${escapeHtml(e.missione)}</td><td>${escapeHtml(e.data)}</td>
-      <td>
-        <button onclick="editEntry('${e.id}')">Modifica</button>
-        <button onclick="deleteEntry('${e.id}')">Elimina</button>
-        <button onclick="exportSinglePDF('${e.id}')">PDF</button>
-      </td>`;
+    tr.innerHTML=`<td>${escapeHtml(e.missione)}</td>
+                  <td>${escapeHtml(e.data)}</td>
+                  <td>${escapeHtml(e.stato||'')}</td>
+                  <td>
+                    <button onclick="editEntry('${e.id}')">Modifica</button>
+                    <button onclick="deleteEntry('${e.id}')">Elimina</button>
+                    <button onclick="exportSinglePDF('${e.id}')">PDF</button>
+                  </td>`;
     tbody.appendChild(tr);
   }
 }
+
 
 function editEntry(id){
   const e=entries.find(x=>x.id===id);
@@ -290,42 +298,46 @@ async function exportSinglePDF(id){
   pdfDiv.style.padding = '20px';
   pdfDiv.style.background = '#fff';
   pdfDiv.style.fontFamily = 'Arial, sans-serif';
+  pdfDiv.style.fontSize = '12px';
   pdfDiv.innerHTML = `
-    <h1 style="text-align:center;">Scheda Paziente TI</h1>
-    <h2>INFO PAZIENTE</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
+    <h1 style="text-align:center; font-size:18px; font-weight:500;">Scheda Paziente TI</h1>
+    <h2 style="font-size:14px; font-weight:500;">Info paziente</h2>
+    <table border="1" style="width:100%;border-collapse:collapse; font-size:12px;">
       <tr><td><b>Missione</b></td><td>${escapeHtml(e.missione)}</td></tr>
       <tr><td><b>Data</b></td><td>${escapeHtml(e.data)}</td></tr>
       <tr><td><b>Nome e Cognome</b></td><td>${escapeHtml(e.nome)}</td></tr>
       <tr><td><b>Età</b></td><td>${escapeHtml(e.eta)}</td></tr>
       <tr><td><b>Data di nascita</b></td><td>${escapeHtml(e.dob)}</td></tr>
       <tr><td><b>Corporatura</b></td><td>${escapeHtml(e.corporatura)}</td></tr>
-      <tr><td><b>Patologia</b></td><td>${escapeHtml(e.patologia)}</td></tr>
-      <tr><td><b>Motivo trasporto</b></td><td>${escapeHtml(e.motivo)}</td></tr>
+      <tr><td><b>Patologia</b></td><td style="white-space:pre-wrap;">${escapeHtml(e.patologia)}</td></tr>
+      <tr><td><b>Motivo trasporto</b></td><td style="white-space:pre-wrap;">${escapeHtml(e.motivo)}</td></tr>
       <tr><td><b>Prelevare da</b></td><td>${escapeHtml(e.prelevare)}</td></tr>
       <tr><td><b>Portare a</b></td><td>${escapeHtml(e.portare)}</td></tr>
       <tr><td><b>PDC</b></td><td>${escapeHtml(e.pdc)}</td></tr>
       <tr><td><b>Telefono PDC</b></td><td>${escapeHtml(e.tel)}</td></tr>
     </table>
-    <h2>TEAM</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
+
+    <h2 style="font-size:14px; font-weight:500;">Team</h2>
+    <table border="1" style="width:100%;border-collapse:collapse; font-size:12px;">
       <tr><td><b>Autista Soccorritore</b></td><td>${escapeHtml(e.autista)}</td></tr>
       <tr><td><b>1° Soccorritore</b></td><td>${escapeHtml(e.socc1)}</td></tr>
       <tr><td><b>2° Soccorritore</b></td><td>${escapeHtml(e.socc2)}</td></tr>
       <tr><td><b>3° Soccorritore</b></td><td>${escapeHtml(e.socc3)}</td></tr>
       <tr><td><b>Tirocinante</b></td><td>${escapeHtml(e.tiro)}</td></tr>
     </table>
-    <h2>INFO TRASPORTO</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
+
+    <h2 style="font-size:14px; font-weight:500;">Info trasporto</h2>
+    <table border="1" style="width:100%;border-collapse:collapse; font-size:12px;">
       <tr><td><b>Arrivo in sede</b></td><td>${escapeHtml(e.arrivoSede)}</td></tr>
       <tr><td><b>Arrivo dal paziente</b></td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
       <tr><td><b>Arrivo a destinazione</b></td><td>${escapeHtml(e.arrivoDest)}</td></tr>
       <tr><td><b>Mezzo assegnato</b></td><td>${escapeHtml(e.mezzo)}</td></tr>
       <tr><td><b>Prezzo</b></td><td>${escapeHtml(e.prezzo)}</td></tr>
-      <tr><td><b>Presidi necessari</b></td><td>${escapeHtml(e.presidi)}</td></tr>
-      <tr><td><b>Note</b></td><td>${escapeHtml(e.note)}</td></tr>
+      <tr><td><b>Presidi necessari</b></td><td style="white-space:pre-wrap;">${escapeHtml(e.presidi)}</td></tr>
+      <tr><td><b>Note</b></td><td style="white-space:pre-wrap;">${escapeHtml(e.note)}</td></tr>
     </table>
-    ${e.firmaRef?`<h2>Referente responsabile della compilazione</h2><p>${escapeHtml(e.firmaRef)}</p>`:''}
+
+    ${e.firmaRef?`<h2 style="font-size:14px; font-weight:500;">Referente responsabile della compilazione</h2><p>${escapeHtml(e.firmaRef)}</p>`:''}
   `;
 
   document.body.appendChild(pdfDiv);
@@ -339,15 +351,15 @@ async function exportSinglePDF(id){
   const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
   pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
 
-  // Stato in alto a destra con colore
+  // Stato in alto a destra
   if(e.stato){
     let color=[0,0,0];
     if(e.stato==="Confermato") color=[0,128,0];
     else if(e.stato==="In lavorazione") color=[255,165,0];
     else if(e.stato==="Annullato") color=[255,0,0];
-    pdf.setFontSize(14);
+    pdf.setFontSize(12);
     pdf.setTextColor(...color);
-    pdf.text(`${e.stato}`, pdfWidth-20, 20, {align:"right"});
+    pdf.text(`Stato: ${e.stato}`, pdfWidth-10, 15, {align:"right"});
   }
 
   pdf.setFontSize(10);
@@ -357,10 +369,12 @@ async function exportSinglePDF(id){
   pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
 }
 
+
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 
 renderTable();
 </script>
 </body>
 </html>
+
 
