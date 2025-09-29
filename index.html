@@ -103,7 +103,19 @@ header img.logo { display:block; margin:0 auto; }
     <div><label>Data di nascita<input type="date" id="dob"></label></div>
     <div><label>Corporatura<input type="number" id="corporatura" min="0" step="1"></label></div>
     <div class="full"><label>Patologia<textarea id="patologia"></textarea></label></div>
-    <div class="full"><label>Motivo trasporto<textarea id="motivo"></textarea></label></div>
+   <div class="full">
+  <label>Motivo trasporto
+    <select id="motivo">
+      <option value="">-- Seleziona motivo --</option>
+      <option>Ricovero</option>
+      <option>Dimissione</option>
+      <option>Visita di controllo A/R</option>
+      <option>Trasporto generico</option>
+      <option>Accompagnamento</option>
+      <option>Visita tra ospedali</option>
+    </select>
+  </label>
+</div>
     <div><label>PDC<input id="pdc" type="text"></label></div>
     <div><label>Telefono PDC<input id="tel" type="number"></label></div>
 
@@ -391,4 +403,5 @@ function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 </script>
 </body>
 </html>
+
 
