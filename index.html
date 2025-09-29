@@ -32,14 +32,14 @@ tr:hover { background:#f1f5f9; }
 footer { text-align:center; margin-top:20px; font-size:12px; color:#555; }
 header img.logo { display:block; margin:0 auto; }
 
-/* Notifiche centrate */
+/* Notifiche centrali */
 #notifications { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:10px; align-items:center; }
-.notification { padding:12px 20px; border-radius:8px; color:#fff; min-width:250px; position:relative; opacity:0.95; font-weight:bold; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.2); cursor:pointer; transition:0.3s; }
+.notification { padding:12px 20px; border-radius:8px; color:#fff; min-width:250px; position:relative; font-weight:bold; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.2); cursor:pointer; opacity:0; transform:translateY(-20px); transition:0.5s; }
+.notification.show { opacity:0.95; transform:translateY(0); }
 .notification.success { background:rgba(34,139,34,0.85); }
 .notification.error { background:rgba(220,20,60,0.85); }
 .notification.warning { background:rgba(255,165,0,0.85); }
 .notification .close { position:absolute; top:5px; right:8px; font-weight:bold; cursor:pointer; }
-.notification:hover { opacity:1; }
 </style>
 </head>
 <body>
@@ -75,9 +75,8 @@ header img.logo { display:block; margin:0 auto; }
     <div><label>Corporatura<input type="number" id="corporatura" min="0" step="1"></label></div>
     <div class="full"><label>Patologia<textarea id="patologia"></textarea></label></div>
     <div class="full"><label>Motivo trasporto<textarea id="motivo"></textarea></label></div>
-    <div><label>Prelevare da<input id="prelevare"></label></div>
-    <div><label>Portare a<input id="portare"></label></div>
-    <div><label>Telefono PDC<input id="tel" type="number" min="0" step="1" placeholder="Solo numeri"></label></div>
+    <div><label>PDC<input id="pdc" type="text"></label></div>
+    <div><label>Telefono PDC<input id="tel" type="number"></label></div>
 
     <div class="section-title">Team</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
@@ -145,7 +144,14 @@ header img.logo { display:block; margin:0 auto; }
 
 <script>
 // CONFIG FIREBASE
-const firebaseConfig = { apiKey: "AIzaSyBCyJjpDuixqjC86U93B7naAWhIu0CZEq8", authDomain: "schede-ti.firebaseapp.com", projectId: "schede-ti", storageBucket: "schede-ti.firebasestorage.app", messagingSenderId: "832227119483", appId: "1:832227119483:web:c5af587729355eaffe6dde"};
+const firebaseConfig = {
+  apiKey: "AIzaSyBCyJjpDuixqjC86U93B7naAWhIu0CZEq8",
+  authDomain: "schede-ti.firebaseapp.com",
+  projectId: "schede-ti",
+  storageBucket: "schede-ti.firebasestorage.app",
+  messagingSenderId: "832227119483",
+  appId: "1:832227119483:web:c5af587729355eaffe6dde"
+};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -154,14 +160,26 @@ const auth = firebase.auth();
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 
-// NOTIFICHE CENTRATE
-function notify(msg,type='success'){ 
-  const div=document.createElement('div'); 
-  div.className='notification '+type; 
-  div.innerHTML=msg+'<span class="close" onclick="this.parentElement.remove()">×</span>';
+// NOTIFICHE
+function notify(msg,type='success'){
+  const div=document.createElement('div');
+  div.className='notification '+type;
+  div.innerHTML = msg + '<span class="close" onclick="this.parentElement.remove()">×</span>';
   document.getElementById('notifications').appendChild(div);
-  setTimeout(()=>{ if(div.parentElement) div.parentElement.remove() },5000);
+  setTimeout(()=>div.classList.add('show'),50);
+  setTimeout(()=>{ div.style.opacity=0; div.style.transform='translateY(-20px)'; setTimeout(()=>{ if(div.parentElement) div.remove() },500); },5000);
 }
+
+// LOGOUT AUTOMATICO
+let inactivityTimer;
+function resetInactivity(){ 
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(()=>{ logout(); notify('Logout automatico per inattività','error'); }, 15*60*1000);
+}
+document.onmousemove = resetInactivity;
+document.onkeypress = resetInactivity;
+document.onclick = resetInactivity;
+document.onscroll = resetInactivity;
 
 // LOGIN / LOGOUT
 function login(){
@@ -172,11 +190,6 @@ function login(){
     .catch(err=>notify(err.message,'error'));
 }
 function logout(){ auth.signOut().then(()=>{ notify('Logout eseguito, prego riaccedi','error'); }); }
-
-// INATTIVITA'
-let inactivityTimer;
-function resetInactivity(){ clearTimeout(inactivityTimer); inactivityTimer = setTimeout(()=>{ logout(); notify('Logout automatico per inattività','error'); }, 15*60*1000);}
-document.onmousemove=resetInactivity; document.onkeypress=resetInactivity; document.onclick=resetInactivity; document.onscroll=resetInactivity;
 
 // RUNTIME
 let entries=[], editingId=null;
@@ -192,12 +205,13 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-// LISTENER FIRESTORE
+// REALTIME LISTENER
 function setupRealtimeListener(){
-  db.collection("schede_TI").orderBy("timestamp","desc").onSnapshot(snapshot=>{
-    entries = snapshot.docs.map(doc=>doc.data());
-    renderTable();
-  });
+  db.collection("schede_TI").orderBy("timestamp","desc")
+    .onSnapshot(snapshot=>{
+      entries = snapshot.docs.map(doc=>doc.data());
+      renderTable();
+    });
 }
 
 // FORM DATA
@@ -214,9 +228,8 @@ function getFormData(){
     corporatura: document.getElementById('corporatura').value,
     patologia: document.getElementById('patologia').value,
     motivo: document.getElementById('motivo').value,
-    prelevare: document.getElementById('prelevare').value,
-    portare: document.getElementById('portare').value,
-    pdc: document.getElementById('tel').value,
+    pdc: document.getElementById('pdc').value,
+    tel: document.getElementById('tel').value,
     autista: document.getElementById('autista').value,
     socc1: document.getElementById('socc1').value,
     socc2: document.getElementById('socc2').value,
@@ -236,29 +249,24 @@ function getFormData(){
 }
 
 // PRICE INPUT
-document.getElementById('prezzo').addEventListener('input',()=>{ 
-  let val = document.getElementById('prezzo').value.replace(/[^0-9.,]/g,'');
-  document.getElementById('prezzo').value = val;
-});
+const prezzoInput = document.getElementById('prezzo');
+prezzoInput.addEventListener('input',()=>{ prezzoInput.value = prezzoInput.value.replace(/[^0-9.,]/g,''); });
 
-// SALVA
+// SAVE
 async function saveEntry(){
   const data = getFormData();
   if(!data.missione){ alert('Compila Missione'); return; }
   try{
     await db.collection("schede_TI").doc(data.id).set(data);
-    if(editingId) notify('Scheda aggiornata','success'); else notify('Scheda salvata','success');
-    editingId=null;
-    resetForm(false);
-  } catch(err){ console.error(err); notify('Errore nel salvataggio','error'); }
+    if(editingId) notify('Scheda aggiornata','success'); 
+    else notify('Scheda salvata','success');
+    resetForm();
+  } 
+  catch(err){ console.error(err); notify('Errore nel salvataggio','error'); }
 }
 
 // RESET
-function resetForm(clear=true){ 
-  if(clear) editingId=null;
-  document.getElementById('mainForm').reset();
-  if(clear) notify('Scheda pulita','error');
-}
+function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); notify('Scheda pulita','error'); }
 
 // RENDER TABLE
 function renderTable(){
@@ -293,7 +301,8 @@ async function exportSinglePDF(id){
   const e = entries.find(x=>x.id===id); if(!e) return;
   const pdfDiv = document.createElement('div');
   pdfDiv.style.width='800px'; pdfDiv.style.padding='10px'; pdfDiv.style.background='#fff'; pdfDiv.style.fontFamily='Arial, sans-serif'; pdfDiv.style.fontSize='12px';
-  pdfDiv.innerHTML = `<div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
+  pdfDiv.innerHTML = `
+    <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
     <h1 style="text-align:center;font-weight:bold;font-size:18px;">Scheda Paziente TI</h1>
     <h2 style="font-weight:bold;font-size:14px;">Info paziente</h2>
     <table border="1" style="width:100%;border-collapse:collapse;">
@@ -305,9 +314,8 @@ async function exportSinglePDF(id){
       <tr><td>Corporatura</td><td>${escapeHtml(e.corporatura)}</td></tr>
       <tr><td>Patologia</td><td>${escapeHtml(e.patologia)}</td></tr>
       <tr><td>Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
-      <tr><td>Prelevare da</td><td>${escapeHtml(e.prelevare)}</td></tr>
-      <tr><td>Portare a</td><td>${escapeHtml(e.portare)}</td></tr>
-      <tr><td>Telefono PDC</td><td>${escapeHtml(e.pdc)}</td></tr>
+      <tr><td>PDC</td><td>${escapeHtml(e.pdc)}</td></tr>
+      <tr><td>Telefono PDC</td><td>${escapeHtml(e.tel)}</td></tr>
     </table>
     <h2 style="font-weight:bold;font-size:14px;">Team</h2>
     <table border="1" style="width:100%;border-collapse:collapse;">
@@ -327,11 +335,12 @@ async function exportSinglePDF(id){
       <tr><td>Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
       <tr><td>Note</td><td>${escapeHtml(e.note)}</td></tr>
     </table>
-    <h2 style="font-weight:bold;font-size:14px;">Referente</h2>
+    <h2 style="font-weight:bold;font-size:14px;">Referente responsabile della compilazione:</h2>
     <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
-    <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString()}</p>`;
+    <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString()}</p>
+  `;
   document.body.appendChild(pdfDiv);
-  const canvas = await html2canvas(pdfDiv,{scale:2});
+  const canvas = await html2canvas(pdfDiv, {scale:2});
   document.body.removeChild(pdfDiv);
   const imgData = canvas.toDataURL('image/png');
   const { jsPDF } = window.jspdf;
@@ -347,7 +356,6 @@ async function exportSinglePDF(id){
 }
 
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
-
 </script>
 </body>
 </html>
