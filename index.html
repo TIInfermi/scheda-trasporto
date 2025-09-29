@@ -347,7 +347,7 @@ async function exportSinglePDF(id){
     else if(e.stato==="Annullato") color=[255,0,0];
     pdf.setFontSize(14);
     pdf.setTextColor(...color);
-    pdf.text(`STATO: ${e.stato}`, pdfWidth-20, 20, {align:"right"});
+    pdf.text(`${e.stato}`, pdfWidth-20, 20, {align:"right"});
   }
 
   pdf.setFontSize(10);
@@ -363,3 +363,4 @@ renderTable();
 </script>
 </body>
 </html>
+
