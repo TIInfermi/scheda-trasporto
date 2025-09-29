@@ -294,7 +294,7 @@ async function exportSinglePDF(id){
       <tr><td>Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
       <tr><td>Note</td><td>${escapeHtml(e.note)}</td></tr>
     </table>
-    <h2 style="font-weight:bold;font-size:14px;">Referente</h2>
+    <h2 style="font-weight:bold;font-size:14px;">Operatore responsabile della compilazione:</h2>
     <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
     <div style="text-align:right;color:red;font-size:12px;margin-top:10px;">${new Date(e.timestamp).toLocaleString()}</div>
   `;
@@ -326,4 +326,5 @@ function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 </script>
 </body>
 </html>
+
 
