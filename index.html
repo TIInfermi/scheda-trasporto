@@ -311,6 +311,7 @@ async function exportSinglePDF(id){
   const e = entries.find(x=>x.id===id); 
   if(!e) return;
 
+  // Crea div temporaneo
   const pdfDiv = document.createElement('div');
   pdfDiv.style.width = '800px';
   pdfDiv.style.padding = '15px';
@@ -321,15 +322,18 @@ async function exportSinglePDF(id){
   pdfDiv.style.color = '#000';
   pdfDiv.style.position = 'relative';
   pdfDiv.style.boxSizing = 'border-box';
+  pdfDiv.style.overflow = 'hidden';
+  pdfDiv.style.wordWrap = 'break-word';
 
   const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
 
+  // Contenuto HTML
   pdfDiv.innerHTML = `
     <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
     <h1 style="text-align:center;font-weight:bold;font-size:18px;margin-bottom:12px;">Scheda Paziente TI</h1>
 
     <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Info paziente</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed;">
       <tr><td>Missione</td><td>${escapeHtml(e.missione)}</td></tr>
       <tr><td>Data</td><td>${escapeHtml(dataIt)}</td></tr>
       <tr><td>Nome e Cognome</td><td>${escapeHtml(e.nome)}</td></tr>
@@ -341,7 +345,7 @@ async function exportSinglePDF(id){
     </table>
 
     <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Partenza / Arrivo</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed;">
       <tr>
         <td style="width:50%; vertical-align:top;">
           <b>Partenza</b><br>
@@ -361,7 +365,7 @@ async function exportSinglePDF(id){
     </table>
 
     <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">PDC</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed;">
       <tr>
         <td style="width:50%;">PDC: ${escapeHtml(e.pdc)}</td>
         <td style="width:50%;">Telefono: ${escapeHtml(e.tel)}</td>
@@ -369,7 +373,7 @@ async function exportSinglePDF(id){
     </table>
 
     <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Team</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed;">
       <tr><td>Autista Soccorritore</td><td>${escapeHtml(e.autista)}</td></tr>
       <tr><td>1° Soccorritore</td><td>${escapeHtml(e.socc1)}</td></tr>
       <tr><td>2° Soccorritore</td><td>${escapeHtml(e.socc2)}</td></tr>
@@ -378,7 +382,7 @@ async function exportSinglePDF(id){
     </table>
 
     <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Info trasporto</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed;">
       <tr><td>Arrivo in sede</td><td>${escapeHtml(e.arrivoSede)}</td></tr>
       <tr><td>Arrivo dal paziente</td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
       <tr><td>Arrivo a destinazione</td><td>${escapeHtml(e.arrivoDest)}</td></tr>
@@ -397,13 +401,18 @@ async function exportSinglePDF(id){
     </p>
   `;
 
+  // riduce leggermente font di tutte le celle per adattarle al singolo foglio
+  pdfDiv.querySelectorAll('td').forEach(td => {
+    td.style.fontSize = '12px';
+    td.style.wordWrap = 'break-word';
+  });
+
   document.body.appendChild(pdfDiv);
 
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
 
-  // scala per adattare tutto in un singolo foglio
-  const scaleFactor = 0.75; // puoi regolare tra 0.7 e 0.85 a seconda di quanto lungo è il contenuto
+  const scaleFactor = 0.75; // scala globale per adattare tutto su un singolo foglio
 
   await pdf.html(pdfDiv, {
       callback: function(pdf) {
@@ -412,12 +421,13 @@ async function exportSinglePDF(id){
       },
       x: 10,
       y: 10,
-      width: 190, // larghezza contenuto in mm
-      windowWidth: 800 * scaleFactor // riduce il contenuto per farlo stare su una pagina
+      width: 190,
+      windowWidth: 800 * scaleFactor
   });
 
   document.body.removeChild(pdfDiv);
 }
+
 
 
 
@@ -427,6 +437,7 @@ function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 
 </body>
 </html>
+
 
 
 
