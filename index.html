@@ -319,7 +319,7 @@ async function exportSinglePDF(id){
   pdfDiv.style.fontSize = '13px';
   pdfDiv.style.lineHeight = '1.4';
   pdfDiv.style.color = '#000';
-  pdfDiv.style.position = 'relative'; // necessario per il timestamp assoluto
+  pdfDiv.style.position = 'relative';
   pdfDiv.style.boxSizing = 'border-box';
 
   const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
@@ -402,6 +402,9 @@ async function exportSinglePDF(id){
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
 
+  // scala per adattare tutto in un singolo foglio
+  const scaleFactor = 0.75; // puoi regolare tra 0.7 e 0.85 a seconda di quanto lungo è il contenuto
+
   await pdf.html(pdfDiv, {
       callback: function(pdf) {
           pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
@@ -410,11 +413,12 @@ async function exportSinglePDF(id){
       x: 10,
       y: 10,
       width: 190, // larghezza contenuto in mm
-      windowWidth: 800 // corrisponde alla larghezza del div
+      windowWidth: 800 * scaleFactor // riduce il contenuto per farlo stare su una pagina
   });
 
   document.body.removeChild(pdfDiv);
 }
+
 
 
 
@@ -423,6 +427,7 @@ function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 
 </body>
 </html>
+
 
 
 
