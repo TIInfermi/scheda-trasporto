@@ -120,8 +120,13 @@ header img.logo { display:block; margin:0 auto; }
       </label>
     </div>
 
-    <div><label>PDC<input id="pdc" type="text"></label></div>
-    <div><label>Telefono PDC<input id="tel" type="number"></label></div>
+<!-- PDC Section -->
+<div class="section-title">PDC</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+  <div><label>PDC<input id="pdc" type="text"></label></div>
+  <div><label>Telefono PDC<input id="tel" type="text"></label></div>
+</div>
+
 
     <div class="section-title">Team</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
@@ -389,3 +394,4 @@ function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 
 </body>
 </html>
+
