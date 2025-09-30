@@ -348,7 +348,7 @@ async function exportSinglePDF(id){
       <tr><td>Età</td><td>${escapeHtml(e.eta)}</td></tr>
       <tr><td>Data di nascita</td><td>${escapeHtml(e.dob)}</td></tr>
       <tr><td>Corporatura</td><td>${escapeHtml(e.corporatura)}</td></tr>
-      <tr><td>Patologia</td><td class="longField">${escapeHtml(e.patologia)}</td></tr>
+      <tr><td>Patologia</td><td style="word-wrap:break-word; max-height:50px; overflow:hidden;">${escapeHtml(e.patologia)}</td></tr>
       <tr><td>Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
     </table>
 
@@ -397,7 +397,7 @@ async function exportSinglePDF(id){
       <tr><td>Mezzo assegnato</td><td>${escapeHtml(e.mezzo)}</td></tr>
       <tr><td>Prezzo</td><td>${escapeHtml(e.prezzo)}</td></tr>
       <tr><td>Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
-      <tr><td>Note</td><td class="longField">${escapeHtml(e.note)}</td></tr>
+      <tr><td>Note</td><td style="word-wrap:break-word; max-height:50px; overflow:hidden;">${escapeHtml(e.note)}</td></tr>
       <tr><td>Link ricevuta</td><td>${escapeHtml(e.linkRicevuta)}</td></tr>
     </table>
 
@@ -440,4 +440,5 @@ async function exportSinglePDF(id){
 
 </body>
 </html>
+
 
