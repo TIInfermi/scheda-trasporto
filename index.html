@@ -339,8 +339,83 @@ async function exportSinglePDF(id){
   pdfDiv.innerHTML = `
     <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
     <h1 style="text-align:center;font-weight:bold;font-size:18px;margin-bottom:12px;">Scheda Paziente TI</h1>
-    <!-- CONTENUTO COME NEL CODICE ORIGINALE -->
+
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Info paziente</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed;">
+      <tr><td>Missione</td><td>${escapeHtml(e.missione)}</td></tr>
+      <tr><td>Data</td><td>${escapeHtml(dataIt)}</td></tr>
+      <tr><td>Nome e Cognome</td><td>${escapeHtml(e.nome)}</td></tr>
+      <tr><td>Età</td><td>${escapeHtml(e.eta)}</td></tr>
+      <tr><td>Data di nascita</td><td>${escapeHtml(e.dob)}</td></tr>
+      <tr><td>Corporatura</td><td>${escapeHtml(e.corporatura)}</td></tr>
+      <tr><td>Patologia</td><td class="longField">${escapeHtml(e.patologia)}</td></tr>
+      <tr><td>Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
+    </table>
+
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Partenza / Arrivo</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed;">
+      <tr>
+        <td style="width:50%; vertical-align:top;">
+          <b>Partenza</b><br>
+          Città: ${escapeHtml(e.partenzaCitta)}<br>
+          Via: ${escapeHtml(e.partenzaVia)}<br>
+          Numero civico: ${escapeHtml(e.partenzaNum)}<br>
+          Ascensore/montacarichi: ${escapeHtml(e.partenzaAscensore)}
+        </td>
+        <td style="width:50%; vertical-align:top;">
+          <b>Arrivo</b><br>
+          Città: ${escapeHtml(e.arrivoCitta)}<br>
+          Via: ${escapeHtml(e.arrivoVia)}<br>
+          Numero civico: ${escapeHtml(e.arrivoNum)}<br>
+          Ascensore/montacarichi: ${escapeHtml(e.arrivoAscensore)}
+        </td>
+      </tr>
+    </table>
+
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">PDC</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed;">
+      <tr>
+        <td style="width:50%;">PDC: ${escapeHtml(e.pdc)}</td>
+        <td style="width:50%;">Telefono: ${escapeHtml(e.tel)}</td>
+      </tr>
+    </table>
+
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Team</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed;">
+      <tr><td>Autista Soccorritore</td><td>${escapeHtml(e.autista)}</td></tr>
+      <tr><td>1° Soccorritore</td><td>${escapeHtml(e.socc1)}</td></tr>
+      <tr><td>2° Soccorritore</td><td>${escapeHtml(e.socc2)}</td></tr>
+      <tr><td>3° Soccorritore</td><td>${escapeHtml(e.socc3)}</td></tr>
+      <tr><td>Tirocinante</td><td>${escapeHtml(e.tiro)}</td></tr>
+    </table>
+
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Info trasporto</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed;">
+      <tr><td>Arrivo in sede</td><td>${escapeHtml(e.arrivoSede)}</td></tr>
+      <tr><td>Arrivo dal paziente</td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
+      <tr><td>Arrivo a destinazione</td><td>${escapeHtml(e.arrivoDest)}</td></tr>
+      <tr><td>Mezzo assegnato</td><td>${escapeHtml(e.mezzo)}</td></tr>
+      <tr><td>Prezzo</td><td>${escapeHtml(e.prezzo)}</td></tr>
+      <tr><td>Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
+      <tr><td>Note</td><td class="longField">${escapeHtml(e.note)}</td></tr>
+      <tr><td>Link ricevuta</td><td>${escapeHtml(e.linkRicevuta)}</td></tr>
+    </table>
+
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Operatore responsabile della compilazione</h2>
+    <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
+
+    <p style="position:absolute; bottom:10px; right:10px; color:red; font-weight:bold;">
+      Generato il: ${new Date(e.timestamp).toLocaleString('it-IT')}
+    </p>
   `;
+
+  pdfDiv.querySelectorAll('.longField').forEach(td => {
+    let textLength = td.innerText.length;
+    if(textLength > 150) td.style.fontSize = '9px';
+    else if(textLength > 80) td.style.fontSize = '10px';
+    else td.style.fontSize = '12px';
+    td.style.wordWrap = 'break-word';
+  });
 
   document.body.appendChild(pdfDiv);
 
@@ -354,13 +429,15 @@ async function exportSinglePDF(id){
       },
       x: 10,
       y: 10,
-      width: 180,   // ridotto per adattare A4
+      width: 180,
       windowWidth: 800
   });
 
   document.body.removeChild(pdfDiv);
 }
+
 </script>
 
 </body>
 </html>
+
