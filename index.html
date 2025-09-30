@@ -98,7 +98,7 @@ header img.logo { display:block; margin:0 auto; }
     <div class="section-title">Partenza</div>
     <div><label>Città<input id="partenzaCitta"></label></div>
     <div><label>Via<input id="partenzaVia"></label></div>
-    <div><label>Numero civico<input id="partenzaNum"></label></div>
+    <div><label>Piano<input id="partenzaNum"></label></div>
     <div>
       <label>Ascensore/montacarichi
         <select id="partenzaAscensore">
@@ -113,7 +113,7 @@ header img.logo { display:block; margin:0 auto; }
     <div class="section-title">Arrivo</div>
     <div><label>Città<input id="arrivoCitta"></label></div>
     <div><label>Via<input id="arrivoVia"></label></div>
-    <div><label>Numero civico<input id="arrivoNum"></label></div>
+    <div><label>Piano<input id="arrivoNum"></label></div>
     <div>
       <label>Ascensore/montacarichi
         <select id="arrivoAscensore">
@@ -363,14 +363,14 @@ async function exportSinglePDF(id){
           Partenza<br>
           Città: <span style="font-weight:normal">${escapeHtml(e.partenzaCitta)}</span><br>
           Via: <span style="font-weight:normal">${escapeHtml(e.partenzaVia)}</span><br>
-          Numero civico: <span style="font-weight:normal">${escapeHtml(e.partenzaNum)}</span><br>
+          Piano: <span style="font-weight:normal">${escapeHtml(e.partenzaNum)}</span><br>
           Ascensore: <span style="font-weight:normal">${escapeHtml(e.partenzaAscensore)}</span>
         </td>
         <td style="width:50%; vertical-align:top; font-weight:bold;">
           Arrivo<br>
           Città: <span style="font-weight:normal">${escapeHtml(e.arrivoCitta)}</span><br>
           Via: <span style="font-weight:normal">${escapeHtml(e.arrivoVia)}</span><br>
-          Numero civico: <span style="font-weight:normal">${escapeHtml(e.arrivoNum)}</span><br>
+          Piano: <span style="font-weight:normal">${escapeHtml(e.arrivoNum)}</span><br>
           Ascensore: <span style="font-weight:normal">${escapeHtml(e.arrivoAscensore)}</span>
         </td>
       </tr>
@@ -442,6 +442,7 @@ async function exportSinglePDF(id){
 </script>
 </body>
 </html>
+
 
 
 
