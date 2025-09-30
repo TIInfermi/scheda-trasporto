@@ -317,7 +317,7 @@ async function exportSinglePDF(id){
   pdfDiv.style.padding = '15px';
   pdfDiv.style.background = '#fff';
   pdfDiv.style.fontFamily = 'Arial, sans-serif';
-  pdfDiv.style.fontSize = '13px';
+  pdfDiv.style.fontSize = '12px';
   pdfDiv.style.lineHeight = '1.4';
   pdfDiv.style.color = '#000';
   pdfDiv.style.position = 'relative';
@@ -340,7 +340,7 @@ async function exportSinglePDF(id){
       <tr><td>Età</td><td>${escapeHtml(e.eta)}</td></tr>
       <tr><td>Data di nascita</td><td>${escapeHtml(e.dob)}</td></tr>
       <tr><td>Corporatura</td><td>${escapeHtml(e.corporatura)}</td></tr>
-      <tr><td>Patologia</td><td>${escapeHtml(e.patologia)}</td></tr>
+      <tr><td>Patologia</td><td class="longField">${escapeHtml(e.patologia)}</td></tr>
       <tr><td>Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
     </table>
 
@@ -389,7 +389,7 @@ async function exportSinglePDF(id){
       <tr><td>Mezzo assegnato</td><td>${escapeHtml(e.mezzo)}</td></tr>
       <tr><td>Prezzo</td><td>${escapeHtml(e.prezzo)}</td></tr>
       <tr><td>Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
-      <tr><td>Note</td><td>${escapeHtml(e.note)}</td></tr>
+      <tr><td>Note</td><td class="longField">${escapeHtml(e.note)}</td></tr>
       <tr><td>Link ricevuta</td><td>${escapeHtml(e.linkRicevuta)}</td></tr>
     </table>
 
@@ -401,23 +401,13 @@ async function exportSinglePDF(id){
     </p>
   `;
 
-  // Funzione per ridurre il font dei campi lunghi
-  function adjustFontSize(td, maxFont=13, minFont=8) {
-    let lines = td.innerText.split('\n').length;
-    let fontSize = maxFont;
-    if(lines > 5) fontSize = Math.max(minFont, maxFont - (lines - 5));
-    td.style.fontSize = fontSize + 'px';
+  // Riduzione font per campi lunghi (Patologia, Note)
+  pdfDiv.querySelectorAll('.longField').forEach(td => {
+    let textLength = td.innerText.length;
+    if(textLength > 150) td.style.fontSize = '9px';
+    else if(textLength > 80) td.style.fontSize = '10px';
+    else td.style.fontSize = '12px';
     td.style.wordWrap = 'break-word';
-  }
-
-  // Applica riduzione font solo a Patologia e Note
-  pdfDiv.querySelectorAll('td').forEach(td => {
-    if(td.previousElementSibling && (td.previousElementSibling.innerText.includes('Patologia') || td.previousElementSibling.innerText.includes('Note'))) {
-      adjustFontSize(td);
-    } else {
-      td.style.fontSize = '12px'; // font standard per le altre celle
-      td.style.wordWrap = 'break-word';
-    }
   });
 
   document.body.appendChild(pdfDiv);
@@ -425,8 +415,7 @@ async function exportSinglePDF(id){
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
 
-  const scaleFactor = 0.75; // scala globale per adattare tutto su un singolo foglio
-
+  // Scala globale: riduce tutto il div per farlo entrare in una sola pagina
   await pdf.html(pdfDiv, {
       callback: function(pdf) {
           pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
@@ -435,15 +424,11 @@ async function exportSinglePDF(id){
       x: 10,
       y: 10,
       width: 190,
-      windowWidth: 800 * scaleFactor
+      windowWidth: 700 // ridurre questo valore se il contenuto esce ancora
   });
 
   document.body.removeChild(pdfDiv);
 }
-
-
-
-
 
 
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
@@ -451,10 +436,3 @@ function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 
 </body>
 </html>
-
-
-
-
-
-
-
