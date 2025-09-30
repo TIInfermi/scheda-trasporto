@@ -184,7 +184,7 @@ header img.logo { display:block; margin:0 auto; }
     <div id="dataTableWrapper">
       <table id="dataTable">
         <thead>
-          <tr><th>Missione N°</th><th>Data</th><th>Stato</th><th>Azioni</th></tr>
+          <tr><th>Missione N°</th><th>Data</th><th>Stato</th><th>Operatore</th><th>Azioni</th></tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -293,18 +293,28 @@ function resetForm(){ editingId=null; document.getElementById('mainForm').reset(
 
 // RENDER TABLE
 function renderTable(){
-  const tbody=document.querySelector('#dataTable tbody'); tbody.innerHTML='';
+  const tbody = document.querySelector('#dataTable tbody'); 
+  tbody.innerHTML = '';
   const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+
   for(const e of entries){
     if(searchTerm && !e.missione.toLowerCase().includes(searchTerm) && !(e.nome||'').toLowerCase().includes(searchTerm)) continue;
-    const tr=document.createElement('tr');
+
+    const tr = document.createElement('tr');
     const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
-    tr.innerHTML = `<td>${escapeHtml(e.missione)}</td><td>${escapeHtml(dataIt)}</td><td>${escapeHtml(e.stato)}</td>
-    <td>
-      <button onclick="editEntry('${e.id}')">Modifica</button>
-      <button onclick="deleteEntry('${e.id}')">Elimina</button>
-      <button onclick="exportSinglePDF('${e.id}')">PDF</button>
-    </td>`;
+
+    tr.innerHTML = `
+      <td>${escapeHtml(e.missione)}</td>
+      <td>${escapeHtml(dataIt)}</td>
+      <td>${escapeHtml(e.stato)}</td>
+      <td>${escapeHtml(e.firmaRef)}</td>
+      <td>
+        <button onclick="editEntry('${e.id}')">Modifica</button>
+        <button onclick="deleteEntry('${e.id}')">Elimina</button>
+        <button onclick="exportSinglePDF('${e.id}')">PDF</button>
+      </td>
+    `;
+
     tbody.appendChild(tr);
   }
 }
@@ -318,7 +328,7 @@ async function deleteEntry(id){ if(!confirm('Eliminare scheda?')) return; try{ a
 
 // PDF EXPORT
 async function exportSinglePDF(id){
-  const e = entries.find(x=>x.id===id); 
+  const e = entries.find(x => x.id === id); 
   if(!e) return;
 
   const pdfDiv = document.createElement('div');
@@ -326,7 +336,7 @@ async function exportSinglePDF(id){
   pdfDiv.style.padding = '8px';
   pdfDiv.style.background = '#fff';
   pdfDiv.style.fontFamily = 'Arial, sans-serif';
-  pdfDiv.style.fontSize = '10px';  // font principale
+  pdfDiv.style.fontSize = '10px';
   pdfDiv.style.lineHeight = '1.2';
   pdfDiv.style.color = '#000';
   pdfDiv.style.boxSizing = 'border-box';
@@ -334,8 +344,9 @@ async function exportSinglePDF(id){
 
   const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
 
-  // funzione per ridurre font dinamicamente in base alla lunghezza del testo
-  function getFontSize(str, maxLength=150){ return str && str.length>maxLength ? '9px' : '10px'; }
+  function getFontSize(str, maxLength=150){ 
+    return str && str.length > maxLength ? '9px' : '10px'; 
+  }
 
   pdfDiv.innerHTML = `
     <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">
@@ -404,9 +415,6 @@ async function exportSinglePDF(id){
       <tr><td style="font-weight:bold;">Link ricevuta</td><td>${escapeHtml(e.linkRicevuta)}</td></tr>
     </table>
 
-    <h2>Operatore</h2>
-    <p>${escapeHtml(e.firmaRef)}</p>
-
     <div style="text-align:right; color:red; font-weight:bold; margin-top:5px;">
       Generato il: ${new Date(e.timestamp).toLocaleString('it-IT')}
     </div>
@@ -421,8 +429,8 @@ async function exportSinglePDF(id){
 
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
-
   const scale = 190 / pdfDiv.offsetWidth;
+
   await pdf.html(pdfDiv, {
       callback: function(pdf){
           pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
@@ -439,9 +447,11 @@ async function exportSinglePDF(id){
 
 
 
+
 </script>
 </body>
 </html>
+
 
 
 
