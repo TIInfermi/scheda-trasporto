@@ -5,124 +5,31 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SCHEDA PAZIENTE TI</title>
 <style>
-/* Stili Base e Layout Generale */
 body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin:0; padding:16px; background:#f0f2f5; }
 .container { max-width: 950px; margin:0 auto; background:#fff; padding:24px; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.1); position:relative; min-height:calc(100vh - 40px); }
-
-/* Header e Titolo (Centrato) */
 header { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
 header img { height:60px; width:auto; }
-header h1 { 
-    font-size:25px; 
-    text-align:center; 
-    flex:1; 
-    margin:0; 
-    font-weight:bold; 
-}
-
-/* Pulsanti Standard (Per Salva/Pulisci/Accedi/Bottoni in Tabella) */
-button { 
-    padding:10px 16px; 
-    font-size:14px; 
-    border:none; 
-    border-radius:6px; 
-    cursor:pointer; 
-    background:#b33a3a; 
-    color:#fff; 
-    transition:0.2s; 
-}
-button:hover { background:#7a1e1e; }
-.buttons { grid-column:1/3; display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
-
-/* Form Elements */
+header h1 { font-size:25px; text-align:center; flex:1; margin:0; font-weight:bold; }
 form { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
 label { display:block; font-size:14px; margin-bottom:4px; font-weight:500; }
 input, select, textarea { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-sizing:border-box; }
 textarea { min-height:60px; }
 .full { grid-column:1/3; }
 .section-title { grid-column:1/3; font-size:17px; margin-top:16px; margin-bottom:8px; color:#555; border-bottom:1px solid #ccc; padding-bottom:4px; font-weight:bold; }
-
-/* Navigazione Home/Logout (Top Right) */
-.top-right-actions {
-    position:absolute;
-    right:24px;
-    top:24px;
-    display: flex;
-    gap: 8px;
-}
-.top-right-actions button {
-    padding:8px 12px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    transition:0.2s;
-}
-#logoutBtn { 
-    background:#b33a3a; 
-    color:#fff; 
-}
-#logoutBtn:hover { 
-    background:#7a1e1e; 
-}
-#homeNavBtn { 
-    background:#4a7bb3; 
-    color:#fff; 
-}
-#homeNavBtn:hover { 
-    background:#3a5c88; 
-}
-
-/* Stili Tabella Schede TI */
+.buttons { grid-column:1/3; display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
+button { padding:10px 16px; font-size:14px; border:none; border-radius:6px; cursor:pointer; background:#b33a3a; color:#fff; transition:0.2s; }
+button:hover { background:#7a1e1e; }
+#logoutBtn { position:absolute; right:24px; top:24px; padding:8px 12px; background:#b33a3a; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+#logoutBtn:hover { background:#7a1e1e; }
 table { width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
-th, td { border:1px solid #ddd; padding:8px; text-align:left; vertical-align:middle; }
+th, td { border:1px solid #ddd; padding:8px; text-align:left; }
 th { background:#f3f4f6; }
 tr:hover { background:#f1f5f9; }
-
-/* Pulsanti all'interno della colonna "Azioni" nella tabella */
-#dataTable td button {
-    /* Reindirizza allo stile generale del bottone ma con padding ridotto */
-    padding: 5px 10px;
-    font-size: 13px;
-    margin: 2px; /* piccolo spazio tra i bottoni */
-    white-space: nowrap; /* Tieni i bottoni affiancati */
-}
-#dataTable td button:nth-child(1) { background:#4a7bb3; color:white; } /* Modifica */
-#dataTable td button:nth-child(2) { background:#cc0000; color:white; } /* Elimina */
-#dataTable td button:nth-child(3) { background:#b33a3a; color:white; } /* PDF */
-
-
-/* Login e Notifiche */
+@media(max-width:760px){ form { grid-template-columns:1fr; } .full { grid-column:auto; } header { flex-direction:column; align-items:flex-start; } header h1 { text-align:left; } }
 #loginDiv { max-width:400px; margin:50px auto; padding:20px; background:#fff; border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,0.1); text-align:center; }
 #loginDiv input { margin-bottom:10px; width:90%; padding:8px; }
-/* ASSICURA COERENZA: Il pulsante di accesso usa lo stile 'button' standard */
-#loginDiv button { 
-    margin-top: 15px; 
-    width: 90%; 
-    padding: 10px;
-    background:#b33a3a; 
-} 
 footer { text-align:center; margin-top:20px; font-size:12px; color:#555; }
-#searchBar { width:100%; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-sizing:border-box; }
-#dataTableWrapper { max-height:400px; overflow-y:auto; }
-
-/* HOME BOXES */
-#homeDiv .content { display:flex; justify-content:center; gap:30px; margin-top:50px; flex-wrap:wrap; }
-.action-box { 
-    flex: 0 1 300px; 
-    text-align:center; 
-    padding:30px; 
-    border:1px solid #ddd; 
-    border-radius:10px; 
-    cursor:pointer; 
-    transition:0.3s; 
-    box-shadow:0 4px 8px rgba(0,0,0,0.05);
-    background:#fafafa;
-}
-.action-box:hover { box-shadow:0 8px 16px rgba(0,0,0,0.1); transform:translateY(-2px); background:#fff; }
-.action-box img { height:80px; margin-bottom:15px; }
-.action-box h3 { margin:0; color:#b33a3a; font-size:20px; }
-
-/* Notifiche (invariate) */
+header img.logo { display:block; margin:0 auto; }
 #notifications { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:10px; align-items:center; }
 .notification { padding:12px 20px; border-radius:8px; color:#fff; min-width:250px; position:relative; font-weight:bold; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.2); cursor:pointer; opacity:0; transform:translateY(-20px); transition:0.5s; }
 .notification.show { opacity:0.95; transform:translateY(0); }
@@ -130,167 +37,160 @@ footer { text-align:center; margin-top:20px; font-size:12px; color:#555; }
 .notification.error { background:rgba(220,20,60,0.85); }
 .notification.warning { background:rgba(255,165,0,0.85); }
 .notification .close { position:absolute; top:5px; right:8px; font-weight:bold; cursor:pointer; }
+
+/* SEARCH BAR E SCROLL TABLE */
+#searchBar { width:100%; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-sizing:border-box; }
+#dataTableWrapper { max-height:400px; overflow-y:auto; }
 </style>
 </head>
 <body>
 
 <div id="notifications"></div>
 
+<!-- Login -->
 <div id="loginDiv">
-  <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/802edc62968aa9566f7685ac09524d39(1).png" alt="Logo" class="logo" style="height:120px; margin-bottom:10px;">
-  <h2>Benvenuto nel sistema di creazione schede TI</h2>
-  <p>Effettua l'accesso con le credenziali che ti sono state affidate</p>
-  <input type="email" id="loginEmail" placeholder="Email"><br>
-  <input type="password" id="loginPassword" placeholder="Password"><br>
-  <label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:14px; margin-left:20px;">
-    <input type="checkbox" id="rememberMe" style="vertical-align:middle; width:16px; height:16px;">
-    Ricordami
-  </label>
-  <button onclick="login()">Accedi</button>   <footer>© Antonio Troiani, Tutti i diritti riservati</footer>
+  <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/802edc62968aa9566f7685ac09524d39(1).png" alt="Logo" class="logo" style="height:120px; margin-bottom:10px;">
+  <h2>Benvenuto nel sistema di creazione schede TI</h2>
+  <p>Effettua l'accesso con le credenziali che ti sono state affidate</p>
+  <input type="email" id="loginEmail" placeholder="Email"><br>
+  <input type="password" id="loginPassword" placeholder="Password"><br>
+  <label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:14px;">
+    <input type="checkbox" id="rememberMe" style="vertical-align:middle; width:16px; height:16px;">
+    Ricordami
+  </label>
+  <button onclick="login()">Accedi</button>
+  <footer>© Antonio Troiani, Tutti i diritti riservati</footer>
 </div>
 
+<!-- App principale -->
 <div class="container" id="mainApp" style="display:none;">
-    <div class="top-right-actions">
-        <button id="homeNavBtn" onclick="showSection('homeDiv')">Home</button>
-        <button id="logoutBtn" onclick="logout()">Logout</button>
-    </div>
-    <header>
-        <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/802edc62968aa9566f7685ac09524d39(1).png" alt="Logo">
-        <h1 id="appTitle"></h1>     </header>
+  <button id="logoutBtn" onclick="logout()">Logout</button>
+  <header>
+    <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/802edc62968aa9566f7685ac09524d39(1).png" alt="Logo">
+    <h1>Scheda Paziente TI</h1>
+  </header>
 
-    <div id="homeDiv" style="display:none;">
-        <div class="content">
-            <div class="action-box" onclick="showSection('createDiv')">
-                <img src="https://img.icons8.com/color/96/000000/add-file.png" alt="Genera Scheda">
-                <h3>Genera scheda TI</h3>
-            </div>
-            <div class="action-box" onclick="showSection('viewDiv')">
-                <img src="https://img.icons8.com/color/96/000000/list.png" alt="Visualizza Schede">
-                <h3>Visualizza schede TI</h3>
-            </div>
-        </div>
-    </div>
-
-    <div id="createDiv" style="display:none;">
-        <div class="section-title">Info paziente</div>
-        <form id="mainForm" onsubmit="event.preventDefault(); saveEntry();">
-            <div><label>Missione numero<input id="missione" required></label></div>
-            <div><label>Data<input type="date" id="data" required></label></div>
-            <div><label>Nome e Cognome<input id="nome"></label></div>
-            <div><label>Età<input type="number" id="eta" min="0" step="1"></label></div>
-            <div><label>Data di nascita<input type="date" id="dob"></label></div>
-            <div><label>Corporatura<input type="number" id="corporatura" min="0" step="1"></label></div>
-            <div class="full"><label>Patologia<textarea id="patologia"></textarea></label></div>
-            
-            <div class="full">
-                <label>Motivo trasporto
-                    <select id="motivo">
-                        <option value="">-- Seleziona motivo --</option>
-                        <option>Ricovero</option>
-                        <option>Dimissione</option>
-                        <option>Visita di controllo A/R</option>
-                        <option>Trasporto generico</option>
-                        <option>Accompagnamento</option>
-                        <option>Visita tra ospedali</option>
-                    </select>
-                </label>
-            </div>
-
-            <div class="section-title">Partenza</div>
-            <div><label>Città<input id="partenzaCitta"></label></div>
-            <div><label>Via<input id="partenzaVia"></label></div>
-            <div><label>Piano<input id="partenzaNum"></label></div>
-            <div>
-                <label>Ascensore/montacarichi
-                    <select id="partenzaAscensore">
-                        <option value="">-- Seleziona --</option>
-                        <option>Presente</option>
-                        <option>Assente</option>
-                    </select>
-                </label>
-            </div>
-
-            <div class="section-title">Arrivo</div>
-            <div><label>Città<input id="arrivoCitta"></label></div>
-            <div><label>Via<input id="arrivoVia"></label></div>
-            <div><label>Piano<input id="arrivoNum"></label></div>
-            <div>
-                <label>Ascensore/montacarichi
-                    <select id="arrivoAscensore">
-                        <option value="">-- Seleziona --</option>
-                        <option>Presente</option>
-                        <option>Assente</option>
-                    </select>
-                </label>
-            </div>
-
-            <div class="section-title">PDC</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-                <div><label>PDC<input id="pdc" type="text"></label></div>
-                <div><label>Telefono PDC<input id="tel" type="text"></label></div>
-            </div>
-
-            <div class="section-title">Team</div>
-            <div><label>Autista Soccorritore<input id="autista"></label></div>
-            <div><label>1° Soccorritore<input id="socc1"></label></div>
-            <div><label>2° Soccorritore<input id="socc2"></label></div>
-            <div><label>3° Soccorritore<input id="socc3"></label></div>
-            <div><label>Tirocinante<input id="tiro"></label></div>
-
-            <div class="section-title">Info trasporto</div>
-            <div><label>Arrivo in sede<input type="time" id="arrivoSede"></label></div>
-            <div><label>Arrivo dal paziente<input type="time" id="arrivoPaz"></label></div>
-            <div><label>Arrivo a destinazione<input type="time" id="arrivoDest"></label></div>
-            <div>
-                <label>Mezzo assegnato
-                    <select id="mezzo">
-                        <option value="">-- Seleziona un mezzo --</option>
-                        <option>ABZ 205</option><option>ABZ 406</option><option>ABZ 551</option>
-                        <option>ABZ 237</option><option>ABZ 788</option><option>ABZ 689</option>
-                        <option>DOBLO' 006</option><option>PUNTO BIANCA 428</option><option>PUNTO BLU 159</option>
-                    </select>
-                </label>
-            </div>
-            <div><label>Prezzo<input id="prezzo" type="text" placeholder="0.00"></label></div>
-            <div class="full"><label>Presidi necessari<textarea id="presidi"></textarea></label></div>
-            <div class="full"><label>Note<textarea id="note"></textarea></label></div>
-
-            <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
-                <div style="flex:1">
-                    <label>Operatore che ha compilato la scheda</label>
-                    <input id="firmaRef" placeholder="">
-                </div>
-            </div>
-            <div><label>Stato trasporto
-                <select id="stato">
-                    <option value="">-- Seleziona Stato --</option>
-                    <option>Confermato</option>
-                    <option>In lavorazione</option>
-                    <option>Annullato</option>
-                </select>
-            </label></div>
-
-            <div class="buttons">
-                <button type="submit">Salva scheda TI</button>
-                <button type="button" onclick="resetForm()">Pulisci scheda TI</button>
-            </div>
-        </form>
+  <div class="section-title">Info paziente</div>
+  <form id="mainForm" onsubmit="event.preventDefault(); saveEntry();">
+    <div><label>Missione numero<input id="missione" required></label></div>
+    <div><label>Data<input type="date" id="data" required></label></div>
+    <div><label>Nome e Cognome<input id="nome"></label></div>
+    <div><label>Età<input type="number" id="eta" min="0" step="1"></label></div>
+    <div><label>Data di nascita<input type="date" id="dob"></label></div>
+    <div><label>Corporatura<input type="number" id="corporatura" min="0" step="1"></label></div>
+    <div class="full"><label>Patologia<textarea id="patologia"></textarea></label></div>
+    
+    <div class="full">
+      <label>Motivo trasporto
+        <select id="motivo">
+          <option value="">-- Seleziona motivo --</option>
+          <option>Ricovero</option>
+          <option>Dimissione</option>
+          <option>Visita di controllo A/R</option>
+          <option>Trasporto generico</option>
+          <option>Accompagnamento</option>
+          <option>Visita tra ospedali</option>
+        </select>
+      </label>
     </div>
 
-    <div id="viewDiv" style="display:none;">
-        <h2 style="text-align:center; margin-top:0;">Elenco schede TI</h2>
-        <input type="text" id="searchBar" placeholder="Cerca scheda...">
-        <div id="dataTableWrapper">
-            <table id="dataTable">
-                <thead>
-                    <tr><th>Missione N°</th><th>Data</th><th>Stato</th><th>Operatore</th><th>Azioni</th></tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+    <!-- PARTENZA -->
+    <div class="section-title">Partenza</div>
+    <div><label>Città<input id="partenzaCitta"></label></div>
+    <div><label>Via<input id="partenzaVia"></label></div>
+    <div><label>Piano<input id="partenzaNum"></label></div>
+    <div>
+      <label>Ascensore/montacarichi
+        <select id="partenzaAscensore">
+          <option value="">-- Seleziona --</option>
+          <option>Presente</option>
+          <option>Assente</option>
+        </select>
+      </label>
     </div>
 
-  <footer>© Antonio Troiani, Tutti i diritti riservati</footer>
+    <!-- ARRIVO -->
+    <div class="section-title">Arrivo</div>
+    <div><label>Città<input id="arrivoCitta"></label></div>
+    <div><label>Via<input id="arrivoVia"></label></div>
+    <div><label>Piano<input id="arrivoNum"></label></div>
+    <div>
+      <label>Ascensore/montacarichi
+        <select id="arrivoAscensore">
+          <option value="">-- Seleziona --</option>
+          <option>Presente</option>
+          <option>Assente</option>
+        </select>
+      </label>
+    </div>
+
+<!-- PDC Section -->
+<div class="section-title">PDC</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+  <div><label>PDC<input id="pdc" type="text"></label></div>
+  <div><label>Telefono PDC<input id="tel" type="text"></label></div>
+</div>
+
+    <div class="section-title">Team</div>
+    <div><label>Autista Soccorritore<input id="autista"></label></div>
+    <div><label>1° Soccorritore<input id="socc1"></label></div>
+    <div><label>2° Soccorritore<input id="socc2"></label></div>
+    <div><label>3° Soccorritore<input id="socc3"></label></div>
+    <div><label>Tirocinante<input id="tiro"></label></div>
+
+    <div class="section-title">Info trasporto</div>
+    <div><label>Arrivo in sede<input type="time" id="arrivoSede"></label></div>
+    <div><label>Arrivo dal paziente<input type="time" id="arrivoPaz"></label></div>
+    <div><label>Arrivo a destinazione<input type="time" id="arrivoDest"></label></div>
+    <div>
+      <label>Mezzo assegnato
+        <select id="mezzo">
+          <option value="">-- Seleziona un mezzo --</option>
+          <option>ABZ 205</option><option>ABZ 406</option><option>ABZ 551</option>
+          <option>ABZ 237</option><option>ABZ 788</option><option>ABZ 689</option>
+          <option>DOBLO' 006</option><option>PUNTO BIANCA 428</option><option>PUNTO BLU 159</option>
+        </select>
+      </label>
+    </div>
+    <div><label>Prezzo<input id="prezzo" type="text" placeholder="0.00"></label></div>
+    <div class="full"><label>Presidi necessari<textarea id="presidi"></textarea></label></div>
+    <div class="full"><label>Note<textarea id="note"></textarea></label></div>
+
+    <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:1">
+        <label>Operatore che ha compilato la scheda</label>
+        <input id="firmaRef" placeholder="">
+      </div>
+    </div>
+    <div><label>Stato trasporto
+      <select id="stato">
+        <option value="">-- Seleziona Stato --</option>
+        <option>Confermato</option>
+        <option>In lavorazione</option>
+        <option>Annullato</option>
+      </select>
+    </label></div>
+
+    <div class="buttons">
+      <button type="submit">Salva scheda TI</button>
+      <button type="button" onclick="resetForm()">Pulisci scheda TI</button>
+    </div>
+  </form>
+
+  <div id="pdfArea">
+    <h2>Elenco schede TI</h2>
+    <input type="text" id="searchBar" placeholder="Cerca scheda...">
+    <div id="dataTableWrapper">
+      <table id="dataTable">
+        <thead>
+          <tr><th>Missione N°</th><th>Data</th><th>Stato</th><th>Operatore</th><th>Azioni</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>© Antonio Troiani, Tutti i diritti riservati</footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -319,310 +219,229 @@ let inactivityTimer;
 function resetInactivity(){ clearTimeout(inactivityTimer); inactivityTimer = setTimeout(()=>{ logout(); notify('Logout automatico per inattività','error'); }, 15*60*1000); }
 document.onmousemove = resetInactivity; document.onkeypress = resetInactivity; document.onclick = resetInactivity; document.onscroll = resetInactivity;
 
-// GESTIONE SEZIONI E TITOLO
-function showSection(id){
-    document.getElementById('homeDiv').style.display = 'none';
-    document.getElementById('createDiv').style.display = 'none';
-    document.getElementById('viewDiv').style.display = 'none';
-    document.getElementById(id).style.display = 'block';
-
-    const titleElement = document.getElementById('appTitle');
-    if(id === 'homeDiv'){
-        titleElement.textContent = 'Gestionale schede TI'; 
-    } else if (id === 'createDiv'){
-        titleElement.textContent = 'Scheda Paziente TI (Creazione/Modifica)';
-    } else if (id === 'viewDiv'){
-        titleElement.textContent = 'Gestione schede TI';
-        renderTable(); 
-    }
-}
-
-
 // LOGIN / LOGOUT
 function login(){ const email = document.getElementById('loginEmail').value; const password = document.getElementById('loginPassword').value; const remember = document.getElementById('rememberMe').checked; const persistence = remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION; auth.setPersistence(persistence).then(()=>auth.signInWithEmailAndPassword(email,password)).then(()=>{ notify('Accesso effettuato','success'); }).catch(err=>notify(err.message,'error')); }
 function logout(){ auth.signOut().then(()=>{ notify('Logout eseguito, prego riaccedi','error'); }); }
 
 // RUNTIME
 let entries=[], editingId=null;
-auth.onAuthStateChanged(user=>{ 
-    if(user){ 
-        document.getElementById('loginDiv').style.display='none'; 
-        document.getElementById('mainApp').style.display='block'; 
-        showSection('homeDiv'); // Mostra la home dopo il login
-        setupRealtimeListener(); 
-        resetInactivity(); 
-    } else { 
-        document.getElementById('loginDiv').style.display='block'; 
-        document.getElementById('mainApp').style.display='none'; 
-    } 
-});
+auth.onAuthStateChanged(user=>{ if(user){ document.getElementById('loginDiv').style.display='none'; document.getElementById('mainApp').style.display='block'; setupRealtimeListener(); resetInactivity(); } else { document.getElementById('loginDiv').style.display='block'; document.getElementById('mainApp').style.display='none'; } });
 
 // REALTIME LISTENER
 function setupRealtimeListener(){ db.collection("schede_TI").orderBy("timestamp","desc").onSnapshot(snapshot=>{ entries = snapshot.docs.map(doc=>doc.data()); renderTable(); }); }
 
-// FORM DATA (Invariata)
+// FORM DATA
 function getFormData(){
-  let prezzoVal = parseFloat(document.getElementById('prezzo').value.replace(',','.')) || 0; prezzoVal = prezzoVal.toFixed(2)+'€';
-  return {
-    id: editingId||uid(),
-    missione: document.getElementById('missione').value,
-    data: document.getElementById('data').value,
-    nome: document.getElementById('nome').value,
-    eta: document.getElementById('eta').value,
-    dob: document.getElementById('dob').value,
-    corporatura: document.getElementById('corporatura').value,
-    patologia: document.getElementById('patologia').value,
-    motivo: document.getElementById('motivo').value,
-    partenzaCitta: document.getElementById('partenzaCitta').value,
-    partenzaVia: document.getElementById('partenzaVia').value,
-    partenzaNum: document.getElementById('partenzaNum').value,
-    partenzaAscensore: document.getElementById('partenzaAscensore').value,
-    arrivoCitta: document.getElementById('arrivoCitta').value,
-    arrivoVia: document.getElementById('arrivoVia').value,
-    arrivoNum: document.getElementById('arrivoNum').value,
-    arrivoAscensore: document.getElementById('arrivoAscensore').value,
-    pdc: document.getElementById('pdc').value,
-    tel: document.getElementById('tel').value,
-    autista: document.getElementById('autista').value,
-    socc1: document.getElementById('socc1').value,
-    socc2: document.getElementById('socc2').value,
-    socc3: document.getElementById('socc3').value,
-    tiro: document.getElementById('tiro').value,
-    arrivoSede: document.getElementById('arrivoSede').value,
-    arrivoPaz: document.getElementById('arrivoPaz').value,
-    arrivoDest: document.getElementById('arrivoDest').value,
-    mezzo: document.getElementById('mezzo').value,
-    prezzo: prezzoVal,
-    presidi: document.getElementById('presidi').value,
-    note: document.getElementById('note').value,
-    firmaRef: document.getElementById('firmaRef').value,
-    stato: document.getElementById('stato').value,
-    timestamp: new Date().toISOString()
-  };
+  let prezzoVal = parseFloat(document.getElementById('prezzo').value.replace(',','.')) || 0; prezzoVal = prezzoVal.toFixed(2)+'€';
+  return {
+    id: editingId||uid(),
+    missione: document.getElementById('missione').value,
+    data: document.getElementById('data').value,
+    nome: document.getElementById('nome').value,
+    eta: document.getElementById('eta').value,
+    dob: document.getElementById('dob').value,
+    corporatura: document.getElementById('corporatura').value,
+    patologia: document.getElementById('patologia').value,
+    motivo: document.getElementById('motivo').value,
+    partenzaCitta: document.getElementById('partenzaCitta').value,
+    partenzaVia: document.getElementById('partenzaVia').value,
+    partenzaNum: document.getElementById('partenzaNum').value,
+    partenzaAscensore: document.getElementById('partenzaAscensore').value,
+    arrivoCitta: document.getElementById('arrivoCitta').value,
+    arrivoVia: document.getElementById('arrivoVia').value,
+    arrivoNum: document.getElementById('arrivoNum').value,
+    arrivoAscensore: document.getElementById('arrivoAscensore').value,
+    pdc: document.getElementById('pdc').value,
+    tel: document.getElementById('tel').value,
+    autista: document.getElementById('autista').value,
+    socc1: document.getElementById('socc1').value,
+    socc2: document.getElementById('socc2').value,
+    socc3: document.getElementById('socc3').value,
+    tiro: document.getElementById('tiro').value,
+    arrivoSede: document.getElementById('arrivoSede').value,
+    arrivoPaz: document.getElementById('arrivoPaz').value,
+    arrivoDest: document.getElementById('arrivoDest').value,
+    mezzo: document.getElementById('mezzo').value,
+    prezzo: prezzoVal,
+    presidi: document.getElementById('presidi').value,
+    note: document.getElementById('note').value,
+    linkRicevuta: document.getElementById('linkRicevuta').value,
+    firmaRef: document.getElementById('firmaRef').value,
+    stato: document.getElementById('stato').value,
+    timestamp: new Date().toISOString()
+  };
 }
 
-// PRICE INPUT (Invariato)
+// PRICE INPUT
 const prezzoInput = document.getElementById('prezzo');
 prezzoInput.addEventListener('input',()=>{ prezzoInput.value = prezzoInput.value.replace(/[^0-9.,]/g,''); });
 
-// SAVE (AGGIORNATO: Notifica + Ritorno a viewDiv)
+// SAVE
 async function saveEntry(){
-  const data = getFormData();
-  if(!data.missione){ alert('Compila Missione'); return; }
-  try{
-    await db.collection("schede_TI").doc(data.id).set(data);
-    
-    // AGGIORNAMENTO LOGICA: Notifica verde e reindirizza a visualizzazione
-    if(editingId) {
-        notify('Scheda aggiornata con successo!','success');
-    } else {
-        notify('Scheda creata con successo!','success');
-    }
-    
-    resetForm();
-    showSection('viewDiv'); // Riporta l'utente alla visualizzazione schede
-  } catch(err){ console.error(err); notify('Errore nel salvataggio','error'); }
+  const data = getFormData();
+  if(!data.missione){ alert('Compila Missione'); return; }
+  try{
+    await db.collection("schede_TI").doc(data.id).set(data);
+    if(editingId) notify('Scheda aggiornata','success'); else notify('Scheda salvata','success');
+    resetForm();
+  } catch(err){ console.error(err); notify('Errore nel salvataggio','error'); }
 }
 
-// RESET (Invariato)
+// RESET
 function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); notify('Scheda pulita','error'); }
 
-// RENDER TABLE: CORREZIONE FINALE E DEFINITIVA
+// RENDER TABLE
 function renderTable(){
-  const tbody = document.querySelector('#dataTable tbody'); 
-  tbody.innerHTML = '';
-  const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+  const tbody = document.querySelector('#dataTable tbody'); 
+  tbody.innerHTML = '';
+  const searchTerm = document.getElementById('searchBar').value.toLowerCase();
 
-  for(const e of entries){
-    if(searchTerm && !e.missione.toLowerCase().includes(searchTerm) && !(e.nome||'').toLowerCase().includes(searchTerm)) continue;
+  for(const e of entries){
+    if(searchTerm && !e.missione.toLowerCase().includes(searchTerm) && !(e.nome||'').toLowerCase().includes(searchTerm)) continue;
 
-    const tr = document.createElement('tr');
-    // Formatta la data in modo leggibile (GG/MM/AAAA)
-    const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
+    const tr = document.createElement('tr');
+    const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
 
-    // I DATI SONO ORA CORRETTAMENTE ALLINEATI NELLE LORO CELLE
-    tr.innerHTML = `
-      <td>${escapeHtml(e.missione)}</td>
-      <td>${escapeHtml(dataIt)}</td>
-      <td>${escapeHtml(e.stato)}</td>
-      <td>${escapeHtml(e.firmaRef)}</td>
-      <td>
-        <button onclick="editEntry('${e.id}')">Modifica</button>
-        <button onclick="deleteEntry('${e.id}')">Elimina</button>
-        <button onclick="exportSinglePDF('${e.id}')">PDF</button>
-      </td>
-    `;
+    tr.innerHTML = `
+      <td>${escapeHtml(e.missione)}</td>
+      <td>${escapeHtml(dataIt)}</td>
+      <td>${escapeHtml(e.stato)}</td>
+      <td>${escapeHtml(e.firmaRef)}</td>
+      <td>
+        <button onclick="editEntry('${e.id}')">Modifica</button>
+        <button onclick="deleteEntry('${e.id}')">Elimina</button>
+        <button onclick="exportSinglePDF('${e.id}')">PDF</button>
+      </td>
+    `;
 
-    tbody.appendChild(tr);
-  }
+    tbody.appendChild(tr);
+  }
 }
 
-// SEARCH FILTER (Invariato)
+// SEARCH FILTER
 document.getElementById('searchBar').addEventListener('input', renderTable);
 
-// EDIT / DELETE (Invariato)
-function editEntry(id){ 
-    const e=entries.find(x=>x.id===id); 
-    if(!e) return; 
-    editingId=id; 
-    for(const key in e){ 
-        if(document.getElementById(key)) document.getElementById(key).value=e[key]; 
-    } 
-    showSection('createDiv'); 
-    notify('Modifiche abilitate','warning'); 
-    window.scrollTo({top:0,behavior:'smooth'}); 
-}
+// EDIT / DELETE
+function editEntry(id){ const e=entries.find(x=>x.id===id); if(!e) return; editingId=id; for(const key in e){ if(document.getElementById(key)) document.getElementById(key).value=e[key]; } notify('Modifiche abilitate','warning'); window.scrollTo({top:0,behavior:'smooth'}); }
 async function deleteEntry(id){ if(!confirm('Eliminare scheda?')) return; try{ await db.collection("schede_TI").doc(id).delete(); notify('Scheda eliminata','error'); } catch(err){ console.error(err); } }
 
-// PDF EXPORT (Invariato dall'ultima correzione sul singolo foglio)
+// PDF EXPORT
 async function exportSinglePDF(id){
-  const e = entries.find(x => x.id === id); 
-  if(!e) return;
+  const e = entries.find(x => x.id === id); 
+  if(!e) return;
 
-  const pdfDiv = document.createElement('div');
-  pdfDiv.style.width = '800px'; 
-  pdfDiv.style.padding = '8px';
-  pdfDiv.style.background = '#fff';
-  pdfDiv.style.fontFamily = 'Arial, sans-serif';
-  pdfDiv.style.fontSize = '11px';
-  pdfDiv.style.lineHeight = '1.3';
-  pdfDiv.style.color = '#000';
-  pdfDiv.style.boxSizing = 'border-box';
-  pdfDiv.style.wordWrap = 'break-word';
-  pdfDiv.style.margin = '0 auto'; 
+  const pdfDiv = document.createElement('div');
+  pdfDiv.style.width = '800px';
+  pdfDiv.style.padding = '8px';
+  pdfDiv.style.background = '#fff';
+  pdfDiv.style.fontFamily = 'Arial, sans-serif';
+  pdfDiv.style.fontSize = '11px';
+  pdfDiv.style.lineHeight = '1.3';
+  pdfDiv.style.color = '#000';
+  pdfDiv.style.boxSizing = 'border-box';
+  pdfDiv.style.wordWrap = 'break-word';
 
+  const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
 
-  const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
+  function getFontSize(str, maxLength=150){ 
+    return str && str.length > maxLength ? '10px' : '11px'; 
+  }
 
-  function getFontSize(str, maxLength=150){ 
-    return str && String(str).length > maxLength ? '10px' : '11px'; 
-  }
-    
-    // Funzione per generare una riga di tabella SOLO se il valore non è vuoto
-    function generateTableRow(label, value, isLong=false){
-        if(!value || String(value).trim() === '' || (String(value).trim() === '0€' && label === 'Prezzo')) return '';
-        const escapedValue = escapeHtml(value);
-        const style = isLong ? `style="font-size:${getFontSize(escapedValue)}; word-wrap:break-word;"` : '';
-        return `<tr><td style="font-weight:bold; width: 30%;">${label}</td><td ${style}>${escapedValue}</td></tr>`;
-    }
+  pdfDiv.innerHTML = `
+    <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">
+      STATO: ${escapeHtml(e.stato)}
+    </div>
+    <h1 style="text-align:center;font-weight:bold;font-size:13px;margin-bottom:5px;">Scheda Paziente TI</h1>
 
-    // Funzione per generare il blocco Partenza/Arrivo
-    function generateLocationBlock(title, citta, via, num, ascensore){
-        if(!citta && !via && !num && !ascensore) return '';
-        let content = `
-            <td style="width:50%; vertical-align:top; font-weight:bold;">
-                ${title}<br>
-        `;
-        if(citta) content += `Città: <span style="font-weight:normal">${escapeHtml(citta)}</span><br>`;
-        if(via) content += `Via: <span style="font-weight:normal">${escapeHtml(via)}</span><br>`;
-        if(num) content += `Piano: <span style="font-weight:normal">${escapeHtml(num)}</span><br>`;
-        if(ascensore) content += `Ascensore: <span style="font-weight:normal">${escapeHtml(ascensore)}</span>`;
-        content += `</td>`;
-        return content;
-    }
-    
-    let infoPazienteTable = '';
-    infoPazienteTable += generateTableRow('Missione', e.missione);
-    infoPazienteTable += generateTableRow('Data', dataIt);
-    infoPazienteTable += generateTableRow('Nome e Cognome', e.nome);
-    infoPazienteTable += generateTableRow('Età', e.eta);
-    infoPazienteTable += generateTableRow('Data di nascita', e.dob);
-    infoPazienteTable += generateTableRow('Corporatura', e.corporatura);
-    infoPazienteTable += generateTableRow('Patologia', e.patologia, true);
-    infoPazienteTable += generateTableRow('Motivo trasporto', e.motivo);
+    <h2>Info paziente</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
+      <tr><td style="font-weight:bold;">Missione</td><td>${escapeHtml(e.missione)}</td></tr>
+      <tr><td style="font-weight:bold;">Data</td><td>${escapeHtml(dataIt)}</td></tr>
+      <tr><td style="font-weight:bold;">Nome e Cognome</td><td>${escapeHtml(e.nome)}</td></tr>
+      <tr><td style="font-weight:bold;">Età</td><td>${escapeHtml(e.eta)}</td></tr>
+      <tr><td style="font-weight:bold;">Data di nascita</td><td>${escapeHtml(e.dob)}</td></tr>
+      <tr><td style="font-weight:bold;">Corporatura</td><td>${escapeHtml(e.corporatura)}</td></tr>
+      <tr><td style="font-weight:bold;">Patologia</td>
+          <td style="font-size:${getFontSize(e.patologia)}; word-wrap:break-word;">${escapeHtml(e.patologia)}</td></tr>
+      <tr><td style="font-weight:bold;">Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
+    </table>
 
-    let pdcTable = '';
-    pdcTable += generateTableRow('PDC', e.pdc);
-    pdcTable += generateTableRow('Telefono', e.tel);
+    <h2>Partenza / Arrivo</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
+      <tr>
+        <td style="width:50%; vertical-align:top; font-weight:bold;">
+          Partenza<br>
+          Città: <span style="font-weight:normal">${escapeHtml(e.partenzaCitta)}</span><br>
+          Via: <span style="font-weight:normal">${escapeHtml(e.partenzaVia)}</span><br>
+          Piano: <span style="font-weight:normal">${escapeHtml(e.partenzaNum)}</span><br>
+          Ascensore: <span style="font-weight:normal">${escapeHtml(e.partenzaAscensore)}</span>
+        </td>
+        <td style="width:50%; vertical-align:top; font-weight:bold;">
+          Arrivo<br>
+          Città: <span style="font-weight:normal">${escapeHtml(e.arrivoCitta)}</span><br>
+          Via: <span style="font-weight:normal">${escapeHtml(e.arrivoVia)}</span><br>
+          Piano: <span style="font-weight:normal">${escapeHtml(e.arrivoNum)}</span><br>
+          Ascensore: <span style="font-weight:normal">${escapeHtml(e.arrivoAscensore)}</span>
+        </td>
+      </tr>
+    </table>
 
-    let teamTable = '';
-    teamTable += generateTableRow('Autista', e.autista);
-    teamTable += generateTableRow('1° Soccorritore', e.socc1);
-    teamTable += generateTableRow('2° Soccorritore', e.socc2);
-    teamTable += generateTableRow('3° Soccorritore', e.socc3);
-    teamTable += generateTableRow('Tirocinante', e.tiro);
+    <h2>PDC</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
+      <tr><td style="font-weight:bold;">PDC</td><td>${escapeHtml(e.pdc)}</td></tr>
+      <tr><td style="font-weight:bold;">Telefono</td><td>${escapeHtml(e.tel)}</td></tr>
+    </table>
 
-    let infoTrasportoTable = '';
-    infoTrasportoTable += generateTableRow('Arrivo in sede', e.arrivoSede);
-    infoTrasportoTable += generateTableRow('Arrivo dal paziente', e.arrivoPaz);
-    infoTrasportoTable += generateTableRow('Arrivo a destinazione', e.arrivoDest);
-    infoTrasportoTable += generateTableRow('Mezzo assegnato', e.mezzo);
-    infoTrasportoTable += generateTableRow('Prezzo', e.prezzo);
-    infoTrasportoTable += generateTableRow('Presidi necessari', e.presidi);
-    infoTrasportoTable += generateTableRow('Note', e.note, true);
+    <h2>Team</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
+      <tr><td style="font-weight:bold;">Autista</td><td>${escapeHtml(e.autista)}</td></tr>
+      <tr><td style="font-weight:bold;">1° Soccorritore</td><td>${escapeHtml(e.socc1)}</td></tr>
+      <tr><td style="font-weight:bold;">2° Soccorritore</td><td>${escapeHtml(e.socc2)}</td></tr>
+      <tr><td style="font-weight:bold;">3° Soccorritore</td><td>${escapeHtml(e.socc3)}</td></tr>
+      <tr><td style="font-weight:bold;">Tirocinante</td><td>${escapeHtml(e.tiro)}</td></tr>
+    </table>
 
+    <h2>Info trasporto</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
+      <tr><td style="font-weight:bold;">Arrivo in sede</td><td>${escapeHtml(e.arrivoSede)}</td></tr>
+      <tr><td style="font-weight:bold;">Arrivo dal paziente</td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
+      <tr><td style="font-weight:bold;">Arrivo a destinazione</td><td>${escapeHtml(e.arrivoDest)}</td></tr>
+      <tr><td style="font-weight:bold;">Mezzo assegnato</td><td>${escapeHtml(e.mezzo)}</td></tr>
+      <tr><td style="font-weight:bold;">Prezzo</td><td>${escapeHtml(e.prezzo)}</td></tr>
+      <tr><td style="font-weight:bold;">Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
+      <tr><td style="font-weight:bold;">Note</td>
+          <td style="font-size:${getFontSize(e.note)}; word-wrap:break-word;">${escapeHtml(e.note)}</td></tr>
+      <tr>
+    </table>
 
-  pdfDiv.innerHTML = `
-    <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">
-      STATO: ${escapeHtml(e.stato)}
-    </div>
-    <h1 style="text-align:center;font-weight:bold;font-size:13px;margin-bottom:5px;">Scheda Paziente TI - N° ${escapeHtml(e.missione)}</h1>
+    <div style="text-align:right; color:red; font-weight:bold; margin-top:5px;">
+      Generato il: ${new Date(e.timestamp).toLocaleString('it-IT')}
+    </div>
+  `;
 
-    ${infoPazienteTable ? `<h2>Info paziente</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;"><tbody>${infoPazienteTable}</tbody></table>` : ''}
+  pdfDiv.querySelectorAll('table').forEach(t => {
+    t.style.tableLayout = 'fixed';
+    t.style.wordWrap = 'break-word';
+  });
 
-    ${e.partenzaCitta||e.partenzaVia||e.partenzaNum||e.partenzaAscensore||e.arrivoCitta||e.arrivoVia||e.arrivoNum||e.arrivoAscensore ? 
-        `<h2>Partenza / Arrivo</h2>
-        <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
-            <tr>
-                ${generateLocationBlock('Partenza', e.partenzaCitta, e.partenzaVia, e.partenzaNum, e.partenzaAscensore)}
-                ${generateLocationBlock('Arrivo', e.arrivoCitta, e.arrivoVia, e.arrivoNum, e.arrivoAscensore)}
-            </tr>
-        </table>` : ''}
+  document.body.appendChild(pdfDiv);
 
-    ${pdcTable ? `<h2>PDC</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;"><tbody>${pdcTable}</tbody></table>` : ''}
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p','mm','a4');
+  const scale = 190 / pdfDiv.offsetWidth;
 
-    ${teamTable ? `<h2>Team</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;"><tbody>${teamTable}</tbody></table>` : ''}
+  await pdf.html(pdfDiv, {
+      callback: function(pdf){
+          pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
+          notify('PDF generato, download avviato','success');
+      },
+      x: 10,
+      y: 10,
+      width: pdfDiv.offsetWidth,
+      html2canvas: { scale: scale }
+  });
 
-    ${infoTrasportoTable ? `<h2>Info trasporto</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;"><tbody>${infoTrasportoTable}</tbody></table>` : ''}
-    
-    ${e.firmaRef ? `<div style="margin-top:10px;"><span style="font-weight:bold;">Operatore che ha compilato la scheda:</span> ${escapeHtml(e.firmaRef)}</div>` : ''}
-
-    <div style="text-align:right; color:red; font-weight:bold; margin-top:5px;">
-      Generato il: ${new Date().toLocaleString('it-IT')}
-    </div>
-  `;
-  pdfDiv.querySelectorAll('table').forEach(t => { t.style.tableLayout = 'fixed'; t.style.wordWrap = 'break-word'; });
-
-  document.body.appendChild(pdfDiv);
-
-    // LOGICA PDF per FORZARE UNA SOLA PAGINA
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const pageWidth = 210; 
-  const pageHeight = 297; 
-  const margin = 10;
-  const printableWidth = pageWidth - 2 * margin; 
-
-  // 1. Render content to canvas with high resolution
-  const canvas = await html2canvas(pdfDiv, {
-      scale: 3, 
-      useCORS: true,
-      logging: false
-  });
-  document.body.removeChild(pdfDiv); 
-
-  // 2. Convert canvas to image data
-  const imgData = canvas.toDataURL('image/jpeg', 1.0);
-
-  // 3. Calculate dimensions to fit in printable area
-  let imgWidth = printableWidth; 
-  let imgHeight = (canvas.height * imgWidth) / canvas.width; 
-
-  // 4. Check if content fits vertically. If not, scale down.
-  if (imgHeight > (pageHeight - 2 * margin)) {
-      const scaleFactor = (pageHeight - 2 * margin) / imgHeight;
-      imgWidth *= scaleFactor;
-      imgHeight = (pageHeight - 2 * margin);
-      const x = margin + (printableWidth - imgWidth) / 2;
-      pdf.addImage(imgData, 'JPEG', x, margin, imgWidth, imgHeight);
-      console.warn('Il contenuto è stato ridimensionato per adattarsi ad una singola pagina.');
-  } else {
-      const x = margin + (printableWidth - imgWidth) / 2;
-      pdf.addImage(imgData, 'JPEG', x, margin, imgWidth, imgHeight);
-  }
-
-  pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
-  notify('PDF generato, download avviato','success');
+  document.body.removeChild(pdfDiv);
 }
 
 </script>
