@@ -25,13 +25,11 @@ button {
   border:none; 
   border-radius:6px; 
   cursor:pointer; 
-  background:#b33a3a; /* rosso moderato */ 
+  background:#b33a3a; 
   color:#fff; 
   transition:0.2s; 
 }
-button:hover { 
-  background:#7a1e1e; /* rosso più scuro */ 
-}
+button:hover { background:#7a1e1e; }
 
 /* Logout rosso */
 #logoutBtn { 
@@ -45,9 +43,7 @@ button:hover {
   border-radius:6px; 
   cursor:pointer; 
 }
-#logoutBtn:hover { 
-  background:#7a1e1e; 
-}
+#logoutBtn:hover { background:#7a1e1e; }
 
 table { width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
 th, td { border:1px solid #ddd; padding:8px; text-align:left; }
@@ -61,7 +57,7 @@ tr:hover { background:#f1f5f9; }
 footer { text-align:center; margin-top:20px; font-size:12px; color:#555; }
 header img.logo { display:block; margin:0 auto; }
 
-/* Notifiche centrali */
+/* Notifiche */
 #notifications { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:10px; align-items:center; }
 .notification { padding:12px 20px; border-radius:8px; color:#fff; min-width:250px; position:relative; font-weight:bold; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.2); cursor:pointer; opacity:0; transform:translateY(-20px); transition:0.5s; }
 .notification.show { opacity:0.95; transform:translateY(0); }
@@ -81,15 +77,12 @@ header img.logo { display:block; margin:0 auto; }
   <h2>Benvenuto nel sistema di creazione schede TI</h2>
   <p>Effettua l'accesso con le credenziali che ti sono state affidate</p>
   <input type="email" id="loginEmail" placeholder="Email"><br>
-<input type="password" id="loginPassword" placeholder="Password"><br>
-<label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:14px;">
-  <input type="checkbox" id="rememberMe" style="vertical-align:middle; width:16px; height:16px;">
-  Ricordami
-</label>
-
-
-<button onclick="login()">Accedi</button>
-
+  <input type="password" id="loginPassword" placeholder="Password"><br>
+  <label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:14px;">
+    <input type="checkbox" id="rememberMe" style="vertical-align:middle; width:16px; height:16px;">
+    Ricordami
+  </label>
+  <button onclick="login()">Accedi</button>
   <footer>© Antonio Troiani, Tutti i diritti riservati</footer>
 </div>
 
@@ -110,19 +103,50 @@ header img.logo { display:block; margin:0 auto; }
     <div><label>Data di nascita<input type="date" id="dob"></label></div>
     <div><label>Corporatura<input type="number" id="corporatura" min="0" step="1"></label></div>
     <div class="full"><label>Patologia<textarea id="patologia"></textarea></label></div>
-   <div class="full">
-  <label>Motivo trasporto
-    <select id="motivo">
-      <option value="">-- Seleziona motivo --</option>
-      <option>Ricovero</option>
-      <option>Dimissione</option>
-      <option>Visita di controllo A/R</option>
-      <option>Trasporto generico</option>
-      <option>Accompagnamento</option>
-      <option>Visita tra ospedali</option>
-    </select>
-  </label>
-</div>
+    <div class="full">
+      <label>Motivo trasporto
+        <select id="motivo">
+          <option value="">-- Seleziona motivo --</option>
+          <option>Ricovero</option>
+          <option>Dimissione</option>
+          <option>Visita di controllo A/R</option>
+          <option>Trasporto generico</option>
+          <option>Accompagnamento</option>
+          <option>Visita tra ospedali</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Partenza -->
+    <div class="section-title">Partenza</div>
+    <div><label>Città di partenza<input id="cittaPartenza"></label></div>
+    <div><label>Via di partenza<input id="viaPartenza"></label></div>
+    <div><label>Numero civico<input id="civicoPartenza"></label></div>
+    <div>
+      <label>Ascensore/Montacarichi
+        <select id="ascensorePartenza">
+          <option value="">-- Seleziona --</option>
+          <option>Presente</option>
+          <option>Assente</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Arrivo -->
+    <div class="section-title">Arrivo</div>
+    <div><label>Città di arrivo<input id="cittaArrivo"></label></div>
+    <div><label>Via di arrivo<input id="viaArrivo"></label></div>
+    <div><label>Numero civico<input id="civicoArrivo"></label></div>
+    <div>
+      <label>Ascensore/Montacarichi
+        <select id="ascensoreArrivo">
+          <option value="">-- Seleziona --</option>
+          <option>Presente</option>
+          <option>Assente</option>
+        </select>
+      </label>
+    </div>
+
     <div><label>PDC<input id="pdc" type="text"></label></div>
     <div><label>Telefono PDC<input id="tel" type="number"></label></div>
 
@@ -150,6 +174,8 @@ header img.logo { display:block; margin:0 auto; }
     <div><label>Prezzo<input id="prezzo" type="text" placeholder="0.00"></label></div>
     <div class="full"><label>Presidi necessari<textarea id="presidi"></textarea></label></div>
     <div class="full"><label>Note<textarea id="note"></textarea></label></div>
+    <div class="full"><label>Link ricevuta<input id="linkRicevuta" type="url" placeholder="https://..."></label></div>
+
     <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1">
         <label>Operatore che ha compilato la scheda</label>
@@ -191,7 +217,7 @@ header img.logo { display:block; margin:0 auto; }
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <script>
-// CONFIG FIREBASE
+// FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyBCyJjpDuixqjC86U93B7naAWhIu0CZEq8",
   authDomain: "schede-ti.firebaseapp.com",
@@ -203,15 +229,13 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
-
-// Imposta la persistenza del login
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-// UTILITY
+// Utility
 function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 
-// NOTIFICHE
+// Notifiche
 function notify(msg,type='success'){
   const div=document.createElement('div');
   div.className='notification '+type;
@@ -221,7 +245,7 @@ function notify(msg,type='success'){
   setTimeout(()=>{ div.style.opacity=0; div.style.transform='translateY(-20px)'; setTimeout(()=>{ if(div.parentElement) div.remove() },500); },5000);
 }
 
-// LOGOUT AUTOMATICO
+// Logout automatico
 let inactivityTimer;
 function resetInactivity(){ 
   clearTimeout(inactivityTimer);
@@ -232,25 +256,20 @@ document.onkeypress = resetInactivity;
 document.onclick = resetInactivity;
 document.onscroll = resetInactivity;
 
-// LOGIN / LOGOUT
+// Login/logout
 function login(){
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const remember = document.getElementById('rememberMe').checked;
-
-  const persistence = remember 
-    ? firebase.auth.Auth.Persistence.LOCAL   // rimane dopo chiusura
-    : firebase.auth.Auth.Persistence.SESSION; // termina con la chiusura
-
+  const persistence = remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
   auth.setPersistence(persistence)
     .then(() => auth.signInWithEmailAndPassword(email,password))
     .then(() => { notify('Accesso effettuato','success'); })
     .catch(err => notify(err.message,'error'));
 }
+function logout(){ auth.signOut().then(()=>{ notify('Logout eseguito','error'); }); }
 
-function logout(){ auth.signOut().then(()=>{ notify('Logout eseguito, prego riaccedi','error'); }); }
-
-// RUNTIME
+// Runtime
 let entries=[], editingId=null;
 auth.onAuthStateChanged(user=>{
   if(user){
@@ -264,7 +283,7 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-// REALTIME LISTENER
+// Listener realtime
 function setupRealtimeListener(){
   db.collection("schede_TI").orderBy("timestamp","desc")
     .onSnapshot(snapshot=>{
@@ -273,7 +292,7 @@ function setupRealtimeListener(){
     });
 }
 
-// FORM DATA
+// Form data
 function getFormData(){
   let prezzoVal = parseFloat(document.getElementById('prezzo').value.replace(',','.')) || 0;
   prezzoVal = prezzoVal.toFixed(2)+'€';
@@ -287,6 +306,14 @@ function getFormData(){
     corporatura: document.getElementById('corporatura').value,
     patologia: document.getElementById('patologia').value,
     motivo: document.getElementById('motivo').value,
+    cittaPartenza: document.getElementById('cittaPartenza').value,
+    viaPartenza: document.getElementById('viaPartenza').value,
+    civicoPartenza: document.getElementById('civicoPartenza').value,
+    ascensorePartenza: document.getElementById('ascensorePartenza').value,
+    cittaArrivo: document.getElementById('cittaArrivo').value,
+    viaArrivo: document.getElementById('viaArrivo').value,
+    civicoArrivo: document.getElementById('civicoArrivo').value,
+    ascensoreArrivo: document.getElementById('ascensoreArrivo').value,
     pdc: document.getElementById('pdc').value,
     tel: document.getElementById('tel').value,
     autista: document.getElementById('autista').value,
@@ -301,125 +328,152 @@ function getFormData(){
     prezzo: prezzoVal,
     presidi: document.getElementById('presidi').value,
     note: document.getElementById('note').value,
+    linkRicevuta: document.getElementById('linkRicevuta').value,
     firmaRef: document.getElementById('firmaRef').value,
     stato: document.getElementById('stato').value,
-    timestamp: new Date().toISOString()
+    timestamp: Date.now()
   };
 }
+function setFormData(e){
+  editingId=e.id;
+  document.getElementById('missione').value=e.missione;
+  document.getElementById('data').value=e.data;
+  document.getElementById('nome').value=e.nome;
+  document.getElementById('eta').value=e.eta;
+  document.getElementById('dob').value=e.dob;
+  document.getElementById('corporatura').value=e.corporatura;
+  document.getElementById('patologia').value=e.patologia;
+  document.getElementById('motivo').value=e.motivo;
+  document.getElementById('cittaPartenza').value=e.cittaPartenza;
+  document.getElementById('viaPartenza').value=e.viaPartenza;
+  document.getElementById('civicoPartenza').value=e.civicoPartenza;
+  document.getElementById('ascensorePartenza').value=e.ascensorePartenza;
+  document.getElementById('cittaArrivo').value=e.cittaArrivo;
+  document.getElementById('viaArrivo').value=e.viaArrivo;
+  document.getElementById('civicoArrivo').value=e.civicoArrivo;
+  document.getElementById('ascensoreArrivo').value=e.ascensoreArrivo;
+  document.getElementById('pdc').value=e.pdc;
+  document.getElementById('tel').value=e.tel;
+  document.getElementById('autista').value=e.autista;
+  document.getElementById('socc1').value=e.socc1;
+  document.getElementById('socc2').value=e.socc2;
+  document.getElementById('socc3').value=e.socc3;
+  document.getElementById('tiro').value=e.tiro;
+  document.getElementById('arrivoSede').value=e.arrivoSede;
+  document.getElementById('arrivoPaz').value=e.arrivoPaz;
+  document.getElementById('arrivoDest').value=e.arrivoDest;
+  document.getElementById('mezzo').value=e.mezzo;
+  document.getElementById('prezzo').value=e.prezzo.replace('€','');
+  document.getElementById('presidi').value=e.presidi;
+  document.getElementById('note').value=e.note;
+  document.getElementById('linkRicevuta').value=e.linkRicevuta;
+  document.getElementById('firmaRef').value=e.firmaRef;
+  document.getElementById('stato').value=e.stato;
+}
+function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); }
 
-// PRICE INPUT
-const prezzoInput = document.getElementById('prezzo');
-prezzoInput.addEventListener('input',()=>{ prezzoInput.value = prezzoInput.value.replace(/[^0-9.,]/g,''); });
-
-// SAVE
-async function saveEntry(){
-  const data = getFormData();
-  if(!data.missione){ alert('Compila Missione'); return; }
-  try{
-    await db.collection("schede_TI").doc(data.id).set(data);
-    if(editingId) notify('Scheda aggiornata','success'); 
-    else notify('Scheda salvata','success');
+// Salvataggio
+function saveEntry(){
+  const entry=getFormData();
+  db.collection("schede_TI").doc(entry.id).set(entry).then(()=>{
+    notify('Scheda salvata','success');
     resetForm();
-  } 
-  catch(err){ console.error(err); notify('Errore nel salvataggio','error'); }
+  }).catch(err=>notify(err.message,'error'));
 }
 
-// RESET
-function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); notify('Scheda pulita','error'); }
-
-// RENDER TABLE
+// Tabella
 function renderTable(){
   const tbody=document.querySelector('#dataTable tbody');
   tbody.innerHTML='';
-  for(const e of entries){
+  entries.forEach(e=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${escapeHtml(e.missione)}</td><td>${escapeHtml(e.data)}</td><td>${escapeHtml(e.stato)}</td>
-    <td>
-      <button onclick="editEntry('${e.id}')">Modifica</button>
-      <button onclick="deleteEntry('${e.id}')">Elimina</button>
-      <button onclick="exportSinglePDF('${e.id}')">PDF</button>
-    </td>`;
+    tr.innerHTML=`
+      <td>${escapeHtml(e.missione)}</td>
+      <td>${e.data ? new Date(e.data).toLocaleDateString("it-IT") : ""}</td>
+      <td>${escapeHtml(e.stato)}</td>
+      <td>
+        <button onclick="setFormData(entries.find(x=>x.id==='${e.id}'))">Modifica</button>
+        <button onclick="deleteEntry('${e.id}')">Elimina</button>
+        <button onclick="exportSinglePDF('${e.id}')">PDF</button>
+      </td>`;
     tbody.appendChild(tr);
-  }
+  });
 }
+function deleteEntry(id){ if(confirm('Sei sicuro di voler eliminare questa scheda?')){ db.collection("schede_TI").doc(id).delete().then(()=>notify('Scheda eliminata','warning')); } }
 
-// EDIT / DELETE
-function editEntry(id){
-  const e=entries.find(x=>x.id===id); if(!e) return; editingId=id;
-  for(const key in e){ if(document.getElementById(key)) document.getElementById(key).value=e[key]; }
-  notify('Modifiche abilitate','warning');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-async function deleteEntry(id){
-  if(!confirm('Eliminare scheda?')) return;
-  try{ await db.collection("schede_TI").doc(id).delete(); notify('Scheda eliminata','error'); } catch(err){ console.error(err); }
-}
-
-// PDF EXPORT
+// Export PDF singolo
 async function exportSinglePDF(id){
-  const e = entries.find(x=>x.id===id); if(!e) return;
-  const pdfDiv = document.createElement('div');
-  pdfDiv.style.width='800px'; pdfDiv.style.padding='10px'; pdfDiv.style.background='#fff'; pdfDiv.style.fontFamily='Arial, sans-serif'; pdfDiv.style.fontSize='12px';
-  pdfDiv.innerHTML = `
-    <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
-    <h1 style="text-align:center;font-weight:bold;font-size:18px;">Scheda Paziente TI</h1>
-    <h2 style="font-weight:bold;font-size:14px;">Info paziente</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
+  const e = entries.find(x=>x.id===id);
+  if(!e) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'p', unit:'pt', format:'a4' });
+  const img = new Image();
+  img.src = "https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/802edc62968aa9566f7685ac09524d39(1).png";
+  await new Promise(r=>{ img.onload=r; });
+  doc.addImage(img,'PNG',40,20,80,80);
+  doc.setFontSize(18); doc.text("Scheda Paziente TI",140,60);
+  let html = `
+    <h3>Info paziente</h3>
+    <table border="1" cellspacing="0" cellpadding="4">
       <tr><td>Missione</td><td>${escapeHtml(e.missione)}</td></tr>
-      <tr><td>Data</td><td>${escapeHtml(e.data)}</td></tr>
-      <tr><td>Nome e Cognome</td><td>${escapeHtml(e.nome)}</td></tr>
+      <tr><td>Data</td><td>${e.data ? new Date(e.data).toLocaleDateString("it-IT") : ""}</td></tr>
+      <tr><td>Nome</td><td>${escapeHtml(e.nome)}</td></tr>
       <tr><td>Età</td><td>${escapeHtml(e.eta)}</td></tr>
       <tr><td>Data di nascita</td><td>${escapeHtml(e.dob)}</td></tr>
       <tr><td>Corporatura</td><td>${escapeHtml(e.corporatura)}</td></tr>
       <tr><td>Patologia</td><td>${escapeHtml(e.patologia)}</td></tr>
-      <tr><td>Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
-      <tr><td>PDC</td><td>${escapeHtml(e.pdc)}</td></tr>
-      <tr><td>Telefono PDC</td><td>${escapeHtml(e.tel)}</td></tr>
+      <tr><td>Motivo</td><td>${escapeHtml(e.motivo)}</td></tr>
     </table>
-    <h2 style="font-weight:bold;font-size:14px;">Team</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
-      <tr><td>Autista Soccorritore</td><td>${escapeHtml(e.autista)}</td></tr>
-      <tr><td>1° Soccorritore</td><td>${escapeHtml(e.socc1)}</td></tr>
-      <tr><td>2° Soccorritore</td><td>${escapeHtml(e.socc2)}</td></tr>
-      <tr><td>3° Soccorritore</td><td>${escapeHtml(e.socc3)}</td></tr>
+    <h3>Partenza</h3>
+    <table border="1" cellspacing="0" cellpadding="4">
+      <tr><td>Città</td><td>${escapeHtml(e.cittaPartenza)}</td></tr>
+      <tr><td>Via</td><td>${escapeHtml(e.viaPartenza)}</td></tr>
+      <tr><td>Civico</td><td>${escapeHtml(e.civicoPartenza)}</td></tr>
+      <tr><td>Ascensore</td><td>${escapeHtml(e.ascensorePartenza)}</td></tr>
+    </table>
+    <h3>Arrivo</h3>
+    <table border="1" cellspacing="0" cellpadding="4">
+      <tr><td>Città</td><td>${escapeHtml(e.cittaArrivo)}</td></tr>
+      <tr><td>Via</td><td>${escapeHtml(e.viaArrivo)}</td></tr>
+      <tr><td>Civico</td><td>${escapeHtml(e.civicoArrivo)}</td></tr>
+      <tr><td>Ascensore</td><td>${escapeHtml(e.ascensoreArrivo)}</td></tr>
+    </table>
+    <h3>Team</h3>
+    <table border="1" cellspacing="0" cellpadding="4">
+      <tr><td>Autista</td><td>${escapeHtml(e.autista)}</td></tr>
+      <tr><td>Soccorritore 1</td><td>${escapeHtml(e.socc1)}</td></tr>
+      <tr><td>Soccorritore 2</td><td>${escapeHtml(e.socc2)}</td></tr>
+      <tr><td>Soccorritore 3</td><td>${escapeHtml(e.socc3)}</td></tr>
       <tr><td>Tirocinante</td><td>${escapeHtml(e.tiro)}</td></tr>
     </table>
-    <h2 style="font-weight:bold;font-size:14px;">Info trasporto</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
+    <h3>Trasporto</h3>
+    <table border="1" cellspacing="0" cellpadding="4">
       <tr><td>Arrivo in sede</td><td>${escapeHtml(e.arrivoSede)}</td></tr>
       <tr><td>Arrivo dal paziente</td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
       <tr><td>Arrivo a destinazione</td><td>${escapeHtml(e.arrivoDest)}</td></tr>
-      <tr><td>Mezzo assegnato</td><td>${escapeHtml(e.mezzo)}</td></tr>
+      <tr><td>Mezzo</td><td>${escapeHtml(e.mezzo)}</td></tr>
       <tr><td>Prezzo</td><td>${escapeHtml(e.prezzo)}</td></tr>
-      <tr><td>Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
+      <tr><td>Presidi</td><td>${escapeHtml(e.presidi)}</td></tr>
       <tr><td>Note</td><td>${escapeHtml(e.note)}</td></tr>
+      <tr><td>Link ricevuta</td><td>${escapeHtml(e.linkRicevuta)}</td></tr>
     </table>
-    <h2 style="font-weight:bold;font-size:14px;">Operatore responsabile della compilazione:</h2>
-    <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
-    <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString()}</p>
-  `;
-  document.body.appendChild(pdfDiv);
-  const canvas = await html2canvas(pdfDiv, {scale:2});
-  document.body.removeChild(pdfDiv);
-  const imgData = canvas.toDataURL('image/png');
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p','mm','a4');
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * pageWidth) / canvas.width;
-  let scaleFactor = imgHeight > pageHeight ? pageHeight/imgHeight : 1;
-  pdf.addImage(imgData,'PNG',0,0,imgWidth*scaleFactor,imgHeight*scaleFactor);
-  pdf.save(`scheda_${e.missione}_${e.data||''}.pdf`);
-  notify('PDF generato, download avviato','success');
+    <h3>Altro</h3>
+    <table border="1" cellspacing="0" cellpadding="4">
+      <tr><td>PDC</td><td>${escapeHtml(e.pdc)}</td></tr>
+      <tr><td>Telefono</td><td>${escapeHtml(e.tel)}</td></tr>
+      <tr><td>Firma ref</td><td>${escapeHtml(e.firmaRef)}</td></tr>
+      <tr><td>Stato</td><td>${escapeHtml(e.stato)}</td></tr>
+    </table>
+    <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString("it-IT")}</p>`;
+  await doc.html(html,{x:40,y:120,html2canvas:{scale:0.45},autoPaging:"text"});
+  doc.save(`scheda_${e.missione}.pdf`);
 }
 
-function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
+// Export multiplo
+function exportPDF(){
+  if(entries.length===0){ notify('Nessuna scheda da esportare','error'); return; }
+  entries.forEach(e=>exportSinglePDF(e.id));
+}
 </script>
 </body>
 </html>
-
-
-
-
-
