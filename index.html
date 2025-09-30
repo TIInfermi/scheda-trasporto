@@ -277,18 +277,18 @@ footer { text-align:center; margin-top:20px; font-size:12px; color:#555; }
         </form>
     </div>
 
-  <div id="pdfArea">
-    <h2>Elenco schede TI</h2>
-    <input type="text" id="searchBar" placeholder="Cerca scheda...">
-    <div id="dataTableWrapper">
-      <table id="dataTable">
-        <thead>
-          <tr><th>Missione N°</th><th>Data</th><th>Stato</th><th>Operatore</th><th>Azioni</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <div id="viewDiv" style="display:none;">
+        <h2 style="text-align:center; margin-top:0;">Elenco schede TI</h2>
+        <input type="text" id="searchBar" placeholder="Cerca scheda...">
+        <div id="dataTableWrapper">
+            <table id="dataTable">
+                <thead>
+                    <tr><th>Missione N°</th><th>Data</th><th>Stato</th><th>Operatore</th><th>Azioni</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
-  </div>
 
   <footer>© Antonio Troiani, Tutti i diritti riservati</footer>
 </div>
@@ -621,4 +621,3 @@ async function exportSinglePDF(id){
 </script>
 </body>
 </html>
-
