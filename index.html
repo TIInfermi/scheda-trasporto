@@ -9,26 +9,73 @@ body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin:0; padding:16p
 .container { max-width: 950px; margin:0 auto; background:#fff; padding:24px; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.1); position:relative; min-height:calc(100vh - 40px); }
 header { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
 header img { height:60px; width:auto; }
-header h1 { font-size:25px; text-align:center; flex:1; margin:0; font-weight:bold; }
+header h1 { 
+    font-size:25px; 
+    text-align:center; /* Centrato come richiesto */
+    flex:1; 
+    margin:0; 
+    font-weight:bold; 
+}
 form { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
 label { display:block; font-size:14px; margin-bottom:4px; font-weight:500; }
 input, select, textarea { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-sizing:border-box; }
 textarea { min-height:60px; }
 .full { grid-column:1/3; }
 .section-title { grid-column:1/3; font-size:17px; margin-top:16px; margin-bottom:8px; color:#555; border-bottom:1px solid #ccc; padding-bottom:4px; font-weight:bold; }
+.buttons button { padding:10px 16px; font-size:14px; border:none; border-radius:6px; cursor:pointer; background:#b33a3a; color:#fff; transition:0.2s; }
+.buttons button:hover { background:#7a1e1e; }
 .buttons { grid-column:1/3; display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
-button { padding:10px 16px; font-size:14px; border:none; border-radius:6px; cursor:pointer; background:#b33a3a; color:#fff; transition:0.2s; }
-button:hover { background:#7a1e1e; }
-#logoutBtn { position:absolute; right:24px; top:24px; padding:8px 12px; background:#b33a3a; color:#fff; border:none; border-radius:6px; cursor:pointer; }
-#logoutBtn:hover { background:#7a1e1e; }
-#homeBtn { padding:8px 12px; background:#4a7bb3; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:8px; }
-#homeBtn:hover { background:#3a5c88; }
-.menu-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
 
+/* NAV BUTTONS TOP RIGHT - "Home" accanto a "Logout" */
+.top-right-actions {
+    position:absolute;
+    right:24px;
+    top:24px;
+    display: flex;
+    gap: 8px;
+}
+.top-right-actions button {
+    padding:8px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    transition:0.2s;
+}
+#logoutBtn { 
+    background:#b33a3a; 
+    color:#fff; 
+}
+#logoutBtn:hover { 
+    background:#7a1e1e; 
+}
+#homeNavBtn { 
+    background:#4a7bb3; 
+    color:#fff; 
+}
+#homeNavBtn:hover { 
+    background:#3a5c88; 
+}
+
+/* Tabella */
 table { width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
-th, td { border:1px solid #ddd; padding:8px; text-align:left; }
+th, td { border:1px solid #ddd; padding:8px; text-align:left; vertical-align:middle; }
 th { background:#f3f4f6; }
 tr:hover { background:#f1f5f9; }
+/* Stili per i pulsanti nella tabella */
+#dataTable td button {
+    padding: 5px 10px;
+    font-size: 13px;
+    margin: 2px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+#dataTable td button:nth-child(1) { background:#4a7bb3; color:white; } /* Modifica */
+#dataTable td button:nth-child(2) { background:#cc0000; color:white; } /* Elimina */
+#dataTable td button:nth-child(3) { background:#b33a3a; color:white; } /* PDF */
+
+
 @media(max-width:760px){ form { grid-template-columns:1fr; } .full { grid-column:auto; } header { flex-direction:column; align-items:flex-start; } header h1 { text-align:left; } }
 #loginDiv { max-width:400px; margin:50px auto; padding:20px; background:#fff; border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,0.1); text-align:center; }
 #loginDiv input { margin-bottom:10px; width:90%; padding:8px; }
@@ -62,6 +109,7 @@ header img.logo { display:block; margin:0 auto; }
 .action-box:hover { box-shadow:0 8px 16px rgba(0,0,0,0.1); transform:translateY(-2px); background:#fff; }
 .action-box img { height:80px; margin-bottom:15px; }
 .action-box h3 { margin:0; color:#b33a3a; font-size:20px; }
+.menu-bar { display:none; /* Rimosso */ }
 </style>
 </head>
 <body>
@@ -83,11 +131,13 @@ header img.logo { display:block; margin:0 auto; }
 </div>
 
 <div class="container" id="mainApp" style="display:none;">
-  <button id="logoutBtn" onclick="logout()">Logout</button>
-  <header>
-    <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/802edc62968aa9566f7685ac09524d39(1).png" alt="Logo">
-    <h1>Scheda Paziente TI</h1>
-  </header>
+    <div class="top-right-actions">
+        <button id="homeNavBtn" onclick="showSection('homeDiv')">Home</button>
+        <button id="logoutBtn" onclick="logout()">Logout</button>
+    </div>
+    <header>
+        <img src="https://r2.fivemanage.com/qTNmb8WLSLzz3wAA8WJPV/802edc62968aa9566f7685ac09524d39(1).png" alt="Logo">
+        <h1 id="appTitle"></h1>     </header>
 
     <div id="homeDiv" style="display:none;">
         <div class="content">
@@ -103,10 +153,6 @@ header img.logo { display:block; margin:0 auto; }
     </div>
 
     <div id="createDiv" style="display:none;">
-        <div class="menu-bar">
-            <button id="homeBtn" onclick="showSection('homeDiv')">Home</button>
-        </div>
-        
         <div class="section-title">Info paziente</div>
         <form id="mainForm" onsubmit="event.preventDefault(); saveEntry();">
             <div><label>Missione numero<input id="missione" required></label></div>
@@ -213,10 +259,7 @@ header img.logo { display:block; margin:0 auto; }
     </div>
 
     <div id="viewDiv" style="display:none;">
-        <div class="menu-bar">
-            <button id="homeBtn" onclick="showSection('homeDiv')">Home</button>
-            <h2>Elenco schede TI</h2>
-        </div>
+        <h2 style="text-align:center; margin-top:0;">Elenco schede TI</h2>
         <input type="text" id="searchBar" placeholder="Cerca scheda...">
         <div id="dataTableWrapper">
             <table id="dataTable">
@@ -257,13 +300,22 @@ let inactivityTimer;
 function resetInactivity(){ clearTimeout(inactivityTimer); inactivityTimer = setTimeout(()=>{ logout(); notify('Logout automatico per inattività','error'); }, 15*60*1000); }
 document.onmousemove = resetInactivity; document.onkeypress = resetInactivity; document.onclick = resetInactivity; document.onscroll = resetInactivity;
 
-// GESTIONE SEZIONI
+// GESTIONE SEZIONI E TITOLO
 function showSection(id){
     document.getElementById('homeDiv').style.display = 'none';
     document.getElementById('createDiv').style.display = 'none';
     document.getElementById('viewDiv').style.display = 'none';
     document.getElementById(id).style.display = 'block';
-    if(id === 'viewDiv') renderTable(); // Ricarica la tabella quando si entra in visualizzazione
+
+    const titleElement = document.getElementById('appTitle');
+    if(id === 'homeDiv'){
+        titleElement.textContent = 'Gestionale schede TI'; /* Titolo Home aggiornato */
+    } else if (id === 'createDiv'){
+        titleElement.textContent = 'Scheda Paziente TI (Creazione/Modifica)';
+    } else if (id === 'viewDiv'){
+        titleElement.textContent = 'Gestione schede TI';
+        renderTable(); 
+    }
 }
 
 
@@ -348,7 +400,7 @@ async function saveEntry(){
 // RESET
 function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); notify('Scheda pulita','error'); }
 
-// RENDER TABLE
+// RENDER TABLE: CORREZIONE DEL DISALLINEAMENTO
 function renderTable(){
   const tbody = document.querySelector('#dataTable tbody'); 
   tbody.innerHTML = '';
@@ -360,6 +412,7 @@ function renderTable(){
     const tr = document.createElement('tr');
     const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
 
+    // STRUTTURA CORRETTA DELLA RIGA DI TABELLA (TR)
     tr.innerHTML = `
       <td>${escapeHtml(e.missione)}</td>
       <td>${escapeHtml(dataIt)}</td>
@@ -387,19 +440,20 @@ function editEntry(id){
     for(const key in e){ 
         if(document.getElementById(key)) document.getElementById(key).value=e[key]; 
     } 
-    showSection('createDiv'); // Sposta alla sezione di creazione/modifica
+    showSection('createDiv'); 
     notify('Modifiche abilitate','warning'); 
     window.scrollTo({top:0,behavior:'smooth'}); 
 }
 async function deleteEntry(id){ if(!confirm('Eliminare scheda?')) return; try{ await db.collection("schede_TI").doc(id).delete(); notify('Scheda eliminata','error'); } catch(err){ console.error(err); } }
 
-// PDF EXPORT
+// PDF EXPORT AGGIORNATO (FORZA UNA SOLA PAGINA)
 async function exportSinglePDF(id){
   const e = entries.find(x => x.id === id); 
   if(!e) return;
 
   const pdfDiv = document.createElement('div');
-  pdfDiv.style.width = '800px';
+  // Stile temporaneo necessario per html2canvas/PDF
+  pdfDiv.style.width = '800px'; 
   pdfDiv.style.padding = '8px';
   pdfDiv.style.background = '#fff';
   pdfDiv.style.fontFamily = 'Arial, sans-serif';
@@ -408,6 +462,8 @@ async function exportSinglePDF(id){
   pdfDiv.style.color = '#000';
   pdfDiv.style.boxSizing = 'border-box';
   pdfDiv.style.wordWrap = 'break-word';
+  pdfDiv.style.margin = '0 auto'; 
+
 
   const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
 
@@ -417,10 +473,10 @@ async function exportSinglePDF(id){
     
     // Funzione per generare una riga di tabella SOLO se il valore non è vuoto
     function generateTableRow(label, value, isLong=false){
-        if(!value || String(value).trim() === '') return '';
+        if(!value || String(value).trim() === '' || (String(value).trim() === '0€' && label === 'Prezzo')) return '';
         const escapedValue = escapeHtml(value);
         const style = isLong ? `style="font-size:${getFontSize(escapedValue)}; word-wrap:break-word;"` : '';
-        return `<tr><td style="font-weight:bold;">${label}</td><td ${style}>${escapedValue}</td></tr>`;
+        return `<tr><td style="font-weight:bold; width: 30%;">${label}</td><td ${style}>${escapedValue}</td></tr>`;
     }
 
     // Funzione per generare il blocco Partenza/Arrivo
@@ -475,7 +531,7 @@ async function exportSinglePDF(id){
     </div>
     <h1 style="text-align:center;font-weight:bold;font-size:13px;margin-bottom:5px;">Scheda Paziente TI - N° ${escapeHtml(e.missione)}</h1>
 
-    ${infoPazienteTable ? `<h2>Info paziente</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">${infoPazienteTable}</table>` : ''}
+    ${infoPazienteTable ? `<h2>Info paziente</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;"><tbody>${infoPazienteTable}</tbody></table>` : ''}
 
     ${e.partenzaCitta||e.partenzaVia||e.partenzaNum||e.partenzaAscensore||e.arrivoCitta||e.arrivoVia||e.arrivoNum||e.arrivoAscensore ? 
         `<h2>Partenza / Arrivo</h2>
@@ -486,44 +542,63 @@ async function exportSinglePDF(id){
             </tr>
         </table>` : ''}
 
-    ${pdcTable ? `<h2>PDC</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">${pdcTable}</table>` : ''}
+    ${pdcTable ? `<h2>PDC</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;"><tbody>${pdcTable}</tbody></table>` : ''}
 
-    ${teamTable ? `<h2>Team</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">${teamTable}</table>` : ''}
+    ${teamTable ? `<h2>Team</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;"><tbody>${teamTable}</tbody></table>` : ''}
 
-    ${infoTrasportoTable ? `<h2>Info trasporto</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">${infoTrasportoTable}</table>` : ''}
+    ${infoTrasportoTable ? `<h2>Info trasporto</h2><table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;"><tbody>${infoTrasportoTable}</tbody></table>` : ''}
     
-    <div style="margin-top:10px;">
-        <span style="font-weight:bold;">Operatore che ha compilato la scheda:</span> ${escapeHtml(e.firmaRef)}
-    </div>
+    ${e.firmaRef ? `<div style="margin-top:10px;"><span style="font-weight:bold;">Operatore che ha compilato la scheda:</span> ${escapeHtml(e.firmaRef)}</div>` : ''}
 
     <div style="text-align:right; color:red; font-weight:bold; margin-top:5px;">
       Generato il: ${new Date().toLocaleString('it-IT')}
     </div>
   `;
-
-  pdfDiv.querySelectorAll('table').forEach(t => {
-    t.style.tableLayout = 'fixed';
-    t.style.wordWrap = 'break-word';
-  });
+  pdfDiv.querySelectorAll('table').forEach(t => { t.style.tableLayout = 'fixed'; t.style.wordWrap = 'break-word'; });
 
   document.body.appendChild(pdfDiv);
 
+    // NEW SINGLE-PAGE PDF LOGIC
   const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p','mm','a4');
-  const scale = 190 / pdfDiv.offsetWidth;
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = 210; // A4 width in mm
+  const pageHeight = 297; // A4 height in mm
+  const margin = 10;
+  const printableWidth = pageWidth - 2 * margin; // 190mm
 
-  await pdf.html(pdfDiv, {
-      callback: function(pdf){
-          pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
-          notify('PDF generato, download avviato','success');
-      },
-      x: 10,
-      y: 10,
-      width: pdfDiv.offsetWidth,
-      html2canvas: { scale: scale }
+  // 1. Render content to canvas with high resolution
+  const canvas = await html2canvas(pdfDiv, {
+      scale: 3, // High scale for better image quality
+      useCORS: true,
+      logging: false
   });
+  document.body.removeChild(pdfDiv); // Rimuovi il div temporaneo
 
-  document.body.removeChild(pdfDiv);
+  // 2. Convert canvas to image data
+  const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+  // 3. Calculate dimensions to fit in printable area
+  let imgWidth = printableWidth; // Larghezza massima stampabile
+  let imgHeight = (canvas.height * imgWidth) / canvas.width; // Altezza proporzionale
+
+  // 4. Check if content fits vertically. If not, scale down (Forza singola pagina)
+  if (imgHeight > (pageHeight - 2 * margin)) {
+      // Se il contenuto è troppo lungo, lo scaliamo per farlo rientrare in una pagina
+      const scaleFactor = (pageHeight - 2 * margin) / imgHeight;
+      imgWidth *= scaleFactor;
+      imgHeight = (pageHeight - 2 * margin);
+      // Centra l'immagine scalata orizzontalmente
+      const x = margin + (printableWidth - imgWidth) / 2;
+      pdf.addImage(imgData, 'JPEG', x, margin, imgWidth, imgHeight);
+      console.warn('Il contenuto è stato ridimensionato per adattarsi ad una singola pagina.');
+  } else {
+      // Se il contenuto si adatta, lo centriamo orizzontalmente
+      const x = margin + (printableWidth - imgWidth) / 2;
+      pdf.addImage(imgData, 'JPEG', x, margin, imgWidth, imgHeight);
+  }
+
+  pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
+  notify('PDF generato, download avviato','success');
 }
 
 </script>
