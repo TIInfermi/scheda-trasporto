@@ -323,11 +323,11 @@ async function exportSinglePDF(id){
 
   const pdfDiv = document.createElement('div');
   pdfDiv.style.width = '800px';
-  pdfDiv.style.padding = '10px';
+  pdfDiv.style.padding = '8px';
   pdfDiv.style.background = '#fff';
   pdfDiv.style.fontFamily = 'Arial, sans-serif';
-  pdfDiv.style.fontSize = '11px';  // font principale leggibile
-  pdfDiv.style.lineHeight = '1.3';
+  pdfDiv.style.fontSize = '10px';  // font principale
+  pdfDiv.style.lineHeight = '1.2';  // leggermente più compatto
   pdfDiv.style.color = '#000';
   pdfDiv.style.boxSizing = 'border-box';
   pdfDiv.style.wordWrap = 'break-word';
@@ -338,22 +338,22 @@ async function exportSinglePDF(id){
     <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">
       STATO: ${escapeHtml(e.stato)}
     </div>
-    <h1 style="text-align:center;font-weight:bold;font-size:14px;margin-bottom:5px;">Scheda Paziente TI</h1>
+    <h1 style="text-align:center;font-weight:bold;font-size:12px;margin-bottom:5px;">Scheda Paziente TI</h1>
 
     <h2>Info paziente</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; padding:2px;">
       <tr><td>Missione</td><td>${escapeHtml(e.missione)}</td></tr>
       <tr><td>Data</td><td>${escapeHtml(dataIt)}</td></tr>
       <tr><td>Nome e Cognome</td><td>${escapeHtml(e.nome)}</td></tr>
       <tr><td>Età</td><td>${escapeHtml(e.eta)}</td></tr>
       <tr><td>Data di nascita</td><td>${escapeHtml(e.dob)}</td></tr>
       <tr><td>Corporatura</td><td>${escapeHtml(e.corporatura)}</td></tr>
-      <tr><td>Patologia</td><td style="word-wrap:break-word; font-size:9px;">${escapeHtml(e.patologia)}</td></tr>
+      <tr><td>Patologia</td><td style="font-size:9px; word-wrap:break-word;">${escapeHtml(e.patologia)}</td></tr>
       <tr><td>Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
     </table>
 
     <h2>Partenza / Arrivo</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; padding:2px;">
       <tr>
         <td style="width:50%; vertical-align:top;">
           <b>Partenza</b><br>
@@ -373,13 +373,13 @@ async function exportSinglePDF(id){
     </table>
 
     <h2>PDC</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; padding:2px;">
       <tr><td>PDC</td><td>${escapeHtml(e.pdc)}</td></tr>
       <tr><td>Telefono</td><td>${escapeHtml(e.tel)}</td></tr>
     </table>
 
     <h2>Team</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; padding:2px;">
       <tr><td>Autista</td><td>${escapeHtml(e.autista)}</td></tr>
       <tr><td>1° Soccorritore</td><td>${escapeHtml(e.socc1)}</td></tr>
       <tr><td>2° Soccorritore</td><td>${escapeHtml(e.socc2)}</td></tr>
@@ -388,14 +388,14 @@ async function exportSinglePDF(id){
     </table>
 
     <h2>Info trasporto</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; padding:2px;">
       <tr><td>Arrivo in sede</td><td>${escapeHtml(e.arrivoSede)}</td></tr>
       <tr><td>Arrivo dal paziente</td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
       <tr><td>Arrivo a destinazione</td><td>${escapeHtml(e.arrivoDest)}</td></tr>
       <tr><td>Mezzo assegnato</td><td>${escapeHtml(e.mezzo)}</td></tr>
       <tr><td>Prezzo</td><td>${escapeHtml(e.prezzo)}</td></tr>
       <tr><td>Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
-      <tr><td>Note</td><td style="word-wrap:break-word; font-size:9px;">${escapeHtml(e.note)}</td></tr>
+      <tr><td>Note</td><td style="font-size:9px; word-wrap:break-word;">${escapeHtml(e.note)}</td></tr>
       <tr><td>Link ricevuta</td><td>${escapeHtml(e.linkRicevuta)}</td></tr>
     </table>
 
@@ -407,7 +407,6 @@ async function exportSinglePDF(id){
     </div>
   `;
 
-  // Mantieni table-layout fixed
   pdfDiv.querySelectorAll('table').forEach(t => {
     t.style.tableLayout = 'fixed';
     t.style.wordWrap = 'break-word';
@@ -418,6 +417,8 @@ async function exportSinglePDF(id){
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
 
+  // Forza tutto su una pagina adattando la scala
+  const scale = 190 / pdfDiv.offsetWidth; 
   await pdf.html(pdfDiv, {
       callback: function(pdf){
           pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
@@ -425,13 +426,16 @@ async function exportSinglePDF(id){
       },
       x: 10,
       y: 10,
-      width: pdfDiv.offsetWidth
+      width: pdfDiv.offsetWidth,
+      html2canvas: { scale: scale }
   });
 
   document.body.removeChild(pdfDiv);
 }
 
+
 </script>
 </body>
 </html>
+
 
