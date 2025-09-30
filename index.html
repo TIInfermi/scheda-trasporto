@@ -348,7 +348,7 @@ async function exportSinglePDF(id){
 
   pdfDiv.innerHTML = `
     <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">
-      STATO: ${escapeHtml(e.stato)}
+      STATO : ${escapeHtml(e.stato)}
     </div>
     <h1 style="text-align:center;font-weight:bold;font-size:13px;margin-bottom:5px;">Scheda Paziente TI</h1>
 
@@ -446,5 +446,6 @@ async function exportSinglePDF(id){
 </script>
 </body>
 </html>
+
 
 
