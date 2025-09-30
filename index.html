@@ -336,8 +336,8 @@ async function exportSinglePDF(id){
   pdfDiv.style.padding = '8px';
   pdfDiv.style.background = '#fff';
   pdfDiv.style.fontFamily = 'Arial, sans-serif';
-  pdfDiv.style.fontSize = '10px';
-  pdfDiv.style.lineHeight = '1.2';
+  pdfDiv.style.fontSize = '11px';
+  pdfDiv.style.lineHeight = '1.3';
   pdfDiv.style.color = '#000';
   pdfDiv.style.boxSizing = 'border-box';
   pdfDiv.style.wordWrap = 'break-word';
@@ -345,17 +345,17 @@ async function exportSinglePDF(id){
   const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
 
   function getFontSize(str, maxLength=150){ 
-    return str && str.length > maxLength ? '9px' : '10px'; 
+    return str && str.length > maxLength ? '10px' : '11px'; 
   }
 
   pdfDiv.innerHTML = `
     <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">
       STATO: ${escapeHtml(e.stato)}
     </div>
-    <h1 style="text-align:center;font-weight:bold;font-size:12px;margin-bottom:5px;">Scheda Paziente TI</h1>
+    <h1 style="text-align:center;font-weight:bold;font-size:13px;margin-bottom:5px;">Scheda Paziente TI</h1>
 
     <h2>Info paziente</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; padding:2px;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
       <tr><td style="font-weight:bold;">Missione</td><td>${escapeHtml(e.missione)}</td></tr>
       <tr><td style="font-weight:bold;">Data</td><td>${escapeHtml(dataIt)}</td></tr>
       <tr><td style="font-weight:bold;">Nome e Cognome</td><td>${escapeHtml(e.nome)}</td></tr>
@@ -368,7 +368,7 @@ async function exportSinglePDF(id){
     </table>
 
     <h2>Partenza / Arrivo</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:2px;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
       <tr>
         <td style="width:50%; vertical-align:top; font-weight:bold;">
           Partenza<br>
@@ -388,13 +388,13 @@ async function exportSinglePDF(id){
     </table>
 
     <h2>PDC</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; padding:2px;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
       <tr><td style="font-weight:bold;">PDC</td><td>${escapeHtml(e.pdc)}</td></tr>
       <tr><td style="font-weight:bold;">Telefono</td><td>${escapeHtml(e.tel)}</td></tr>
     </table>
 
     <h2>Team</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; padding:2px;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
       <tr><td style="font-weight:bold;">Autista</td><td>${escapeHtml(e.autista)}</td></tr>
       <tr><td style="font-weight:bold;">1° Soccorritore</td><td>${escapeHtml(e.socc1)}</td></tr>
       <tr><td style="font-weight:bold;">2° Soccorritore</td><td>${escapeHtml(e.socc2)}</td></tr>
@@ -403,7 +403,7 @@ async function exportSinglePDF(id){
     </table>
 
     <h2>Info trasporto</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; padding:2px;">
+    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
       <tr><td style="font-weight:bold;">Arrivo in sede</td><td>${escapeHtml(e.arrivoSede)}</td></tr>
       <tr><td style="font-weight:bold;">Arrivo dal paziente</td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
       <tr><td style="font-weight:bold;">Arrivo a destinazione</td><td>${escapeHtml(e.arrivoDest)}</td></tr>
@@ -412,7 +412,10 @@ async function exportSinglePDF(id){
       <tr><td style="font-weight:bold;">Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
       <tr><td style="font-weight:bold;">Note</td>
           <td style="font-size:${getFontSize(e.note)}; word-wrap:break-word;">${escapeHtml(e.note)}</td></tr>
-      <tr><td style="font-weight:bold;">Link ricevuta</td><td>${escapeHtml(e.linkRicevuta)}</td></tr>
+      <tr>
+        <td style="font-weight:bold;">Link ricevuta</td>
+        <td><a href="${escapeHtml(e.linkRicevuta)}" target="_blank" style="color:blue;text-decoration:underline;">${escapeHtml(e.linkRicevuta)}</a></td>
+      </tr>
     </table>
 
     <div style="text-align:right; color:red; font-weight:bold; margin-top:5px;">
@@ -445,15 +448,6 @@ async function exportSinglePDF(id){
   document.body.removeChild(pdfDiv);
 }
 
-
-
-
 </script>
 </body>
 </html>
-
-
-
-
-
-
