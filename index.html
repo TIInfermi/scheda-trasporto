@@ -422,16 +422,20 @@ async function exportSinglePDF(id){
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
 
-  await pdf.html(pdfDiv, {
-      callback: function(pdf) {
-          pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
-          notify('PDF generato, download avviato','success');
-      },
-      x: 10,
-      y: 10,
-      width: 180,
-      windowWidth: 800
-  });
+await pdf.html(pdfDiv, {
+    callback: function(pdf) {
+        pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
+        notify('PDF generato, download avviato','success');
+    },
+    x: 10,
+    y: 10,
+    width: 190,           // larghezza massima della pagina A4
+    windowWidth: 1000,    // larghezza simulata del div
+    html2canvas: {
+        scale: 0.55        // scala tutto il contenuto per rientrare in una pagina
+    }
+});
+
 
   document.body.removeChild(pdfDiv);
 }
@@ -440,5 +444,6 @@ async function exportSinglePDF(id){
 
 </body>
 </html>
+
 
 
