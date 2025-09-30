@@ -308,10 +308,10 @@ async function deleteEntry(id){ if(!confirm('Eliminare scheda?')) return; try{ a
 
 // PDF EXPORT
 async function exportSinglePDF(id){
-  const e = entries.find(x=>x.id===id); if(!e) return;
+  const e = entries.find(x=>x.id===id); 
+  if(!e) return;
 
   const pdfDiv = document.createElement('div');
-  pdfDiv.style.position = 'relative';
   pdfDiv.style.width = '800px';
   pdfDiv.style.padding = '15px';
   pdfDiv.style.background = '#fff';
@@ -319,7 +319,8 @@ async function exportSinglePDF(id){
   pdfDiv.style.fontSize = '13px';
   pdfDiv.style.lineHeight = '1.4';
   pdfDiv.style.color = '#000';
-  pdfDiv.style.margin = '0 auto';
+  pdfDiv.style.position = 'relative'; // necessario per il timestamp assoluto
+  pdfDiv.style.boxSizing = 'border-box';
 
   const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
 
@@ -390,29 +391,31 @@ async function exportSinglePDF(id){
 
     <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Operatore responsabile della compilazione</h2>
     <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
-   <p style="position:absolute; bottom:10px; right:10px; color:red; font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString('it-IT')}</p>
+
+    <p style="position:absolute; bottom:10px; right:10px; color:red; font-weight:bold;">
+      Generato il: ${new Date(e.timestamp).toLocaleString('it-IT')}
+    </p>
   `;
 
   document.body.appendChild(pdfDiv);
 
-  const canvas = await html2canvas(pdfDiv, {scale:3, useCORS:true, backgroundColor:'#fff'});
-  document.body.removeChild(pdfDiv);
-
-  const imgData = canvas.toDataURL('image/png');
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgWidth = pageWidth - 20;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  let yOffset = (pageHeight - imgHeight) / 2;
-  if(yOffset < 0) yOffset = 0;
+  await pdf.html(pdfDiv, {
+      callback: function(pdf) {
+          pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
+          notify('PDF generato, download avviato','success');
+      },
+      x: 10,
+      y: 10,
+      width: 190, // larghezza contenuto in mm
+      windowWidth: 800 // corrisponde alla larghezza del div
+  });
 
-  pdf.addImage(imgData,'PNG',10,yOffset,imgWidth,imgHeight);
-  pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
-  notify('PDF generato, download avviato','success');
+  document.body.removeChild(pdfDiv);
 }
+
 
 
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
@@ -420,6 +423,7 @@ function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 
 </body>
 </html>
+
 
 
 
