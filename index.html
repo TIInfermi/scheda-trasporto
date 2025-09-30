@@ -309,12 +309,24 @@ async function deleteEntry(id){ if(!confirm('Eliminare scheda?')) return; try{ a
 // PDF EXPORT
 async function exportSinglePDF(id){
   const e = entries.find(x=>x.id===id); if(!e) return;
-  const pdfDiv = document.createElement('div'); pdfDiv.style.width='800px'; pdfDiv.style.padding='10px'; pdfDiv.style.background='#fff'; pdfDiv.style.fontFamily='Arial, sans-serif'; pdfDiv.style.fontSize='12px';
+
+  const pdfDiv = document.createElement('div');
+  pdfDiv.style.width = '800px';
+  pdfDiv.style.padding = '15px';
+  pdfDiv.style.background = '#fff';
+  pdfDiv.style.fontFamily = 'Arial, sans-serif';
+  pdfDiv.style.fontSize = '13px';
+  pdfDiv.style.lineHeight = '1.4';
+  pdfDiv.style.color = '#000';
+  pdfDiv.style.margin = '0 auto';
+
   const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
+
   pdfDiv.innerHTML = `
     <div style="text-align:right;font-weight:bold;color:${e.stato==='Confermato'?'green':e.stato==='In lavorazione'?'orange':'red'};">STATO: ${escapeHtml(e.stato)}</div>
-    <h1 style="text-align:center;font-weight:bold;font-size:18px;">Scheda Paziente TI</h1>
-    <h2 style="font-weight:bold;font-size:14px;">Info paziente</h2>
+    <h1 style="text-align:center;font-weight:bold;font-size:18px;margin-bottom:12px;">Scheda Paziente TI</h1>
+
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Info paziente</h2>
     <table border="1" style="width:100%;border-collapse:collapse;">
       <tr><td>Missione</td><td>${escapeHtml(e.missione)}</td></tr>
       <tr><td>Data</td><td>${escapeHtml(dataIt)}</td></tr>
@@ -326,29 +338,35 @@ async function exportSinglePDF(id){
       <tr><td>Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
     </table>
 
-    <h2 style="font-weight:bold;font-size:14px;">Partenza</h2>
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Partenza / Arrivo</h2>
     <table border="1" style="width:100%;border-collapse:collapse;">
-      <tr><td>Città</td><td>${escapeHtml(e.partenzaCitta)}</td></tr>
-      <tr><td>Via</td><td>${escapeHtml(e.partenzaVia)}</td></tr>
-      <tr><td>Numero civico</td><td>${escapeHtml(e.partenzaNum)}</td></tr>
-      <tr><td>Ascensore/montacarichi</td><td>${escapeHtml(e.partenzaAscensore)}</td></tr>
+      <tr>
+        <td style="width:50%; vertical-align:top;">
+          <b>Partenza</b><br>
+          Città: ${escapeHtml(e.partenzaCitta)}<br>
+          Via: ${escapeHtml(e.partenzaVia)}<br>
+          Numero civico: ${escapeHtml(e.partenzaNum)}<br>
+          Ascensore/montacarichi: ${escapeHtml(e.partenzaAscensore)}
+        </td>
+        <td style="width:50%; vertical-align:top;">
+          <b>Arrivo</b><br>
+          Città: ${escapeHtml(e.arrivoCitta)}<br>
+          Via: ${escapeHtml(e.arrivoVia)}<br>
+          Numero civico: ${escapeHtml(e.arrivoNum)}<br>
+          Ascensore/montacarichi: ${escapeHtml(e.arrivoAscensore)}
+        </td>
+      </tr>
     </table>
 
-    <h2 style="font-weight:bold;font-size:14px;">Arrivo</h2>
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">PDC</h2>
     <table border="1" style="width:100%;border-collapse:collapse;">
-      <tr><td>Città</td><td>${escapeHtml(e.arrivoCitta)}</td></tr>
-      <tr><td>Via</td><td>${escapeHtml(e.arrivoVia)}</td></tr>
-      <tr><td>Numero civico</td><td>${escapeHtml(e.arrivoNum)}</td></tr>
-      <tr><td>Ascensore/montacarichi</td><td>${escapeHtml(e.arrivoAscensore)}</td></tr>
+      <tr>
+        <td style="width:50%;">PDC: ${escapeHtml(e.pdc)}</td>
+        <td style="width:50%;">Telefono: ${escapeHtml(e.tel)}</td>
+      </tr>
     </table>
 
-    <h2 style="font-weight:bold;font-size:14px;">PDC e Telefono</h2>
-    <table border="1" style="width:100%;border-collapse:collapse;">
-      <tr><td>PDC</td><td>${escapeHtml(e.pdc)}</td></tr>
-      <tr><td>Telefono PDC</td><td>${escapeHtml(e.tel)}</td></tr>
-    </table>
-
-    <h2 style="font-weight:bold;font-size:14px;">Team</h2>
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Team</h2>
     <table border="1" style="width:100%;border-collapse:collapse;">
       <tr><td>Autista Soccorritore</td><td>${escapeHtml(e.autista)}</td></tr>
       <tr><td>1° Soccorritore</td><td>${escapeHtml(e.socc1)}</td></tr>
@@ -357,7 +375,7 @@ async function exportSinglePDF(id){
       <tr><td>Tirocinante</td><td>${escapeHtml(e.tiro)}</td></tr>
     </table>
 
-    <h2 style="font-weight:bold;font-size:14px;">Info trasporto</h2>
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Info trasporto</h2>
     <table border="1" style="width:100%;border-collapse:collapse;">
       <tr><td>Arrivo in sede</td><td>${escapeHtml(e.arrivoSede)}</td></tr>
       <tr><td>Arrivo dal paziente</td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
@@ -369,29 +387,37 @@ async function exportSinglePDF(id){
       <tr><td>Link ricevuta</td><td>${escapeHtml(e.linkRicevuta)}</td></tr>
     </table>
 
-    <h2 style="font-weight:bold;font-size:14px;">Operatore responsabile della compilazione:</h2>
+    <h2 style="font-weight:bold;font-size:14px;margin-bottom:4px;">Operatore responsabile della compilazione</h2>
     <p style="font-weight:bold;font-size:14px;">${escapeHtml(e.firmaRef)}</p>
     <p style="text-align:right;color:red;font-weight:bold;">Generato il: ${new Date(e.timestamp).toLocaleString('it-IT')}</p>
   `;
+
   document.body.appendChild(pdfDiv);
-  const canvas = await html2canvas(pdfDiv, {scale:2});
+
+  const canvas = await html2canvas(pdfDiv, {scale:3, useCORS:true, backgroundColor:'#fff'});
   document.body.removeChild(pdfDiv);
+
   const imgData = canvas.toDataURL('image/png');
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
+
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * pageWidth) / canvas.width;
-  let scaleFactor = imgHeight > pageHeight ? pageHeight/imgHeight : 1;
-  pdf.addImage(imgData,'PNG',0,0,imgWidth*scaleFactor,imgHeight*scaleFactor);
+  const imgWidth = pageWidth - 20;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let yOffset = (pageHeight - imgHeight) / 2;
+  if(yOffset < 0) yOffset = 0;
+
+  pdf.addImage(imgData,'PNG',10,yOffset,imgWidth,imgHeight);
   pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
   notify('PDF generato, download avviato','success');
 }
+
 
 function exportPDF(){ if(entries.length) exportSinglePDF(entries[0].id); }
 </script>
 
 </body>
 </html>
+
 
