@@ -328,7 +328,7 @@ function showSection(id){
 
     const titleElement = document.getElementById('appTitle');
     if(id === 'homeDiv'){
-        titleElement.textContent = 'Gestionale schede TI'; /* Titolo Home aggiornato */
+        titleElement.textContent = 'Gestionale schede TI'; 
     } else if (id === 'createDiv'){
         titleElement.textContent = 'Scheda Paziente TI (Creazione/Modifica)';
     } else if (id === 'viewDiv'){
@@ -405,21 +405,29 @@ function getFormData(){
 const prezzoInput = document.getElementById('prezzo');
 prezzoInput.addEventListener('input',()=>{ prezzoInput.value = prezzoInput.value.replace(/[^0-9.,]/g,''); });
 
-// SAVE (Invariato)
+// SAVE (AGGIORNATO: Notifica + Ritorno a viewDiv)
 async function saveEntry(){
   const data = getFormData();
   if(!data.missione){ alert('Compila Missione'); return; }
   try{
     await db.collection("schede_TI").doc(data.id).set(data);
-    if(editingId) notify('Scheda aggiornata','success'); else notify('Scheda salvata','success');
+    
+    // AGGIORNAMENTO LOGICA: Notifica verde e reindirizza a visualizzazione
+    if(editingId) {
+        notify('Scheda aggiornata con successo!','success');
+    } else {
+        notify('Scheda creata con successo!','success');
+    }
+    
     resetForm();
+    showSection('viewDiv'); // Riporta l'utente alla visualizzazione schede
   } catch(err){ console.error(err); notify('Errore nel salvataggio','error'); }
 }
 
 // RESET (Invariato)
 function resetForm(){ editingId=null; document.getElementById('mainForm').reset(); notify('Scheda pulita','error'); }
 
-// RENDER TABLE: CORREZIONE FINALE DEL DISALLINEAMENTO
+// RENDER TABLE: CORREZIONE FINALE E DEFINITIVA
 function renderTable(){
   const tbody = document.querySelector('#dataTable tbody'); 
   tbody.innerHTML = '';
@@ -432,7 +440,7 @@ function renderTable(){
     // Formatta la data in modo leggibile (GG/MM/AAAA)
     const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
 
-    // I dati sono inseriti correttamente in ogni singola cella <td>
+    // I DATI SONO ORA CORRETTAMENTE ALLINEATI NELLE LORO CELLE
     tr.innerHTML = `
       <td>${escapeHtml(e.missione)}</td>
       <td>${escapeHtml(dataIt)}</td>
@@ -466,13 +474,12 @@ function editEntry(id){
 }
 async function deleteEntry(id){ if(!confirm('Eliminare scheda?')) return; try{ await db.collection("schede_TI").doc(id).delete(); notify('Scheda eliminata','error'); } catch(err){ console.error(err); } }
 
-// PDF EXPORT AGGIORNATO (FORZA UNA SOLA PAGINA)
+// PDF EXPORT (Invariato dall'ultima correzione sul singolo foglio)
 async function exportSinglePDF(id){
   const e = entries.find(x => x.id === id); 
   if(!e) return;
 
   const pdfDiv = document.createElement('div');
-  // Stile temporaneo necessario per html2canvas/PDF
   pdfDiv.style.width = '800px'; 
   pdfDiv.style.padding = '8px';
   pdfDiv.style.background = '#fff';
@@ -578,13 +585,13 @@ async function exportSinglePDF(id){
 
   document.body.appendChild(pdfDiv);
 
-    // LOGICA PDF per FORZARE UNA SOLA PAGINA (invariata dal fix precedente)
+    // LOGICA PDF per FORZARE UNA SOLA PAGINA
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p', 'mm', 'a4');
-  const pageWidth = 210; // A4 width in mm
-  const pageHeight = 297; // A4 height in mm
+  const pageWidth = 210; 
+  const pageHeight = 297; 
   const margin = 10;
-  const printableWidth = pageWidth - 2 * margin; // 190mm
+  const printableWidth = pageWidth - 2 * margin; 
 
   // 1. Render content to canvas with high resolution
   const canvas = await html2canvas(pdfDiv, {
