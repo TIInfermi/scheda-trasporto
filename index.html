@@ -98,13 +98,13 @@ header img.logo { display:block; margin:0 auto; }
     <div class="section-title">Partenza</div>
     <div><label>Città<input id="partenzaCitta"></label></div>
     <div><label>Via<input id="partenzaVia"></label></div>
-    <div><label>Numero civico<input type="number" id="partenzaNum"></label></div>
+    <div><label>Numero civico<input id="partenzaNum"></label></div>
     <div>
       <label>Ascensore/montacarichi
         <select id="partenzaAscensore">
           <option value="">-- Seleziona --</option>
-          <option>Presenza</option>
-          <option>Assenza</option>
+          <option>Presente</option>
+          <option>Assente</option>
         </select>
       </label>
     </div>
@@ -113,13 +113,13 @@ header img.logo { display:block; margin:0 auto; }
     <div class="section-title">Arrivo</div>
     <div><label>Città<input id="arrivoCitta"></label></div>
     <div><label>Via<input id="arrivoVia"></label></div>
-    <div><label>Numero civico<input type="number" id="arrivoNum"></label></div>
+    <div><label>Numero civico<input id="arrivoNum"></label></div>
     <div>
       <label>Ascensore/montacarichi
         <select id="arrivoAscensore">
           <option value="">-- Seleziona --</option>
-          <option>Presenza</option>
-          <option>Assenza</option>
+          <option>Presente</option>
+          <option>Assente</option>
         </select>
       </label>
     </div>
@@ -442,6 +442,7 @@ async function exportSinglePDF(id){
 </script>
 </body>
 </html>
+
 
 
 
