@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SCHEDA PAZIENTE TI</title>
 <style>
-/* CSS ESISTENTE */
+/* CSS ESISTENTE E AGGIORNATO */
 body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin:0; padding:16px; background:#f0f2f5; }
 .container { max-width: 950px; margin:0 auto; background:#fff; padding:24px; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.1); position:relative; min-height:calc(100vh - 40px); }
 header { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
@@ -42,11 +42,29 @@ header img.logo { display:block; margin:0 auto; }
 #searchBar { width:100%; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-sizing:border-box; }
 #dataTableWrapper { max-height:400px; overflow-y:auto; }
 
-/* NUOVI STILI PER LA NAVIGAZIONE */
-.nav-tabs { display: flex; border-bottom: 2px solid #ccc; margin-bottom: 20px; gap: 8px; flex-wrap: wrap; }
-.nav-tab-button { background: none; border: none; padding: 10px 15px; cursor: pointer; font-weight: 500; font-size: 16px; color: #555; border-bottom: 3px solid transparent; transition: all 0.2s; }
-.nav-tab-button.active { color: #b33a3a; border-bottom: 3px solid #b33a3a; font-weight: bold; }
+/* NUOVI STILI PER LA NAVIGAZIONE PRINCIPALE */
+.main-nav { display: flex; justify-content: space-around; gap: 20px; margin-bottom: 30px; }
+.nav-box {
+    flex: 1;
+    text-align: center;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #f9f9f9;
+}
+.nav-box:hover {
+    background: #e5e5e5;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.nav-box.active {
+    border-color: #b33a3a;
+    background: #fff;
+    box-shadow: 0 0 0 2px #b33a3a; /* Bordo esterno rosso per attivo */
+}
 .tab-content { padding-top: 10px; }
+.nav-box h3 { margin: 0; color: #b33a3a; font-size: 18px; }
 </style>
 </head>
 <body>
@@ -74,10 +92,13 @@ header img.logo { display:block; margin:0 auto; }
     <h1>Gestione Schede TI</h1>
   </header>
 
-    <nav class="nav-tabs">
-    <button class="nav-tab-button active" onclick="showTab('tabGeneraScheda')">Genera scheda TI</button>
-    <button class="nav-tab-button" onclick="showTab('tabVisualizzaSchede')">Visualizza schede TI</button>
-    <button class="nav-tab-button" onclick="showTab('tabCaricaFoglio')">Carica foglio di marcia</button>
+    <nav class="main-nav">
+    <div id="navGenera" class="nav-box active" onclick="showTab('tabGeneraScheda')">
+      <h3>Genera nuova scheda TI</h3>
+    </div>
+    <div id="navVisualizza" class="nav-box" onclick="showTab('tabVisualizzaSchede')">
+      <h3>Elenco schede TI</h3>
+    </div>
   </nav>
 
     <div id="tabGeneraScheda" class="tab-content">
@@ -192,25 +213,11 @@ header img.logo { display:block; margin:0 auto; }
     <div id="dataTableWrapper">
       <table id="dataTable">
         <thead>
-          <tr><th>Missione N°</th><th>Data</th><th>Stato</th><th>Foglio Marcia</th><th>Operatore</th><th>Azioni</th></tr>
+          <tr><th>Missione N°</th><th>Data</th><th>Stato</th><th>Operatore</th><th>Azioni</th></tr>
         </thead>
         <tbody></tbody>
       </table>
     </div>
-  </div>
-
-    <div id="tabCaricaFoglio" class="tab-content" style="display:none;">
-    <h2>Carica Foglio di Marcia</h2>
-    <div style="max-width:400px; padding:20px; border:1px solid #ccc; border-radius:8px;">
-      <label>N° Missione (per collegamento)</label>
-      <input type="text" id="foglioMissione" placeholder="Inserisci il N° Missione" style="margin-bottom:15px;" required>
-
-      <label>Carica/Scatta Foto del Foglio</label>
-      <input type="file" id="foglioFile" accept="image/*, .pdf" capture="environment" style="margin-bottom:15px;">
-      
-      <button onclick="uploadFoglioMarcia()" style="background:#4a90e2; width:100%;">Carica Foglio di Marcia</button>
-    </div>
-    <p style="margin-top:20px;">*Il file verrà salvato in Firebase Storage e il link verrà aggiunto alla scheda TI corrispondente nel database.</p>
   </div>
 
   <footer>© Antonio Troiani, Tutti i diritti riservati</footer>
@@ -221,15 +228,13 @@ header img.logo { display:block; margin:0 auto; }
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
 <script>
 // CONFIG FIREBASE
 const firebaseConfig = { apiKey: "AIzaSyBCyJjpDuixqjC86U93B7naAWhIu0CZEq8", authDomain: "schede-ti.firebaseapp.com", projectId: "schede-ti", storageBucket: "schede-ti.firebasestorage.app", messagingSenderId: "832227119483", appId: "1:832227119483:web:c5af587729355eaffe6dde" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
-const storage = firebase.storage(); 
+// const storage = firebase.storage(); // Rimosso Storage
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 // UTILITY
@@ -250,18 +255,20 @@ function logout(){ auth.signOut().then(()=>{ notify('Logout eseguito, prego riac
 
 // GESTIONE NAVIGAZIONE A SCHEDE (TABS)
 function showTab(tabId) {
+    // Nasconde tutti i contenuti e rimuove la classe 'active' da tutti i box
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.style.display = 'none';
     });
-    document.querySelectorAll('.nav-tab-button').forEach(btn => {
-        btn.classList.remove('active');
+    document.querySelectorAll('.nav-box').forEach(box => {
+        box.classList.remove('active');
     });
 
+    // Mostra il contenuto corretto e aggiunge la classe 'active' al box selezionato
     document.getElementById(tabId).style.display = 'block';
-    document.querySelector(`.nav-tab-button[onclick*="${tabId}"]`).classList.add('active');
-
-    // Se si va alla tabella, forza il rendering per eventuali filtri o dati aggiornati
-    if (tabId === 'tabVisualizzaSchede') {
+    if (tabId === 'tabGeneraScheda') {
+        document.getElementById('navGenera').classList.add('active');
+    } else if (tabId === 'tabVisualizzaSchede') {
+        document.getElementById('navVisualizza').classList.add('active');
         renderTable();
     }
 }
@@ -278,11 +285,6 @@ function setupRealtimeListener(){ db.collection("schede_TI").orderBy("timestamp"
 function getFormData(){
   let prezzoVal = parseFloat(document.getElementById('prezzo').value.replace(',','.')) || 0; prezzoVal = prezzoVal.toFixed(2)+'€';
   
-  // Mantieni eventuali dati del Foglio di Marcia durante la modifica
-  const currentEntry = entries.find(e => e.id === editingId);
-  const foglioMarciaURL = currentEntry ? currentEntry.foglioMarciaURL : null;
-  const foglioMarciaNome = currentEntry ? currentEntry.foglioMarciaNome : null;
-  
   return {
     id: editingId||uid(),
     missione: document.getElementById('missione').value,
@@ -317,9 +319,6 @@ function getFormData(){
     note: document.getElementById('note').value,
     firmaRef: document.getElementById('firmaRef').value,
     stato: document.getElementById('stato').value,
-    // Mantenimento dei dati del Foglio di Marcia
-    foglioMarciaURL: foglioMarciaURL, 
-    foglioMarciaNome: foglioMarciaNome,
     timestamp: new Date().toISOString()
   };
 }
@@ -355,17 +354,10 @@ function renderTable(){
     const tr = document.createElement('tr');
     const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
 
-    // LOGICA PER IL LINK AL FOGLIO DI MARCIA
-    let foglioMarciaCell = '<span style="color:#aaa;">Assente</span>';
-    if (e.foglioMarciaURL) {
-        foglioMarciaCell = `<a href="${escapeHtml(e.foglioMarciaURL)}" target="_blank" style="color: #4a90e2; font-weight: bold; text-decoration: none;">VEDI FILE</a>`;
-    }
-
     tr.innerHTML = `
       <td>${escapeHtml(e.missione)}</td>
       <td>${escapeHtml(dataIt)}</td>
       <td>${escapeHtml(e.stato)}</td>
-      <td>${foglioMarciaCell}</td>
       <td>${escapeHtml(e.firmaRef)}</td>
       <td>
         <button onclick="editEntry('${e.id}')">Modifica</button>
@@ -396,7 +388,6 @@ function editEntry(id){
 async function deleteEntry(id){ if(!confirm('Eliminare scheda? Questa operazione è irreversibile.')) return; try{ await db.collection("schede_TI").doc(id).delete(); notify('Scheda eliminata','error'); } catch(err){ console.error(err); } }
 
 // PDF EXPORT
-// [La funzione exportSinglePDF rimane invariata]
 async function exportSinglePDF(id){
   const e = entries.find(x => x.id === id); 
   if(!e) return;
@@ -485,8 +476,6 @@ async function exportSinglePDF(id){
       <tr>
     </table>
     
-    ${e.foglioMarciaURL ? `<p style="margin-top:10px; font-weight:bold;">Foglio di Marcia:</p><a href="${escapeHtml(e.foglioMarciaURL)}" target="_blank">${escapeHtml(e.foglioMarciaNome || 'Vedi File Allegato')}</a>` : ''}
-
     <div style="text-align:right; color:red; font-weight:bold; margin-top:5px;">
       Generato il : ${new Date(e.timestamp).toLocaleString('it-IT')}
     </div>
@@ -515,79 +504,6 @@ async function exportSinglePDF(id){
   });
 
   document.body.removeChild(pdfDiv);
-}
-
-// NUOVA FUNZIONE PER CARICARE FOGLIO DI MARCIA (Modificata per salvare il link in Firestore)
-async function uploadFoglioMarcia() {
-    const missioneNum = document.getElementById('foglioMissione').value.trim();
-    const fileInput = document.getElementById('foglioFile');
-    const file = fileInput.files[0];
-
-    if (!missioneNum) {
-        notify('Per favore, inserisci il Numero Missione.', 'error');
-        return;
-    }
-
-    if (!file) {
-        notify('Per favore, seleziona un file o scatta una foto.', 'error');
-        return;
-    }
-
-    // 1. Cerca la scheda esistente tramite numero missione (assumiamo missione sia unico)
-    const existingSchedaQuery = await db.collection("schede_TI").where("missione", "==", missioneNum).limit(1).get();
-    
-    if (existingSchedaQuery.empty) {
-        notify(`Nessuna scheda T.I. trovata con il numero missione ${missioneNum}. Caricamento annullato.`, 'error');
-        return;
-    }
-
-    const schedaDoc = existingSchedaQuery.docs[0];
-    const schedaId = schedaDoc.id;
-
-    notify(`Caricamento del Foglio di Marcia per Missione ${missioneNum}...`, 'warning');
-
-    try {
-        // 2. Prepara il riferimento per lo Storage (usando l'ID del documento per evitare conflitti)
-        const fileExtension = file.name.split('.').pop();
-        const filePath = `fogli_marcia/${schedaId}_${uid()}.${fileExtension}`; // Aggiunto UID per evitare sovrascrittura in caso di file con lo stesso nome
-        const storageRef = storage.ref(filePath);
-        
-        // 3. Carica il file
-        const uploadTask = storageRef.put(file);
-
-        uploadTask.on('state_changed', 
-            (snapshot) => {
-                // Opzionale: Mostra l'avanzamento in console
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress.toFixed(0) + '% done');
-            }, 
-            (error) => {
-                // Gestione degli errori
-                console.error("Errore di upload:", error);
-                notify(`Errore durante il caricamento: ${error.message}`, 'error');
-            }, 
-            async () => {
-                // Upload completato con successo
-                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-                
-                // 4. Aggiorna il documento della scheda paziente con il link del Foglio di Marcia
-                await db.collection("schede_TI").doc(schedaId).update({
-                    foglioMarciaURL: downloadURL,
-                    foglioMarciaNome: file.name
-                });
-
-                notify('Foglio di Marcia caricato e collegato alla scheda con successo!', 'success');
-                // Pulisci il modulo
-                document.getElementById('foglioMissione').value = '';
-                document.getElementById('foglioFile').value = '';
-                showTab('tabVisualizzaSchede'); 
-            }
-        );
-
-    } catch (error) {
-        console.error("Errore imprevisto nell'upload:", error);
-        notify("Errore imprevisto durante il caricamento. Controlla la console.", 'error');
-    }
 }
 </script>
 </body>
