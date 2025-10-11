@@ -5,12 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SCHEDA PAZIENTE TI</title>
 <style>
+/* CSS ORIGINALE */
 body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin:0; padding:16px; background:#f0f2f5; }
 .container { max-width: 950px; margin:0 auto; background:#fff; padding:24px; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.1); position:relative; min-height:calc(100vh - 40px); }
 header { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
 header img { height:60px; width:auto; }
 header h1 { font-size:25px; text-align:center; flex:1; margin:0; font-weight:bold; }
+
+/* MODIFICA: CSS GRID PIÙ ROBUSTO */
 form { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+/* ASSICURA CHE GLI ELEMENTI OCCUPINO SPAZIO CORRETTAMENTE NELLA GRIGLIA */
+form > div { padding: 0; margin: 0; } 
+
 label { display:block; font-size:14px; margin-bottom:4px; font-weight:500; }
 input, select, textarea { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-sizing:border-box; }
 textarea { min-height:60px; }
@@ -19,6 +25,11 @@ textarea { min-height:60px; }
 .buttons { grid-column:1/3; display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
 button { padding:10px 16px; font-size:14px; border:none; border-radius:6px; cursor:pointer; background:#b33a3a; color:#fff; transition:0.2s; }
 button:hover { background:#7a1e1e; }
+/* Stile per il nuovo bottone Genera Report */
+button.generate-report { background:#28a745; }
+button.generate-report:hover { background:#1e7e34; }
+
+
 #logoutBtn { position:absolute; right:24px; top:24px; padding:8px 12px; background:#b33a3a; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 #logoutBtn:hover { background:#7a1e1e; }
 table { width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
@@ -75,7 +86,7 @@ header img.logo { display:block; margin:0 auto; }
     <div><label>Nome e Cognome<input id="nome"></label></div>
     <div><label>Età<input type="number" id="eta" min="0" step="1"></label></div>
     <div><label>Data di nascita<input type="date" id="dob"></label></div>
-     <div><label>Corporatura<input type="number" id="corporatura" min="0" step="1"></label></div>
+    <div><label>Corporatura<input type="number" id="corporatura" min="0" step="1"></label></div>
     <div class="full"><label>Patologia<textarea id="patologia"></textarea></label></div>
     
     <div class="full">
@@ -111,7 +122,7 @@ header img.logo { display:block; margin:0 auto; }
 
         <div class="section-title">Arrivo</div>
     <div><label>Città<input id="arrivoCitta"></label></div>
-    <div><label>Via<input id="arrivoVia"></label></div>
+     <div><label>Via<input id="arrivoVia"></label></div>
     <div><label>Piano<input id="arrivoNum"></label></div>
     <div>
       <label>Ascensore/montacarichi
@@ -124,10 +135,8 @@ header img.logo { display:block; margin:0 auto; }
     </div>
 
 <div class="section-title">PDC</div>
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-  <div><label>PDC<input id="pdc" type="text"></label></div>
-  <div><label>Telefono PDC<input id="number" type="text"></label></div>
-</div>
+<div><label>PDC<input id="pdc" type="text"></label></div>
+<div><label>Telefono PDC<input id="number" type="text"></label></div>
 
     <div class="section-title">Team</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
@@ -179,7 +188,7 @@ header img.logo { display:block; margin:0 auto; }
     <div class="buttons">
       <button type="submit">Salva scheda TI</button>
       <button type="button" onclick="resetForm()">Pulisci scheda TI</button>
-      <button type="button" onclick="generateReport()" style="background:#28a745;">Genera Elenco Schede</button>
+      <button type="button" onclick="generateReport()" class="generate-report">Genera Elenco Schede</button>
     </div>
   </form>
 
@@ -269,7 +278,7 @@ function getFormData(){
     arrivoDest: document.getElementById('arrivoDest').value,
     mezzo: document.getElementById('mezzo').value,
     prezzo: prezzoVal,
-    sede: document.getElementById('sede').value, /* AGGIUNTO CAMPO SEDE */
+    sede: document.getElementById('sede').value, 
     presidi: document.getElementById('presidi').value,
     note: document.getElementById('note').value,
     firmaRef: document.getElementById('firmaRef').value,
@@ -313,7 +322,8 @@ function renderTable(){
       <td>${escapeHtml(dataIt)}</td>
       <td>${escapeHtml(e.stato)}</td>
       <td>${escapeHtml(e.firmaRef)}</td>
-      <td>${escapeHtml(e.prezzo)}</td>          <td>
+      <td>${escapeHtml(e.prezzo)}</td>   
+      <td>
         <button onclick="editEntry('${e.id}')">Modifica</button>
         <button onclick="deleteEntry('${e.id}')">Elimina</button>
         <button onclick="exportSinglePDF('${e.id}')">PDF</button>
@@ -331,13 +341,13 @@ document.getElementById('searchBar').addEventListener('input', renderTable);
 function editEntry(id){ const e=entries.find(x=>x.id===id); if(!e) return; editingId=id; for(const key in e){ if(document.getElementById(key)) document.getElementById(key).value=e[key]; } notify('Modifiche abilitate','warning'); window.scrollTo({top:0,behavior:'smooth'}); }
 async function deleteEntry(id){ if(!confirm('Eliminare scheda?')) return; try{ await db.collection("schede_TI").doc(id).delete(); notify('Scheda eliminata','error'); } catch(err){ console.error(err); } }
 
-// PDF EXPORT
+// PDF EXPORT SCHEDA SINGOLA (Migliorata la struttura della tabella per la stampa)
 async function exportSinglePDF(id){
   const e = entries.find(x => x.id === id); 
   if(!e) return;
 
   const pdfDiv = document.createElement('div');
-  pdfDiv.style.width = '800px';
+  pdfDiv.style.width = '190mm'; /* Dimensioni A4 più affidabili */
   pdfDiv.style.padding = '8px';
   pdfDiv.style.background = '#fff';
   pdfDiv.style.fontFamily = 'Arial, sans-serif';
@@ -359,30 +369,53 @@ async function exportSinglePDF(id){
     </div>
     <h1 style="text-align:center;font-weight:bold;font-size:13px;margin-bottom:5px;">Scheda Paziente TI</h1>
 
-    <h2>Info paziente</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
-      <tr><td style="font-weight:bold;">Missione</td><td>${escapeHtml(e.missione)}</td></tr>
-      <tr><td style="font-weight:bold;">Data</td><td>${escapeHtml(dataIt)}</td></tr>
-      <tr><td style="font-weight:bold;">Nome e Cognome</td><td>${escapeHtml(e.nome)}</td></tr>
-      <tr><td style="font-weight:bold;">Età</td><td>${escapeHtml(e.eta)}</td></tr>
-      <tr><td style="font-weight:bold;">Data di nascita</td><td>${escapeHtml(e.dob)}</td></tr>
-      <tr><td style="font-weight:bold;">Corporatura</td><td>${escapeHtml(e.corporatura)}</td></tr>
-      <tr><td style="font-weight:bold;">Patologia</td>
-          <td style="font-size:${getFontSize(e.patologia)}; word-wrap:break-word;">${escapeHtml(e.patologia)}</td></tr>
-      <tr><td style="font-weight:bold;">Motivo trasporto</td><td>${escapeHtml(e.motivo)}</td></tr>
+    <h2 style="font-size:12px; margin-top:8px;">Info paziente</h2>
+    <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px;">
+      <tr style="background:#f3f4f6;">
+        <td style="width:30%; font-weight:bold; border:1px solid #ddd; padding:4px;">Missione</td>
+        <td style="width:70%; border:1px solid #ddd; padding:4px;">${escapeHtml(e.missione)}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">Data</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(dataIt)}</td>
+      </tr>
+      <tr style="background:#f3f4f6;">
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px;">Nome e Cognome</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.nome)}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">Età</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.eta)}</td>
+      </tr>
+      <tr style="background:#f3f4f6;">
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px;">Data di nascita</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.dob)}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">Corporatura</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.corporatura)}</td>
+      </tr>
+      <tr style="background:#f3f4f6;">
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px;">Patologia</td>
+        <td style="border:1px solid #ddd; padding:4px; font-size:${getFontSize(e.patologia)}; word-wrap:break-word;">${escapeHtml(e.patologia)}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">Motivo trasporto</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.motivo)}</td>
+      </tr>
     </table>
 
-    <h2>Partenza / Arrivo</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
+    <h2 style="font-size:12px; margin-top:8px;">Partenza / Arrivo</h2>
+    <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px;">
       <tr>
-        <td style="width:50%; vertical-align:top; font-weight:bold;">
+        <td style="width:50%; vertical-align:top; border:1px solid #ddd; padding:4px; background:#f3f4f6; font-weight:bold;">
           Partenza<br>
           Città: <span style="font-weight:normal">${escapeHtml(e.partenzaCitta)}</span><br>
           Via: <span style="font-weight:normal">${escapeHtml(e.partenzaVia)}</span><br>
           Piano: <span style="font-weight:normal">${escapeHtml(e.partenzaNum)}</span><br>
           Ascensore: <span style="font-weight:normal">${escapeHtml(e.partenzaAscensore)}</span>
         </td>
-        <td style="width:50%; vertical-align:top; font-weight:bold;">
+        <td style="width:50%; vertical-align:top; border:1px solid #ddd; padding:4px; font-weight:bold;">
           Arrivo<br>
           Città: <span style="font-weight:normal">${escapeHtml(e.arrivoCitta)}</span><br>
           Via: <span style="font-weight:normal">${escapeHtml(e.arrivoVia)}</span><br>
@@ -392,50 +425,81 @@ async function exportSinglePDF(id){
       </tr>
     </table>
 
-    <h2>PDC</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
-      <tr><td style="font-weight:bold;">PDC</td><td>${escapeHtml(e.pdc)}</td></tr>
-      <tr><td style="font-weight:bold;">Telefono</td><td>${escapeHtml(e.tel)}</td></tr>
-    </table>
-
-    <h2>Team</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
-      <tr><td style="font-weight:bold;">Autista</td><td>${escapeHtml(e.autista)}</td></tr>
-      <tr><td style="font-weight:bold;">1° Soccorritore</td><td>${escapeHtml(e.socc1)}</td></tr>
-      <tr><td style="font-weight:bold;">2° Soccorritore</td><td>${escapeHtml(e.socc2)}</td></tr>
-      <tr><td style="font-weight:bold;">3° Soccorritore</td><td>${escapeHtml(e.socc3)}</td></tr>
-      <tr><td style="font-weight:bold;">Tirocinante</td><td>${escapeHtml(e.tiro)}</td></tr>
-    </table>
-
-    <h2>Info trasporto</h2>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; padding:3px;">
-      <tr><td style="font-weight:bold;">Arrivo in sede</td><td>${escapeHtml(e.arrivoSede)}</td></tr>
-      <tr><td style="font-weight:bold;">Arrivo dal paziente</td><td>${escapeHtml(e.arrivoPaz)}</td></tr>
-      <tr><td style="font-weight:bold;">Arrivo a destinazione</td><td>${escapeHtml(e.arrivoDest)}</td></tr>
-      <tr><td style="font-weight:bold;">Mezzo assegnato</td><td>${escapeHtml(e.mezzo)}</td></tr>
-      <tr><td style="font-weight:bold;">Prezzo</td><td>${escapeHtml(e.prezzo)}</td></tr>
-      <tr><td style="font-weight:bold;">Sede</td><td>${escapeHtml(e.sede)}</td></tr>       <tr><td style="font-weight:bold;">Presidi necessari</td><td>${escapeHtml(e.presidi)}</td></tr>
-      <tr><td style="font-weight:bold;">Note</td>
-          <td style="font-size:${getFontSize(e.note)}; word-wrap:break-word;">${escapeHtml(e.note)}</td></tr>
+    <h2 style="font-size:12px; margin-top:8px;">PDC / Team</h2>
+    <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px;">
       <tr>
+        <td style="width:25%; font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">PDC</td>
+        <td style="width:25%; border:1px solid #ddd; padding:4px;">${escapeHtml(e.pdc)}</td>
+        <td style="width:25%; font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">Autista</td>
+        <td style="width:25%; border:1px solid #ddd; padding:4px;">${escapeHtml(e.autista)}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">Telefono</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.tel)}</td>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">1° Socc.</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.socc1)}</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="border:none;"></td>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">2° Socc.</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.socc2)}</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="border:none;"></td>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">3° Socc.</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.socc3)}</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="border:none;"></td>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">Tirocinante</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.tiro)}</td>
+      </tr>
     </table>
 
-    <div style="text-align:right; color:red; font-weight:bold; margin-top:5px;">
+    <h2 style="font-size:12px; margin-top:8px;">Info trasporto</h2>
+    <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px;">
+      <tr style="background:#f3f4f6;">
+        <td style="width:30%; font-weight:bold; border:1px solid #ddd; padding:4px;">Arrivo in sede</td><td style="width:20%; border:1px solid #ddd; padding:4px;">${escapeHtml(e.arrivoSede)}</td>
+        <td style="width:30%; font-weight:bold; border:1px solid #ddd; padding:4px;">Mezzo assegnato</td><td style="width:20%; border:1px solid #ddd; padding:4px;">${escapeHtml(e.mezzo)}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">Arrivo dal paziente</td><td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.arrivoPaz)}</td>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">Prezzo</td><td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.prezzo)}</td>
+      </tr>
+      <tr style="background:#f3f4f6;">
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px;">Arrivo a destinazione</td><td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.arrivoDest)}</td>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px;">Sede</td><td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.sede)}</td>
+      </tr>
+    </table>
+
+    <h2 style="font-size:12px; margin-top:8px;">Presidi / Note / Firma</h2>
+    <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px;">
+      <tr style="background:#f3f4f6;">
+        <td style="width:20%; font-weight:bold; border:1px solid #ddd; padding:4px;">Presidi necessari</td>
+        <td style="width:80%; border:1px solid #ddd; padding:4px; font-size:${getFontSize(e.presidi, 250)}; word-wrap:break-word;">${escapeHtml(e.presidi)}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px; background:#f3f4f6;">Note</td>
+        <td style="border:1px solid #ddd; padding:4px; font-size:${getFontSize(e.note, 250)}; word-wrap:break-word;">${escapeHtml(e.note)}</td>
+      </tr>
+      <tr style="background:#f3f4f6;">
+        <td style="font-weight:bold; border:1px solid #ddd; padding:4px;">Operatore compilatore</td>
+        <td style="border:1px solid #ddd; padding:4px;">${escapeHtml(e.firmaRef)}</td>
+      </tr>
+    </table>
+
+    <div style="text-align:right; color:red; font-weight:bold; margin-top:5px; font-size:10px;">
       Generato il : ${new Date(e.timestamp).toLocaleString('it-IT')}
     </div>
   `;
-
-  pdfDiv.querySelectorAll('table').forEach(t => {
-    t.style.tableLayout = 'fixed';
-    t.style.wordWrap = 'break-word';
-  });
 
   document.body.appendChild(pdfDiv);
 
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
-  const scale = 190 / pdfDiv.offsetWidth;
-
+  // Ho rimosso la scala fissa basata sulla larghezza del div (meno affidabile)
+  // e mi affido alla larghezza del div fissa (190mm)
+  
   await pdf.html(pdfDiv, {
       callback: function(pdf){
           pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
@@ -443,15 +507,15 @@ async function exportSinglePDF(id){
       },
       x: 10,
       y: 10,
-      width: pdfDiv.offsetWidth,
-      html2canvas: { scale: scale }
+      width: 190, // Larghezza esplicita in mm per A4
+      html2canvas: { scale: 0.9 } // Scaling leggermente ridotto per sicurezza
   });
 
   document.body.removeChild(pdfDiv);
 }
 
 
-// NUOVA FUNZIONE PER GENERARE REPORT PDF
+// FUNZIONE PER GENERARE REPORT PDF (Ottimizzata per mostrare solo Missione, Data, Prezzo)
 async function generateReport(){
   const sedi = ['Taranto', 'Monteiasi'];
   let sedeSelezionata = null;
@@ -475,7 +539,7 @@ async function generateReport(){
   notify(`Filtro report impostato su: ${sedeSelezionata}`,'warning');
 
   // Filtra i dati in base alla sede
-  const filteredEntries = entries.filter(e => e.sede === sedeSelezionata);
+  const filteredEntries = entries.filter(e => e.sede && e.sede.toLowerCase() === sedeSelezionata.toLowerCase());
 
   if(filteredEntries.length === 0){
     notify(`Nessuna scheda trovata per la sede di ${sedeSelezionata}`,'error');
@@ -484,13 +548,13 @@ async function generateReport(){
 
   notify(`Generazione report per ${filteredEntries.length} schede...`,'success');
 
-  // CREAZIONE DEL DIV PER IL REPORT
+  // CREAZIONE DEL DIV PER IL REPORT (USANDO MM PER PRECISIONE)
   const pdfDiv = document.createElement('div');
-  pdfDiv.style.width = '800px';
+  pdfDiv.style.width = '190mm'; 
   pdfDiv.style.padding = '8px';
   pdfDiv.style.background = '#fff';
   pdfDiv.style.fontFamily = 'Arial, sans-serif';
-  pdfDiv.style.fontSize = '11px';
+  pdfDiv.style.fontSize = '10px';
   pdfDiv.style.lineHeight = '1.3';
   pdfDiv.style.color = '#000';
   pdfDiv.style.boxSizing = 'border-box';
@@ -501,19 +565,15 @@ async function generateReport(){
     <h1 style="text-align:center;font-weight:bold;font-size:16px;margin-bottom:10px;">
       Report Trasporti - Sede di ${sedeSelezionata}
     </h1>
-    <div style="font-size:12px; margin-bottom:10px; text-align:right;">
-      Totale Schede: ${filteredEntries.length}
+    <div style="font-size:11px; margin-bottom:8px; text-align:left; font-weight:bold;">
+      Totale Schede Trovate: ${filteredEntries.length}
     </div>
-    <table border="1" style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px;">
+    <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px;">
       <thead>
-        <tr>
-          <th style="width:8%;">Miss. N°</th>
-          <th style="width:12%;">Data</th>
-          <th style="width:20%;">Paziente</th>
-          <th style="width:15%;">Autista</th>
-          <th style="width:15%;">Stato</th>
-          <th style="width:15%;">Mezzo</th>
-          <th style="width:15%;">Prezzo</th>
+        <tr style="background:#f3f4f6;">
+          <th style="width:30%; text-align:left; padding:5px; border:1px solid #000;">Missione N°</th>
+          <th style="width:30%; text-align:left; padding:5px; border:1px solid #000;">Data</th>
+          <th style="width:40%; text-align:right; padding:5px; border:1px solid #000;">Prezzo</th>
         </tr>
       </thead>
       <tbody>
@@ -522,19 +582,17 @@ async function generateReport(){
   // CORPO DEL REPORT (una riga per scheda)
   let totaliPrezzo = 0;
   filteredEntries.forEach(e => {
-    const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
-    const prezzoNumero = parseFloat(e.prezzo.replace('€','').replace(',','.')) || 0;
+    const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : 'N/D';
+    
+    const prezzoClean = String(e.prezzo || '0').replace('€','').replace(',','.');
+    const prezzoNumero = parseFloat(prezzoClean) || 0;
     totaliPrezzo += prezzoNumero;
     
     htmlContent += `
       <tr>
-        <td>${escapeHtml(e.missione)}</td>
-        <td>${escapeHtml(dataIt)}</td>
-        <td>${escapeHtml(e.nome)}</td>
-        <td>${escapeHtml(e.autista)}</td>
-        <td>${escapeHtml(e.stato)}</td>
-        <td>${escapeHtml(e.mezzo)}</td>
-        <td>${escapeHtml(e.prezzo)}</td>
+        <td style="text-align:left; padding:4px; border:1px solid #ddd;">${escapeHtml(e.missione)}</td>
+        <td style="text-align:left; padding:4px; border:1px solid #ddd;">${escapeHtml(dataIt)}</td>
+        <td style="text-align:right; padding:4px; border:1px solid #ddd;">${escapeHtml(e.prezzo)}</td>
       </tr>
     `;
   });
@@ -543,8 +601,8 @@ async function generateReport(){
   htmlContent += `
       </tbody>
     </table>
-    <div style="font-size:12px; font-weight:bold; margin-top:10px; text-align:right;">
-      TOTALE Prezzi: ${totaliPrezzo.toFixed(2)}€
+    <div style="font-size:12px; font-weight:bold; margin-top:15px; text-align:right; padding-right:4px; border-top:2px solid #000;">
+      TOTALE Prezzi Complessivo: ${totaliPrezzo.toFixed(2)}€
     </div>
     <div style="text-align:right; color:#555; font-size:10px; margin-top:20px;">
       Report generato in data: ${new Date().toLocaleString('it-IT')}
@@ -557,7 +615,6 @@ async function generateReport(){
 
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
-  const scale = 190 / pdfDiv.offsetWidth; // Adatta alla larghezza della pagina
 
   await pdf.html(pdfDiv, {
       callback: function(pdf){
@@ -566,8 +623,8 @@ async function generateReport(){
       },
       x: 10,
       y: 10,
-      width: pdfDiv.offsetWidth,
-      html2canvas: { scale: scale }
+      width: 190, // Larghezza esplicita in mm
+      html2canvas: { scale: 0.9 } // Scaling leggermente ridotto
   });
 
   document.body.removeChild(pdfDiv);
