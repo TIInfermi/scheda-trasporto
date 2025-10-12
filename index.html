@@ -247,7 +247,6 @@ function getFormData(){
   let prezzoVal = parseFloat(document.getElementById('prezzo').value.replace(',','.')) || 0; prezzoVal = prezzoVal.toFixed(2)+'€';
   
   // Sede
-  let sedeInput = document.getElementById('sedeNumero').value.trim();
   let sedeSelect = document.getElementById('sede').value;
   let sedeFinal = '';
   if(sedeInput==='1') sedeFinal='Taranto';
@@ -523,6 +522,7 @@ async function generatePDFReport(){
 </script>
 </body>
 </html>
+
 
 
 
