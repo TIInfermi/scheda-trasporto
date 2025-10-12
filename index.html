@@ -182,12 +182,11 @@ header img.logo { display:block; margin:0 auto; }
       </select>
     </label></div>
 
-<div class="buttons">
-  <button type="submit">Salva scheda TI</button>
-  <button type="button" onclick="resetForm()">Pulisci scheda TI</button>
-  <button type="button" onclick="generatePDFReport()">Genera report PDF</button>
-  <button type="button" onclick="showLogs()">Visualizza log attività</button>
-</div>
+    <div class="buttons">
+      <button type="submit">Salva scheda TI</button>
+      <button type="button" onclick="resetForm()">Pulisci scheda TI</button>
+      <button type="button" onclick="generatePDFReport()">Genera report PDF</button>
+    </div>
   </form>
 
   <div id="pdfArea">
@@ -269,8 +268,6 @@ function login(){
 
 function logout(){
   auth.signOut().then(()=>{ notify('Logout eseguito, prego riaccedi','error'); });
-  addLog('Logout utente', '');
-
 }
 
 // RUNTIME
@@ -352,7 +349,6 @@ async function saveEntry(){
   if(!data.missione){ alert('Compila Missione'); return; }
   try{
     await db.collection("schede_TI").doc(data.id).set(data);
-    addLog(editingId ? 'Modifica scheda' : 'Salvataggio scheda', `Missione: ${data.missione}`);
     notify(editingId ? 'Scheda aggiornata' : 'Scheda salvata','success');
     resetForm();
   } catch(err){ console.error(err); notify('Errore nel salvataggio','error'); }
@@ -408,14 +404,12 @@ function editEntry(id){
 async function deleteEntry(id){
   if(!confirm('Eliminare scheda?')) return;
   try{ await db.collection("schede_TI").doc(id).delete(); notify('Scheda eliminata','error'); }
-    addLog('Eliminazione scheda', `ID: ${id}`);
   catch(err){ console.error(err); }
 }
 
 // EXPORT SINGLE PDF
 async function exportSinglePDF(id){
   const e = entries.find(x => x.id === id); 
-  addLog('Generazione PDF singolo', `Missione: ${e.missione}`);
   if(!e) return;
 
   const pdfDiv = document.createElement('div');
@@ -534,7 +528,6 @@ async function exportSinglePDF(id){
   // GENERA PDF ELENCO PER SEDE
 async function generatePDFReport(){
   let sedeInput = prompt('Inserisci la sede per generare l\'elenco (1 = Taranto, 2 = Monteiasi)');
-  addLog('Generazione report PDF', `Sede: ${sedeName}`);
   if(!sedeInput) return;
   let sedeName = sedeInput==='1'?'Taranto': sedeInput==='2'?'Monteiasi': sedeInput;
 
@@ -582,67 +575,6 @@ async function generatePDFReport(){
   notify('Elenco generato e download avviato','success');
 }
 
-// ====== LOG ATTIVITÀ ======
-let activityLogs = [];
-
-// Registra un evento
-function addLog(action, details='') {
-  const user = auth.currentUser ? auth.currentUser.email : 'Utente sconosciuto';
-  const timestamp = new Date().toLocaleString('it-IT');
-  const logEntry = { timestamp, user, action, details };
-  activityLogs.unshift(logEntry); // Inserisce in cima
-  console.log('LOG:', logEntry);
-
-  // Salva anche su localStorage (persistente)
-  localStorage.setItem('activityLogs', JSON.stringify(activityLogs));
-}
-
-// Carica log salvati (se esistono)
-if (localStorage.getItem('activityLogs')) {
-  activityLogs = JSON.parse(localStorage.getItem('activityLogs'));
-}
-
-// Mostra la finestra dei log
-function showLogs() {
-  const tbody = document.querySelector('#logTable tbody');
-  tbody.innerHTML = '';
-  if (activityLogs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Nessuna attività registrata</td></tr>`;
-  } else {
-    for (const log of activityLogs) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${log.timestamp}</td>
-        <td>${log.user}</td>
-        <td>${log.action}</td>
-        <td>${log.details}</td>`;
-      tbody.appendChild(tr);
-    }
-  }
-  document.getElementById('logModal').style.display = 'flex';
-}
-
-// Chiudi finestra log
-function closeLogs() {
-  document.getElementById('logModal').style.display = 'none';
-}
-
-  
 </script>
-  <!-- MODAL LOG ATTIVITÀ -->
-<div id="logModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
-  background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
-  <div style="background:#fff; width:90%; max-width:700px; padding:20px; border-radius:10px; position:relative; max-height:80vh; overflow-y:auto;">
-    <h2 style="text-align:center;">📋 Log Attività</h2>
-    <button onclick="closeLogs()" style="position:absolute; top:10px; right:15px; background:#b33a3a; color:#fff; border:none; border-radius:6px; padding:4px 10px; cursor:pointer;">Chiudi</button>
-    <table id="logTable" style="width:100%; border-collapse:collapse; margin-top:15px;">
-      <thead>
-        <tr style="background:#f3f4f6;"><th>Data/Ora</th><th>Utente</th><th>Azione</th><th>Dettagli</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-
 </body>
 </html>
