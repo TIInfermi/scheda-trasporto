@@ -88,6 +88,9 @@ header img.logo { display:block; margin:0 auto; }
           <option>Trasporto generico</option>
           <option>Accompagnamento</option>
           <option>Visita tra ospedali</option>
+          <option>Dialisi</option>
+          <option>Terapia continuativa</option>
+          <option>Taxi Sociale</option>
         </select>
       </label>
     </div>
@@ -162,7 +165,6 @@ header img.logo { display:block; margin:0 auto; }
           <option value="1">Taranto</option>
           <option value="2">Monteiasi</option>
         </select>
-        <input type="text" id="sedeNumero" placeholder="Inserisci 1 per Taranto o 2 per Monteiasi" style="margin-top:6px;">
       </label>
     </div>
 
@@ -194,7 +196,7 @@ header img.logo { display:block; margin:0 auto; }
     <div id="dataTableWrapper">
       <table id="dataTable">
         <thead>
-          <tr><th>Missione N°</th><th>Data</th><th>Stato</th><th>Operatore</th><th>Azioni</th></tr>
+          <tr><th>Missione N°</th><th>Data</th><th>Stato</th><th>Operatore</th><th>Sede</th><th>Azioni</th></tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -319,17 +321,19 @@ function renderTable(){
     if(searchTerm && !e.missione.toLowerCase().includes(searchTerm) && !(e.nome||'').toLowerCase().includes(searchTerm)) continue;
     const tr = document.createElement('tr');
     const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
-    tr.innerHTML = `
-      <td>${escapeHtml(e.missione)}</td>
-      <td>${escapeHtml(dataIt)}</td>
-      <td>${escapeHtml(e.stato)}</td>
-      <td>${escapeHtml(e.firmaRef)}</td>
-      <td>
-        <button onclick="editEntry('${e.id}')">Modifica</button>
-        <button onclick="deleteEntry('${e.id}')">Elimina</button>
-        <button onclick="exportSinglePDF('${e.id}')">PDF</button>
-      </td>
-    `;
+tr.innerHTML = `
+  <td>${escapeHtml(e.missione)}</td>
+  <td>${escapeHtml(dataIt)}</td>
+  <td>${escapeHtml(e.stato)}</td>
+  <td>${escapeHtml(e.firmaRef)}</td>
+  <td>${escapeHtml(e.sede)}</td>
+  <td>
+    <button onclick="editEntry('${e.id}')">Modifica</button>
+    <button onclick="deleteEntry('${e.id}')">Elimina</button>
+    <button onclick="exportSinglePDF('${e.id}')">PDF</button>
+  </td>
+`;
+
     tbody.appendChild(tr);
   }
 }
@@ -520,4 +524,5 @@ async function generatePDFReport(){
 </script>
 </body>
 </html>
+
 
