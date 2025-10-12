@@ -37,8 +37,6 @@ header img.logo { display:block; margin:0 auto; }
 .notification.error { background:rgba(220,20,60,0.85); }
 .notification.warning { background:rgba(255,165,0,0.85); }
 .notification .close { position:absolute; top:5px; right:8px; font-weight:bold; cursor:pointer; }
-
-/* SEARCH BAR E SCROLL TABLE */
 #searchBar { width:100%; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-sizing:border-box; }
 #dataTableWrapper { max-height:400px; overflow-y:auto; }
 </style>
@@ -156,6 +154,18 @@ header img.logo { display:block; margin:0 auto; }
     <div class="full"><label>Presidi necessari<textarea id="presidi"></textarea></label></div>
     <div class="full"><label>Note<textarea id="note"></textarea></label></div>
 
+    <!-- NUOVO CAMPO SEDE -->
+    <div class="full">
+      <label>Sede
+        <select id="sede">
+          <option value="">-- Seleziona Sede --</option>
+          <option value="1">Taranto</option>
+          <option value="2">Monteiasi</option>
+        </select>
+        <input type="text" id="sedeNumero" placeholder="Inserisci 1 per Taranto o 2 per Monteiasi" style="margin-top:6px;">
+      </label>
+    </div>
+
     <div class="full" style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1">
         <label>Operatore che ha compilato la scheda</label>
@@ -174,12 +184,12 @@ header img.logo { display:block; margin:0 auto; }
     <div class="buttons">
       <button type="submit">Salva scheda TI</button>
       <button type="button" onclick="resetForm()">Pulisci scheda TI</button>
+      <button type="button" onclick="generatePDFReport()">Genera PDF elenco</button>
     </div>
   </form>
 
   <div id="pdfArea">
     <h2>Elenco schede TI</h2>
-    <button onclick="generateReport()">Genera PDF elenco</button>
     <input type="text" id="searchBar" placeholder="Cerca scheda...">
     <div id="dataTableWrapper">
       <table id="dataTable">
@@ -234,6 +244,15 @@ function setupRealtimeListener(){ db.collection("schede_TI").orderBy("timestamp"
 // FORM DATA
 function getFormData(){
   let prezzoVal = parseFloat(document.getElementById('prezzo').value.replace(',','.')) || 0; prezzoVal = prezzoVal.toFixed(2)+'€';
+  
+  // Sede
+  let sedeInput = document.getElementById('sedeNumero').value.trim();
+  let sedeSelect = document.getElementById('sede').value;
+  let sedeFinal = '';
+  if(sedeInput==='1') sedeFinal='Taranto';
+  else if(sedeInput==='2') sedeFinal='Monteiasi';
+  else sedeFinal = sedeSelect==='1'?'Taranto': sedeSelect==='2'?'Monteiasi': sedeSelect;
+
   return {
     id: editingId||uid(),
     missione: document.getElementById('missione').value,
@@ -268,6 +287,7 @@ function getFormData(){
     note: document.getElementById('note').value,
     firmaRef: document.getElementById('firmaRef').value,
     stato: document.getElementById('stato').value,
+    sede: sedeFinal,
     timestamp: new Date().toISOString()
   };
 }
@@ -295,13 +315,10 @@ function renderTable(){
   const tbody = document.querySelector('#dataTable tbody'); 
   tbody.innerHTML = '';
   const searchTerm = document.getElementById('searchBar').value.toLowerCase();
-
   for(const e of entries){
     if(searchTerm && !e.missione.toLowerCase().includes(searchTerm) && !(e.nome||'').toLowerCase().includes(searchTerm)) continue;
-
     const tr = document.createElement('tr');
     const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
-
     tr.innerHTML = `
       <td>${escapeHtml(e.missione)}</td>
       <td>${escapeHtml(dataIt)}</td>
@@ -313,7 +330,6 @@ function renderTable(){
         <button onclick="exportSinglePDF('${e.id}')">PDF</button>
       </td>
     `;
-
     tbody.appendChild(tr);
   }
 }
@@ -325,92 +341,63 @@ document.getElementById('searchBar').addEventListener('input', renderTable);
 function editEntry(id){ const e=entries.find(x=>x.id===id); if(!e) return; editingId=id; for(const key in e){ if(document.getElementById(key)) document.getElementById(key).value=e[key]; } notify('Modifiche abilitate','warning'); window.scrollTo({top:0,behavior:'smooth'}); }
 async function deleteEntry(id){ if(!confirm('Eliminare scheda?')) return; try{ await db.collection("schede_TI").doc(id).delete(); notify('Scheda eliminata','error'); } catch(err){ console.error(err); } }
 
-// PDF EXPORT SINGOLO
-async function exportSinglePDF(id){
-  const e = entries.find(x => x.id === id); 
-  if(!e) return;
+// PDF ELENCO PER SEDE
+async function generatePDFReport(){
+  let sedeInput = prompt('Inserisci la sede per generare l\'elenco (1 = Taranto, 2 = Monteiasi)');
+  if(!sedeInput) return;
+
+  let sedeName = sedeInput==='1'?'Taranto': sedeInput==='2'?'Monteiasi': sedeInput;
+  const filtered = entries.filter(e=>e.sede===sedeName);
+
+  if(filtered.length===0){ notify('Nessuna scheda trovata per la sede selezionata','error'); return; }
 
   const pdfDiv = document.createElement('div');
-  pdfDiv.style.width = '800px';
-  pdfDiv.style.padding = '8px';
-  pdfDiv.style.background = '#fff';
-  pdfDiv.style.fontFamily = 'Arial, sans-serif';
-  pdfDiv.style.fontSize = '11px';
-  pdfDiv.style.lineHeight = '1.3';
-  pdfDiv.style.color = '#000';
-  pdfDiv.style.boxSizing = 'border-box';
-  pdfDiv.style.wordWrap = 'break-word';
+  pdfDiv.style.width='800px'; pdfDiv.style.padding='8px'; pdfDiv.style.background='#fff'; pdfDiv.style.fontFamily='Arial, sans-serif';
+  pdfDiv.style.fontSize='12px'; pdfDiv.style.lineHeight='1.3'; pdfDiv.style.color='#000'; pdfDiv.style.boxSizing='border-box';
 
-  const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
+  let tableRows = '';
+  let totalPrezzo = 0;
+  filtered.forEach(e=>{
+    let prezzoNum = parseFloat((e.prezzo||'0').replace('€','').replace(',','.')) || 0;
+    totalPrezzo += prezzoNum;
+    let dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
+    tableRows += `<tr>
+      <td>${escapeHtml(e.missione)}</td>
+      <td>${escapeHtml(dataIt)}</td>
+      <td>${escapeHtml(e.prezzo)}</td>
+      <td>${escapeHtml(e.sede)}</td>
+    </tr>`;
+  });
 
-  function getFontSize(str, maxLength=150){ 
-    return str && str.length > maxLength ? '10px' : '11px'; 
-  }
-
-  pdfDiv.innerHTML = `...`; // lascia intatto il contenuto già esistente della singola scheda
+  pdfDiv.innerHTML = `
+    <h2 style="text-align:center;">Elenco schede - ${sedeName}</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; font-size:12px;">
+      <tr><th>Missione</th><th>Data</th><th>Prezzo</th><th>Sede</th></tr>
+      ${tableRows}
+      <tr><td colspan="3" style="font-weight:bold;">Totale schede</td><td>${filtered.length}</td></tr>
+      <tr><td colspan="3" style="font-weight:bold;">Prezzo totale</td><td>${totalPrezzo.toFixed(2)}€</td></tr>
+    </table>
+    <div style="text-align:right; margin-top:10px; font-weight:bold;">
+      Report generato il: ${new Date().toLocaleString('it-IT')}
+    </div>
+  `;
 
   document.body.appendChild(pdfDiv);
-
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
   const scale = 190 / pdfDiv.offsetWidth;
 
   await pdf.html(pdfDiv, {
       callback: function(pdf){
-          pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
-          notify('PDF generato, download avviato','success');
+          pdf.save(`elenco_${sedeName}.pdf`);
+          notify('Elenco generato e download avviato','success');
       },
-      x: 10,
-      y: 10,
+      x:10,
+      y:10,
       width: pdfDiv.offsetWidth,
-      html2canvas: { scale: scale }
+      html2canvas:{ scale:scale }
   });
-
   document.body.removeChild(pdfDiv);
-}
-
-// ----------------------
-// NUOVA FUNZIONE PDF ELENCO
-async function generateReport(){
-  const sede = prompt("Inserisci la sede per il report:","");
-  if(sede===null) return; // annullato
-  const filtered = entries.filter(e=>!sede || (e.arrivoCitta || '').toLowerCase()===sede.toLowerCase());
-  if(filtered.length===0){ notify('Nessuna scheda per la sede selezionata','error'); return; }
-
-  const div = document.createElement('div');
-  div.style.width='800px'; div.style.padding='8px'; div.style.background='#fff'; div.style.fontFamily='Arial, sans-serif'; div.style.fontSize='11px'; div.style.color='#000';
-
-  let html = `<h1 style="text-align:center;">Elenco schede TI - Sede: ${escapeHtml(sede)}</h1>`;
-  html += `<table border="1" style="width:100%;border-collapse:collapse;font-size:11px;">`;
-  html += `<tr><th>Missione</th><th>Data</th><th>Prezzo</th><th>Sede</th></tr>`;
-
-  let totalePrezzo = 0;
-  for(const e of filtered){
-    const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
-    const prezzoNum = parseFloat((e.prezzo||'0').replace('€','').replace(',','.'))||0;
-    totalePrezzo += prezzoNum;
-    html += `<tr>
-      <td>${escapeHtml(e.missione)}</td>
-      <td>${escapeHtml(dataIt)}</td>
-      <td>${prezzoNum.toFixed(2)}€</td>
-      <td>${escapeHtml(e.arrivoCitta)}</td>
-    </tr>`;
-  }
-  html += `<tr><td colspan="2"><strong>Totale trasporti: ${filtered.length}</strong></td><td colspan="2"><strong>Totale prezzo: ${totalePrezzo.toFixed(2)}€</strong></td></tr>`;
-  html += `</table>`;
-  html += `<div style="text-align:right;margin-top:5px;">Generato il: ${new Date().toLocaleString('it-IT')}</div>`;
-  div.innerHTML = html;
-  document.body.appendChild(div);
-
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p','mm','a4');
-  const scale = 190 / div.offsetWidth;
-  await pdf.html(div,{
-    callback: function(pdf){ pdf.save(`elenco_schede_${sede}.pdf`); notify('Elenco generato, download avviato','success'); },
-    x:10, y:10, width: div.offsetWidth, html2canvas:{scale:scale}
-  });
-
-  document.body.removeChild(div);
 }
 </script>
 </body>
