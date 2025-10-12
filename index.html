@@ -558,10 +558,10 @@ async function generatePDFReport(){
     <table border="1" style="width:100%; border-collapse:collapse; font-size:12px;">
       <tr><th>Missione</th><th>Data</th><th>Prezzo</th><th>Sede</th></tr>
       ${tableRows}
-      <tr><td colspan="3" style="font-weight:bold;">Totale schede</td><td>${filtered.length}</td></tr>
-      <tr><td colspan="3" style="font-weight:bold;">Prezzo totale</td><td>${totalPrezzo.toFixed(2)}€</td></tr>
+      <tr><td colspan="3" style="font-weight:bold;">Totale trasporti</td><td>${filtered.length}</td></tr>
+      <tr><td colspan="3" style="font-weight:bold;">Totale entrate</td><td>${totalPrezzo.toFixed(2)}€</td></tr>
     </table>
-    <div style="text-align:right; margin-top:10px; font-weight:bold;">
+    <div style="text-align:center; color:red; font-weight:bold; margin-top:10px;">
       Report generato il: ${new Date().toLocaleString('it-IT')}
     </div>
   `;
@@ -578,6 +578,7 @@ async function generatePDFReport(){
 </script>
 </body>
 </html>
+
 
 
 
