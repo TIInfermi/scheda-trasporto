@@ -39,9 +39,6 @@ header img.logo { display:block; margin:0 auto; }
 .notification .close { position:absolute; top:5px; right:8px; font-weight:bold; cursor:pointer; }
 #searchBar { width:100%; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-sizing:border-box; }
 #dataTableWrapper { max-height:400px; overflow-y:auto; }
-#logViewer { display:none; margin-top:20px; background:#fff; padding:12px; border-radius:8px; box-shadow:0 6px 16px rgba(0,0,0,0.06); }
-.small-muted { font-size:12px; color:#666; }
-.btn-secondary { background:#6b7280; }
 </style>
 </head>
 <body>
@@ -76,9 +73,9 @@ header img.logo { display:block; margin:0 auto; }
     <div><label>Missione numero<input id="missione" required></label></div>
     <div><label>Data<input type="date" id="data" required></label></div>
     <div><label>Nome e Cognome<input id="nome"></label></div>
-    <div><label>Età<input id="eta" type="number" min="0" step="1"></label></div>
+    <div><label>Età<input type="number" id="eta" min="0" step="1"></label></div>
     <div><label>Data di nascita<input type="date" id="dob"></label></div>
-    <div><label>Corporatura<input id="corporatura" type="number" min="0" step="1"></label></div>
+    <div><label>Corporatura<input type="number" id="corporatura" min="0" step="1"></label></div>
     <div class="full"><label>Patologia<textarea id="patologia"></textarea></label></div>
     
     <div class="full">
@@ -128,12 +125,12 @@ header img.logo { display:block; margin:0 auto; }
       </label>
     </div>
 
-    <!-- PDC Section -->
-    <div class="section-title">PDC</div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-      <div><label>PDC<input id="pdc" type="text"></label></div>
-      <div><label>Telefono PDC<input id="number" type="text"></label></div>
-    </div>
+<!-- PDC Section -->
+<div class="section-title">PDC</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+  <div><label>PDC<input id="pdc" type="text"></label></div>
+  <div><label>Telefono PDC<input id="number" type="text"></label></div>
+</div>
 
     <div class="section-title">Team</div>
     <div><label>Autista Soccorritore<input id="autista"></label></div>
@@ -185,12 +182,12 @@ header img.logo { display:block; margin:0 auto; }
       </select>
     </label></div>
 
-    <div class="buttons">
-      <button type="submit">Salva scheda TI</button>
-      <button type="button" onclick="resetForm()" class="btn-secondary">Pulisci scheda TI</button>
-      <button type="button" onclick="generatePDFReport()">Genera report PDF</button>
-      <button id="logBtn" type="button" onclick="showActivityLog()" style="display:none;">Visualizza log attività</button>
-    </div>
+<div class="buttons">
+  <button type="submit">Salva scheda TI</button>
+  <button type="button" onclick="resetForm()">Pulisci scheda TI</button>
+  <button type="button" onclick="generatePDFReport()">Genera report PDF</button>
+  <button type="button" onclick="showLogs()">Visualizza log attività</button>
+</div>
   </form>
 
   <div id="pdfArea">
@@ -206,24 +203,9 @@ header img.logo { display:block; margin:0 auto; }
     </div>
   </div>
 
-  <!-- LOG VIEWER -->
-  <div id="logViewer">
-    <h2>Registro attività</h2>
-    <p class="small-muted">Visibile solo a <strong>postazioneinfermi@ta.com</strong></p>
-    <table border="1" style="width:100%; border-collapse:collapse; font-size:13px;">
-      <thead><tr><th>Data/Ora</th><th>Utente</th><th>Azione</th><th>Dettagli</th></tr></thead>
-      <tbody id="logTableBody"></tbody>
-    </table>
-    <div style="margin-top:10px;">
-      <button onclick="hideActivityLog()" class="btn-secondary">Chiudi</button>
-      <button onclick="exportLogsPDF()" style="margin-left:8px;">Esporta log in PDF</button>
-    </div>
-  </div>
-
   <footer>© Antonio Troiani, Tutti i diritti riservati</footer>
 </div>
 
-<!-- LIBS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -247,11 +229,10 @@ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 // VARIABILI GLOBALI
 let entries = [], editingId = null;
-const ADMIN_EMAIL = "postazioneinfermi@ta.com";
 
 // UTILITY
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-function escapeHtml(str){ if(str===null || str===undefined) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // NOTIFICHE
 function notify(msg,type='success'){
@@ -274,21 +255,6 @@ function resetInactivity(){
 }
 document.onmousemove = resetInactivity; document.onkeypress = resetInactivity; document.onclick = resetInactivity; document.onscroll = resetInactivity;
 
-// LOG ATTIVITÀ
-async function logActivity(action, details='') {
-  const user = auth.currentUser;
-  try {
-    await db.collection('activity_logs').add({
-      userEmail: user ? user.email : 'anonimo',
-      action,
-      details,
-      timestamp: new Date().toISOString()
-    });
-  } catch (err) {
-    console.error('Errore log attività:', err);
-  }
-}
-
 // LOGIN / LOGOUT
 function login(){
   const email = document.getElementById('loginEmail').value;
@@ -297,13 +263,14 @@ function login(){
   const persistence = remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
   auth.setPersistence(persistence)
     .then(()=>auth.signInWithEmailAndPassword(email,password))
-    .then(()=>{ notify('Accesso effettuato','success'); logActivity('Login'); })
+    .then(()=>{ notify('Accesso effettuato','success'); })
     .catch(err=>notify(err.message,'error'));
 }
 
 function logout(){
-  logActivity('Logout');
   auth.signOut().then(()=>{ notify('Logout eseguito, prego riaccedi','error'); });
+  addLog('Logout utente', '');
+
 }
 
 // RUNTIME
@@ -313,9 +280,6 @@ auth.onAuthStateChanged(user=>{
     document.getElementById('mainApp').style.display='block'; 
     setupRealtimeListener(); 
     resetInactivity(); 
-    // Mostra pulsante log solo se admin
-    const logBtn = document.getElementById('logBtn');
-    if (logBtn) logBtn.style.display = (user.email === ADMIN_EMAIL) ? 'inline-block' : 'none';
   } else { 
     document.getElementById('loginDiv').style.display='block'; 
     document.getElementById('mainApp').style.display='none'; 
@@ -332,51 +296,53 @@ function setupRealtimeListener(){
 
 // GET FORM DATA
 function getFormData(){
-  let prezzoVal = parseFloat((document.getElementById('prezzo').value || '').replace(',','.')) || 0;
+  let prezzoVal = parseFloat(document.getElementById('prezzo').value.replace(',','.')) || 0;
   prezzoVal = prezzoVal.toFixed(2)+'€';
+
   const sedeSelect = document.getElementById('sede').value;
   const sedeFinal = sedeSelect==='1'?'Taranto': sedeSelect==='2'?'Monteiasi': sedeSelect;
+
   return {
     id: editingId || uid(),
-    missione: document.getElementById('missione').value || '',
-    data: document.getElementById('data').value || '',
-    nome: document.getElementById('nome').value || '',
-    eta: document.getElementById('eta').value || '',
-    dob: document.getElementById('dob').value || '',
-    corporatura: document.getElementById('corporatura').value || '',
-    patologia: document.getElementById('patologia').value || '',
-    motivo: document.getElementById('motivo').value || '',
-    partenzaCitta: document.getElementById('partenzaCitta').value || '',
-    partenzaVia: document.getElementById('partenzaVia').value || '',
-    partenzaNum: document.getElementById('partenzaNum').value || '',
-    partenzaAscensore: document.getElementById('partenzaAscensore').value || '',
-    arrivoCitta: document.getElementById('arrivoCitta').value || '',
-    arrivoVia: document.getElementById('arrivoVia').value || '',
-    arrivoNum: document.getElementById('arrivoNum').value || '',
-    arrivoAscensore: document.getElementById('arrivoAscensore').value || '',
-    pdc: document.getElementById('pdc').value || '',
-    tel: document.getElementById('number').value || '',
-    autista: document.getElementById('autista').value || '',
-    socc1: document.getElementById('socc1').value || '',
-    socc2: document.getElementById('socc2').value || '',
-    socc3: document.getElementById('socc3').value || '',
-    tiro: document.getElementById('tiro').value || '',
-    arrivoSede: document.getElementById('arrivoSede').value || '',
-    arrivoPaz: document.getElementById('arrivoPaz').value || '',
-    arrivoDest: document.getElementById('arrivoDest').value || '',
-    mezzo: document.getElementById('mezzo').value || '',
+    missione: document.getElementById('missione').value,
+    data: document.getElementById('data').value,
+    nome: document.getElementById('nome').value,
+    eta: document.getElementById('eta').value,
+    dob: document.getElementById('dob').value,
+    corporatura: document.getElementById('corporatura').value,
+    patologia: document.getElementById('patologia').value,
+    motivo: document.getElementById('motivo').value,
+    partenzaCitta: document.getElementById('partenzaCitta').value,
+    partenzaVia: document.getElementById('partenzaVia').value,
+    partenzaNum: document.getElementById('partenzaNum').value,
+    partenzaAscensore: document.getElementById('partenzaAscensore').value,
+    arrivoCitta: document.getElementById('arrivoCitta').value,
+    arrivoVia: document.getElementById('arrivoVia').value,
+    arrivoNum: document.getElementById('arrivoNum').value,
+    arrivoAscensore: document.getElementById('arrivoAscensore').value,
+    pdc: document.getElementById('pdc').value,
+    tel: document.getElementById('number').value,
+    autista: document.getElementById('autista').value,
+    socc1: document.getElementById('socc1').value,
+    socc2: document.getElementById('socc2').value,
+    socc3: document.getElementById('socc3').value,
+    tiro: document.getElementById('tiro').value,
+    arrivoSede: document.getElementById('arrivoSede').value,
+    arrivoPaz: document.getElementById('arrivoPaz').value,
+    arrivoDest: document.getElementById('arrivoDest').value,
+    mezzo: document.getElementById('mezzo').value,
     prezzo: prezzoVal,
-    presidi: document.getElementById('presidi').value || '',
-    note: document.getElementById('note').value || '',
-    firmaRef: document.getElementById('firmaRef').value || '',
-    stato: document.getElementById('stato').value || '',
+    presidi: document.getElementById('presidi').value,
+    note: document.getElementById('note').value,
+    firmaRef: document.getElementById('firmaRef').value,
+    stato: document.getElementById('stato').value,
     sede: sedeFinal,
     timestamp: new Date().toISOString()
   };
 }
 
-// PREZZO INPUT FILTER (usa function per 'this')
-document.getElementById('prezzo').addEventListener('input', function(){
+// PREZZO INPUT FILTER
+document.getElementById('prezzo').addEventListener('input', ()=>{
   this.value = this.value.replace(/[^0-9.,]/g,'');
 });
 
@@ -386,8 +352,8 @@ async function saveEntry(){
   if(!data.missione){ alert('Compila Missione'); return; }
   try{
     await db.collection("schede_TI").doc(data.id).set(data);
+    addLog(editingId ? 'Modifica scheda' : 'Salvataggio scheda', `Missione: ${data.missione}`);
     notify(editingId ? 'Scheda aggiornata' : 'Scheda salvata','success');
-    logActivity(editingId ? 'Modifica scheda' : 'Salva nuova scheda', `Missione: ${data.missione}`);
     resetForm();
   } catch(err){ console.error(err); notify('Errore nel salvataggio','error'); }
 }
@@ -403,9 +369,9 @@ function resetForm(){
 function renderTable(){
   const tbody = document.querySelector('#dataTable tbody'); 
   tbody.innerHTML = '';
-  const searchTerm = (document.getElementById('searchBar').value || '').toLowerCase();
+  const searchTerm = document.getElementById('searchBar').value.toLowerCase();
   for(const e of entries){
-    if(searchTerm && !( (e.missione||'').toLowerCase().includes(searchTerm) || (e.nome||'').toLowerCase().includes(searchTerm) )) continue;
+    if(searchTerm && !e.missione.toLowerCase().includes(searchTerm) && !(e.nome||'').toLowerCase().includes(searchTerm)) continue;
     const tr = document.createElement('tr');
     const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
     tr.innerHTML = `
@@ -435,27 +401,23 @@ function editEntry(id){
     if(document.getElementById(key)) document.getElementById(key).value = e[key];
   }
   notify('Modifiche abilitate','warning');
-  logActivity('Inizia modifica', `Missione: ${e.missione} (ID: ${id})`);
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
 // DELETE ENTRY
 async function deleteEntry(id){
   if(!confirm('Eliminare scheda?')) return;
-  try{ 
-    await db.collection("schede_TI").doc(id).delete(); 
-    notify('Scheda eliminata','error'); 
-    logActivity('Elimina scheda', `ID: ${id}`);
-  }
-  catch(err){ console.error(err); notify('Errore eliminazione','error'); }
+  try{ await db.collection("schede_TI").doc(id).delete(); notify('Scheda eliminata','error'); }
+    addLog('Eliminazione scheda', `ID: ${id}`);
+  catch(err){ console.error(err); }
 }
 
 // EXPORT SINGLE PDF
 async function exportSinglePDF(id){
   const e = entries.find(x => x.id === id); 
+  addLog('Generazione PDF singolo', `Missione: ${e.missione}`);
   if(!e) return;
 
-  // Build printable div (rich content)
   const pdfDiv = document.createElement('div');
   pdfDiv.style.width = '800px';
   pdfDiv.style.padding = '8px';
@@ -465,6 +427,7 @@ async function exportSinglePDF(id){
   pdfDiv.style.lineHeight = '1.3';
   pdfDiv.style.color = '#000';
   pdfDiv.style.boxSizing = 'border-box';
+  pdfDiv.style.wordWrap = 'break-word';
 
   const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
 
@@ -559,7 +522,6 @@ async function exportSinglePDF(id){
       callback: function(pdf){
           pdf.save(`scheda_${e.missione}_${dataIt}.pdf`);
           notify('PDF generato, download avviato','success');
-          logActivity('Genera PDF singolo', `Missione: ${e.missione}`);
       },
       x: 10,
       y: 10,
@@ -569,12 +531,13 @@ async function exportSinglePDF(id){
 
   document.body.removeChild(pdfDiv);
 }
-
-// GENERA PDF ELENCO PER SEDE
+  // GENERA PDF ELENCO PER SEDE
 async function generatePDFReport(){
-  let sedeInput = prompt('Inserisci la sede per generare l\\'elenco (1 = Taranto, 2 = Monteiasi)');
+  let sedeInput = prompt('Inserisci la sede per generare l\'elenco (1 = Taranto, 2 = Monteiasi)');
+  addLog('Generazione report PDF', `Sede: ${sedeName}`);
   if(!sedeInput) return;
   let sedeName = sedeInput==='1'?'Taranto': sedeInput==='2'?'Monteiasi': sedeInput;
+
   const filtered = entries.filter(e=>e.sede===sedeName);
   if(filtered.length===0){ notify('Nessuna scheda trovata per la sede selezionata','error'); return; }
 
@@ -617,75 +580,69 @@ async function generatePDFReport(){
   await pdf.html(pdfDiv, { callback: pdf=>pdf.save(`elenco_${sedeName}.pdf`), x:10, y:10, width: pdfDiv.offsetWidth, html2canvas:{scale} });
   document.body.removeChild(pdfDiv);
   notify('Elenco generato e download avviato','success');
-  logActivity('Genera report PDF', `Sede: ${sedeName}`);
 }
 
-// VISUALIZZA LOG ATTIVITÀ (solo admin)
-async function showActivityLog() {
-  const user = auth.currentUser;
-  if (!user || user.email !== ADMIN_EMAIL) {
-    notify('Accesso negato: non sei autorizzato a visualizzare i log', 'error');
-    return;
-  }
-  const logDiv = document.getElementById('logViewer');
-  const tbody = document.getElementById('logTableBody');
-  tbody.innerHTML = '<tr><td colspan="4">Caricamento log...</td></tr>';
-  try {
-    const snapshot = await db.collection('activity_logs').orderBy('timestamp', 'desc').limit(500).get();
-    tbody.innerHTML = '';
-    snapshot.forEach(doc => {
-      const e = doc.data();
-      const timeIt = e.timestamp ? new Date(e.timestamp).toLocaleString('it-IT') : '';
+// ====== LOG ATTIVITÀ ======
+let activityLogs = [];
+
+// Registra un evento
+function addLog(action, details='') {
+  const user = auth.currentUser ? auth.currentUser.email : 'Utente sconosciuto';
+  const timestamp = new Date().toLocaleString('it-IT');
+  const logEntry = { timestamp, user, action, details };
+  activityLogs.unshift(logEntry); // Inserisce in cima
+  console.log('LOG:', logEntry);
+
+  // Salva anche su localStorage (persistente)
+  localStorage.setItem('activityLogs', JSON.stringify(activityLogs));
+}
+
+// Carica log salvati (se esistono)
+if (localStorage.getItem('activityLogs')) {
+  activityLogs = JSON.parse(localStorage.getItem('activityLogs'));
+}
+
+// Mostra la finestra dei log
+function showLogs() {
+  const tbody = document.querySelector('#logTable tbody');
+  tbody.innerHTML = '';
+  if (activityLogs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Nessuna attività registrata</td></tr>`;
+  } else {
+    for (const log of activityLogs) {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${escapeHtml(timeIt)}</td><td>${escapeHtml(e.userEmail)}</td><td>${escapeHtml(e.action)}</td><td>${escapeHtml(e.details)}</td>`;
+      tr.innerHTML = `
+        <td>${log.timestamp}</td>
+        <td>${log.user}</td>
+        <td>${log.action}</td>
+        <td>${log.details}</td>`;
       tbody.appendChild(tr);
-    });
-    logDiv.style.display = 'block';
-    notify('Log caricati con successo', 'success');
-    logActivity('Visualizza log', `Aperto registro attività`);
-  } catch (err) {
-    console.error(err);
-    notify('Errore nel caricamento dei log', 'error');
+    }
   }
+  document.getElementById('logModal').style.display = 'flex';
 }
 
-function hideActivityLog(){
-  document.getElementById('logViewer').style.display = 'none';
+// Chiudi finestra log
+function closeLogs() {
+  document.getElementById('logModal').style.display = 'none';
 }
 
-// EXPORT LOGS TO PDF (admin only)
-async function exportLogsPDF(){
-  const user = auth.currentUser;
-  if (!user || user.email !== ADMIN_EMAIL) {
-    notify('Accesso negato: non sei autorizzato a esportare i log', 'error');
-    return;
-  }
-  const tbody = document.getElementById('logTableBody');
-  if (!tbody || tbody.children.length === 0) { notify('Nessun log da esportare','error'); return; }
-
-  // Build a printable div with the logs
-  const pdfDiv = document.createElement('div');
-  pdfDiv.style.width='800px'; pdfDiv.style.padding='8px'; pdfDiv.style.background='#fff';
-  pdfDiv.style.fontFamily='Arial, sans-serif';
-  pdfDiv.style.fontSize='11px';
-
-  let rowsHtml = '<table border="1" style="width:100%; border-collapse:collapse;"><tr><th>Data/Ora</th><th>Utente</th><th>Azione</th><th>Dettagli</th></tr>';
-  Array.from(tbody.children).forEach(tr=>{
-    rowsHtml += `<tr>${tr.innerHTML}</tr>`;
-  });
-  rowsHtml += '</table>';
-
-  pdfDiv.innerHTML = `<h2 style="text-align:center;">Registro attività - esportazione</h2>${rowsHtml}<div style="text-align:right;margin-top:8px;">Generato: ${new Date().toLocaleString('it-IT')}</div>`;
-  document.body.appendChild(pdfDiv);
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p','mm','a4');
-  const scale = 190 / pdfDiv.offsetWidth;
-  await pdf.html(pdfDiv, { callback: pdf=>pdf.save(`logs_export_${new Date().toISOString()}.pdf`), x:10, y:10, width: pdfDiv.offsetWidth, html2canvas:{scale} });
-  document.body.removeChild(pdfDiv);
-  notify('Export log PDF generato','success');
-  logActivity('Esporta log PDF', 'Export eseguito');
-}
-
+  
 </script>
+  <!-- MODAL LOG ATTIVITÀ -->
+<div id="logModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+  background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+  <div style="background:#fff; width:90%; max-width:700px; padding:20px; border-radius:10px; position:relative; max-height:80vh; overflow-y:auto;">
+    <h2 style="text-align:center;">📋 Log Attività</h2>
+    <button onclick="closeLogs()" style="position:absolute; top:10px; right:15px; background:#b33a3a; color:#fff; border:none; border-radius:6px; padding:4px 10px; cursor:pointer;">Chiudi</button>
+    <table id="logTable" style="width:100%; border-collapse:collapse; margin-top:15px;">
+      <thead>
+        <tr style="background:#f3f4f6;"><th>Data/Ora</th><th>Utente</th><th>Azione</th><th>Dettagli</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
 </body>
 </html>
