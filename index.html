@@ -185,7 +185,7 @@ header img.logo { display:block; margin:0 auto; }
     <div class="buttons">
       <button type="submit">Salva scheda TI</button>
       <button type="button" onclick="resetForm()">Pulisci scheda TI</button>
-      <button type="button" onclick="generatePDFReport()">Genera PDF elenco</button>
+      <button type="button" onclick="generatePDFReport()">Genera report PDF</button>
     </div>
   </form>
 
@@ -525,9 +525,60 @@ async function exportSinglePDF(id){
 
   document.body.removeChild(pdfDiv);
 }
+  // GENERA PDF ELENCO PER SEDE
+async function generatePDFReport(){
+  let sedeInput = prompt('Inserisci la sede per generare l\'elenco (1 = Taranto, 2 = Monteiasi)');
+  if(!sedeInput) return;
+  let sedeName = sedeInput==='1'?'Taranto': sedeInput==='2'?'Monteiasi': sedeInput;
+
+  const filtered = entries.filter(e=>e.sede===sedeName);
+  if(filtered.length===0){ notify('Nessuna scheda trovata per la sede selezionata','error'); return; }
+
+  const pdfDiv = document.createElement('div');
+  pdfDiv.style.width='800px'; pdfDiv.style.padding='8px'; pdfDiv.style.background='#fff';
+  pdfDiv.style.fontFamily='Arial, sans-serif';
+  pdfDiv.style.fontSize='12px'; pdfDiv.style.lineHeight='1.3'; pdfDiv.style.color='#000'; pdfDiv.style.boxSizing='border-box';
+
+  let tableRows = '';
+  let totalPrezzo = 0;
+  filtered.forEach(e=>{
+    let prezzoNum = parseFloat((e.prezzo||'0').replace('€','').replace(',','.')) || 0;
+    totalPrezzo += prezzoNum;
+    let dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
+    tableRows += `<tr>
+      <td>${escapeHtml(e.missione)}</td>
+      <td>${escapeHtml(dataIt)}</td>
+      <td>${escapeHtml(e.prezzo)}</td>
+      <td>${escapeHtml(e.sede)}</td>
+    </tr>`;
+  });
+
+  pdfDiv.innerHTML = `
+    <h2 style="text-align:center;">Elenco schede - ${sedeName}</h2>
+    <table border="1" style="width:100%; border-collapse:collapse; font-size:12px;">
+      <tr><th>Missione</th><th>Data</th><th>Prezzo</th><th>Sede</th></tr>
+      ${tableRows}
+      <tr><td colspan="3" style="font-weight:bold;">Totale schede</td><td>${filtered.length}</td></tr>
+      <tr><td colspan="3" style="font-weight:bold;">Prezzo totale</td><td>${totalPrezzo.toFixed(2)}€</td></tr>
+    </table>
+    <div style="text-align:right; margin-top:10px; font-weight:bold;">
+      Report generato il: ${new Date().toLocaleString('it-IT')}
+    </div>
+  `;
+
+  document.body.appendChild(pdfDiv);
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p','mm','a4');
+  const scale = 190 / pdfDiv.offsetWidth;
+  await pdf.html(pdfDiv, { callback: pdf=>pdf.save(`elenco_${sedeName}.pdf`), x:10, y:10, width: pdfDiv.offsetWidth, html2canvas:{scale} });
+  document.body.removeChild(pdfDiv);
+  notify('Elenco generato e download avviato','success');
+}
+
 </script>
 </body>
 </html>
+
 
 
 
