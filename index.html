@@ -376,11 +376,11 @@ function renderTable(){
       <td>${escapeHtml(e.stato)}</td>
       <td>${escapeHtml(e.firmaRef)}</td>
       <td>${escapeHtml(e.sede)}</td>
-<td>
-  <button onclick="editEntry('${e.id}')">Modifica</button>
-  <button onclick="deleteEntry('${e.id}')">Elimina</button>
-  <button onclick="exportSinglePDF('${e.id}')">PDF</button>
-</td>`;
+      <td>
+        <button onclick="editEntry('${e.id}')">Modifica</button>
+        <button onclick="deleteEntry('${e.id}')">Elimina</button>
+        <button onclick="exportSinglePDF('${e.id}')">PDF</button>
+      </td>`;
     tbody.appendChild(tr);
   }
 }
@@ -578,6 +578,4 @@ async function generatePDFReport(){
 </script>
 </body>
 </html>
-
-
 
