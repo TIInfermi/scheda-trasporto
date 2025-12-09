@@ -380,7 +380,6 @@ function renderTable(){
   <button onclick="editEntry('${e.id}')">Modifica</button>
   <button onclick="deleteEntry('${e.id}')">Elimina</button>
   <button onclick="exportSinglePDF('${e.id}')">PDF</button>
-  <button onclick="exportSingleTXT('${e.id}')">TXT</button>
 </td>`;
     tbody.appendChild(tr);
   }
@@ -576,83 +575,9 @@ async function generatePDFReport(){
   notify('Elenco generato e download avviato','success');
 }
 
-  // EXPORT SINGLE TXT
-function exportSingleTXT(id){
-  const e = entries.find(x => x.id === id);
-  if(!e) return;
-
-  const dataIt = e.data ? new Date(e.data).toLocaleDateString('it-IT') : '';
-
-  const txtContent =
-`==============================
-      SCHEDA PAZIENTE TI
-==============================
-
-STATO: ${e.stato}
-
->>> INFO PAZIENTE <<<
-Missione: ${e.missione}
-Data: ${dataIt}
-Nome e Cognome: ${e.nome}
-Età: ${e.eta}
-Data di nascita: ${e.dob}
-Corporatura: ${e.corporatura}
-Patologia: ${e.patologia}
-Motivo trasporto: ${e.motivo}
-
->>> PARTENZA <<<
-Città: ${e.partenzaCitta}
-Via: ${e.partenzaVia}
-Piano: ${e.partenzaNum}
-Ascensore: ${e.partenzaAscensore}
-
->>> ARRIVO <<<
-Città: ${e.arrivoCitta}
-Via: ${e.arrivoVia}
-Piano: ${e.arrivoNum}
-Ascensore: ${e.arrivoAscensore}
-
->>> PDC <<<
-PDC: ${e.pdc}
-Telefono PDC: ${e.tel}
-
->>> TEAM <<<
-Autista: ${e.autista}
-1° Soccorritore: ${e.socc1}
-2° Soccorritore: ${e.socc2}
-3° Soccorritore: ${e.socc3}
-Tirocinante: ${e.tiro}
-
->>> INFO TRASPORTO <<<
-Arrivo in sede: ${e.arrivoSede}
-Arrivo dal paziente: ${e.arrivoPaz}
-Arrivo a destinazione: ${e.arrivoDest}
-Mezzo: ${e.mezzo}
-Prezzo: ${e.prezzo}
-Presidi necessari: ${e.presidi}
-Note: ${e.note}
-
-Operatore che ha compilato: ${e.firmaRef}
-Sede: ${e.sede}
-
-Generato il: ${new Date(e.timestamp).toLocaleString('it-IT')}
-`;
-
-  // crea file txt
-  const blob = new Blob([txtContent], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `scheda_${e.missione}_${dataIt}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
-
-  notify("File TXT generato e scaricato", "success");
-}
-
-
 </script>
 </body>
 </html>
+
 
 
