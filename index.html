@@ -130,6 +130,7 @@ header img.logo { display:block; margin:0 auto; }
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
   <div><label>PDC<input id="pdc" type="text"></label></div>
   <div><label>Telefono PDC<input id="number" type="text"></label></div>
+  <div><label>Email<input id="email" type="text"></label></div>
 </div>
 
     <div class="section-title">Team</div>
@@ -319,6 +320,7 @@ function getFormData(){
     arrivoAscensore: document.getElementById('arrivoAscensore').value,
     pdc: document.getElementById('pdc').value,
     tel: document.getElementById('number').value,
+    email: document.getElementById('email').value,
     autista: document.getElementById('autista').value,
     socc1: document.getElementById('socc1').value,
     socc2: document.getElementById('socc2').value,
@@ -578,4 +580,5 @@ async function generatePDFReport(){
 </script>
 </body>
 </html>
+
 
